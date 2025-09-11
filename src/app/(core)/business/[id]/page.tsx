@@ -1,16 +1,27 @@
+// Components
+import HeaderBusiness from "./components/HeaderBusiness";
+import InformationBusiness from "./components/InformationBusiness";
+import LayoutServices from "./components/LayoutServices";
+import NavigationBar from "./components/NavigationBar";
+
 interface BusinessDetailPageProps {
   params: {
     id: string;
   };
 }
 
-export default function BusinessDetailPage({
-  params: { id },
+export default async function BusinessDetailPage({
+  params,
 }: BusinessDetailPageProps) {
+  const { id } = await params;
+  console.log("Business ID:", id);
+
   return (
     <div>
-      <h1>Business Detail</h1>
-      <p>Details for business ID: {id}</p>
+      <NavigationBar />
+      <HeaderBusiness />
+      <InformationBusiness />
+      <LayoutServices />
     </div>
   );
 }
