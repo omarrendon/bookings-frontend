@@ -14,22 +14,42 @@ export const NavMenu = (props: ComponentProps<typeof NavigationMenu>) => (
     <NavigationMenuList className="gap-3 space-x-0 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-start data-[orientation=vertical]:justify-start">
       <NavigationMenuItem>
         <NavigationMenuLink asChild>
-          <Link href="#">Nosotros</Link>
+          <Link
+            href="#"
+            className="font-semibold text-black sm:text-white cursor-pointer"
+          >
+            Nosotros
+          </Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuLink asChild>
-          <Link href="#">Servicios</Link>
+          <Link
+            href="#"
+            className="font-semibold  text-black sm:text-white cursor-pointer"
+          >
+            Servicios
+          </Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuLink asChild>
-          <Link href="#">Horarios</Link>
+          <Link
+            href="#"
+            className="font-semibold text-black sm:text-white cursor-pointer "
+          >
+            Testimonios
+          </Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuLink asChild>
-          <Link href="#">Contáctanos</Link>
+          <Link
+            href="#"
+            className="font-semibold text-black sm:text-white cursor-pointer"
+          >
+            Contacto
+          </Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
     </NavigationMenuList>
