@@ -28,7 +28,7 @@ export const NavMenu = (props: ComponentProps<typeof NavigationMenu>) => (
             href="#"
             className="font-semibold  text-black sm:text-white cursor-pointer"
           >
-            Servicios
+            Fotos
           </Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
@@ -38,7 +38,7 @@ export const NavMenu = (props: ComponentProps<typeof NavigationMenu>) => (
             href="#"
             className="font-semibold text-black sm:text-white cursor-pointer "
           >
-            Testimonios
+            Servicios
           </Link>
         </NavigationMenuLink>
       </NavigationMenuItem>

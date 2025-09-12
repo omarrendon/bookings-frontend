@@ -1,6 +1,7 @@
 // Components
 import HeaderBusiness from "./components/HeaderBusiness";
 import InformationBusiness from "./components/InformationBusiness";
+import LayoutImages from "./components/LayoutImages";
 import LayoutServices from "./components/LayoutServices";
 import NavigationBar from "./components/NavigationBar";
 
@@ -20,6 +21,9 @@ export default async function BusinessDetailPage({
     <div>
       <NavigationBar />
       <HeaderBusiness />
+      <div className="my-10 px-2">
+        <LayoutImages />
+      </div>
       <InformationBusiness />
       <LayoutServices />
     </div>

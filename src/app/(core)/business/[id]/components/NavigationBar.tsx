@@ -1,4 +1,3 @@
-"use client";
 // Components
 import { Logo } from "./Logo";
 import { NavMenu } from "./NavMenu";
