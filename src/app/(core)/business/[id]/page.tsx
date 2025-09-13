@@ -24,8 +24,8 @@ export default async function BusinessDetailPage({
       <div className="my-10 px-2">
         <LayoutImages />
       </div>
-      <InformationBusiness />
       <LayoutServices />
+      <InformationBusiness />
     </div>
   );
 }

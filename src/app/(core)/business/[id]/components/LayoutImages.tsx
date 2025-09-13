@@ -1,6 +1,5 @@
 // Components
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -24,17 +23,13 @@ export default function LayoutImages() {
         <CarouselContent>
           {Array.from({ length: 10 }).map((_, index) => (
             <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-              <Card>
-                <CardContent className="flex aspect-square items-center justify-center">
-                  <Image
-                    src={`https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg`}
-                    alt={`Imagen ${index + 1}`}
-                    width={800}
-                    height={800}
-                    className="rounded-md h-full w-full object-cover"
-                  />
-                </CardContent>
-              </Card>
+              <Image
+                src={`https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg`}
+                alt={`Imagen ${index + 1}`}
+                width={800}
+                height={800}
+                className="rounded-md h-full w-full object-cover"
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
