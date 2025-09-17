@@ -1,9 +1,11 @@
 // Components
+import Footer from "@/components/ui/Footer";
+import ContactBusiness from "./components/ContactBusiness";
 import HeaderBusiness from "./components/HeaderBusiness";
-import InformationBusiness from "./components/InformationBusiness";
 import LayoutImages from "./components/LayoutImages";
 import LayoutServices from "./components/LayoutServices";
 import NavigationBar from "./components/NavigationBar";
+import ProductsSummary from "@/components/ui/ProductsSummary";
 
 interface BusinessDetailPageProps {
   params: {
@@ -25,7 +27,9 @@ export default async function BusinessDetailPage({
         <LayoutImages />
       </div>
       <LayoutServices />
-      <InformationBusiness />
+      <ProductsSummary />
+      <ContactBusiness />
+      <Footer />
     </div>
   );
 }
