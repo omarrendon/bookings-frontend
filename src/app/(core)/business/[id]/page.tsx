@@ -4,7 +4,7 @@ import ContactBusiness from "./components/ContactBusiness";
 import HeaderBusiness from "./components/HeaderBusiness";
 import LayoutImages from "./components/LayoutImages";
 import LayoutServices from "./components/LayoutServices";
-import NavigationBar from "./components/NavigationBar";
+import NavigationBar from "../../../../components/ui/NavigationBar";
 import ProductsSummary from "@/components/ui/ProductsSummary";
 
 interface BusinessDetailPageProps {
