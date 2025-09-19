@@ -39,7 +39,7 @@ export default function Calendar() {
   const [selected, setSelected] = useState<Date>();
 
   return (
-    <div className="w-full flex items-center justify-center ">
+    <div className="w-full flex items-center justify-center">
       <DayPicker
         locale={es}
         animate

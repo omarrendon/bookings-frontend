@@ -4,7 +4,7 @@ import Calendar from "@/components/ui/Calendar";
 
 export default function SchedulePicker() {
   return (
-    <div className="w-full h-auto flex flex-col border rounded-lg gap-3">
+    <div className="w-full h-auto flex flex-col border rounded-lg gap-2">
       <div className="p-4">
         <h2 className="text-lg md:text-xl  text-center text-pink-400 font-medium">
           Selecciona la fecha y hora para su cita
