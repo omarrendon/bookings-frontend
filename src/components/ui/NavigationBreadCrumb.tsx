@@ -44,7 +44,7 @@ export default function NavigationBreadCrumb({
   id,
 }: NavigationBreadCrumbProps) {
   return (
-    <div className="w-full flex flex-row items-center justify-between  px-4 py-2 rounded-md text-white mb-4">
+    <div className="w-full flex flex-row items-center justify-between px-4 py-2 rounded-md text-white mb-4">
       <Link
         href={url}
         className="font-medium text-xl flex flex-row items-center text-black hover:text-gray-600 gap-3"
