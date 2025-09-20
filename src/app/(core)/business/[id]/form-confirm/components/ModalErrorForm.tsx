@@ -13,7 +13,6 @@ import { CircleX } from "lucide-react";
 export default function ModalErrorForm() {
   return (
     <Dialog open={false}>
-      {/* <DialogTrigger>Open</DialogTrigger> */}
       <DialogContent className="" showCloseButton={false}>
         <DialogHeader className="flex flex-col items-center gap-4 bg-red-500/10 p-2 rounded-lg">
           <CircleX size={48} color="red" />
