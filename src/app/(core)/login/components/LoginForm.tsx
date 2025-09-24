@@ -7,7 +7,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 // Schemas
 import { loginFormSchema } from "@/lib/schemas/loginFormSchema";
 
@@ -34,35 +40,58 @@ export default function LoginForm() {
         </span>
       </div>
       <div className="grid gap-6 rounded-xl border p-4">
-        <div className="grid gap-3">
-          <Label htmlFor="email">Correo electrónico</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="miemail@example.com"
-            required
-          />
-        </div>
-        <div className="grid gap-3">
-          <div className="flex items-center">
-            <Label htmlFor="password">Contraseña</Label>
-            <Link
-              href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="********"
-            required
-          />
-        </div>
-        <Button type="submit" className="w-full cursor-pointer ">
-          Iniciar sesión
-        </Button>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="w-full flex flex-col gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="grid gap-1">
+                  <FormLabel htmlFor="email">Correo electrónico</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="miemail@example.com"
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem className="grid gap-1">
+                  <div className="flex items-center justify-between">
+                    <FormLabel htmlFor="password">Contraseña</FormLabel>
+                    <Link
+                      href="/login/reset-password"
+                      className="text-sm underline-offset-4 hover:underline"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </Link>
+                  </div>
+                  <FormControl>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="********"
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full cursor-pointer mt-4">
+              Iniciar sesión
+            </Button>
+          </form>
+        </Form>
         <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t" />
         <div className="text-center text-sm">
           ¿No tienes una cuenta?{" "}
