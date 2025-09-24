@@ -1,6 +1,7 @@
-import { Calendar, Clock3 } from "lucide-react";
+// Components
 import Image from "next/image";
-import React from "react";
+// Icons
+import { Calendar, Clock3 } from "lucide-react";
 
 export default function ScheduleDetail() {
   return (

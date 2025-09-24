@@ -1,3 +1,4 @@
+// Components
 import NavigationBreadCrumb from "@/components/ui/NavigationBreadCrumb";
 import CustomerForm from "./components/CustomerForm";
 
@@ -18,7 +19,6 @@ export default function BusinessFormConfirmPage({
         id={id}
       />
       <CustomerForm />
-      {/* <CardSummaryServices /> */}
     </div>
   );
 }

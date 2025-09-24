@@ -1,8 +1,9 @@
-// Icons
-import { CircleCheck } from "lucide-react";
+// Components
 import CardSummaryServices from "../schedule/components/CardSummaryServices";
 import ScheduleDetail from "./components/ScheduleDetail";
 import Link from "next/link";
+// Icons
+import { CircleCheck } from "lucide-react";
 
 export default function page() {
   return (
