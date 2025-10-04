@@ -1,3 +1,6 @@
+"use client";
+// Components
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -15,9 +18,16 @@ export function SiteHeader() {
               variant="ghost"
               asChild
               size="sm"
-              className="hidden sm:flex"
+              className="hidden sm:flex "
             >
-              Cerrar sesión
+              <Link
+                href="/dashboard"
+                rel="noopener noreferrer"
+                target="_blank"
+                className="dark:text-foreground hover:bg-red-600 hover:text-white"
+              >
+                Cerrar sesión
+              </Link>
             </Button>
           </div>
         </div>
