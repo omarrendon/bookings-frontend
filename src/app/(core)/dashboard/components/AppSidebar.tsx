@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 // Icons
 import { GalleryVerticalEnd } from "lucide-react";
+// Data
 import { menuDataOptions } from "@/utils/menuDataOptions";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
