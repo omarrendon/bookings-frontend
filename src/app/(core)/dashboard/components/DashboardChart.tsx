@@ -1,6 +1,8 @@
 "use client";
+// Dependencies
+import { useEffect, useState } from "react";
+// Components
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Card,
   CardAction,
@@ -26,7 +28,8 @@ import {
 //   ToggleGroup,
 //   ToggleGroupItem,
 // } from "@/components/ui/toggle-group"
-import { useEffect, useState } from "react";
+// Hooks
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const description = "An interactive area chart";
 const chartData = [
