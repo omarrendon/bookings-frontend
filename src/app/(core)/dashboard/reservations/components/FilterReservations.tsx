@@ -24,8 +24,8 @@ export default function FilterReservations() {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(undefined);
   return (
-    <div className="w-full border rounded-2xl shadow xl:border-none xl:shadow-none p-6 bg-white ">
-      <h2 className="text-lg font-semibold mb-4 text-gray-700">
+    <div className="w-full">
+      <h2 className="text-lg font-semibold mb-2 text-gray-700">
         Filtros de búsqueda
       </h2>
       <div className="flex flex-col xl:flex-row gap-4">
@@ -58,11 +58,11 @@ export default function FilterReservations() {
         <Input type="text" placeholder="Email" />
         <Input type="text" placeholder="Número de teléfono" />
       </div>
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-end mt-4 sm:space-x-2 space-y-2 sm:space-y-0 flex-col sm:flex-row">
         <Button variant="outline" className="mr-2">
-          Limpiar
+          Limpiar Campos
         </Button>
-        <Button variant="outline">Aplicar filtros</Button>
+        <Button variant="outline">Buscar</Button>
       </div>
     </div>
   );
