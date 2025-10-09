@@ -11,13 +11,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-
 // Types
 import { Reservation } from "@/types/Reservation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BadgeCheck, BadgeX } from "lucide-react";
 
-export const ColumnsTable: ColumnDef<Reservation>[] = [
+export const ColumnsReservationTable: ColumnDef<Reservation>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -134,7 +133,7 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
     header: ({ column }) => {
       return (
         <div className="flex justify-between py-2 text-left">
-          <span className="font-bold">Pago</span>
+          <span className="font-bold ">Pago</span>
         </div>
       );
     },
@@ -143,9 +142,9 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
       return (
         <div className="flex justify-start items-center gap-2">
           {proofOfPayment ? (
-            <BadgeCheck color="green" />
+            <BadgeCheck className="text-primary" />
           ) : (
-            <BadgeX color="red" />
+            <BadgeX className="text-canceled" />
           )}
         </div>
       );
@@ -163,11 +162,11 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
     cell: ({ row }) => {
       const { status } = row.original;
       const colors = {
-        pending: "bg-yellow-300",
-        confirmed: "bg-blue-500",
-        canceled: "bg-red-500",
-        completed: "bg-green-500",
-        rescheduled: "bg-orange-600",
+        pending: "bg-pending",
+        confirmed: "bg-primary",
+        canceled: "bg-canceled",
+        completed: "bg-completed",
+        rescheduled: "bg-rescheduled",
       };
 
       const labels = {
@@ -176,6 +175,12 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
         canceled: "Cancelada",
         completed: "Completada",
         rescheduled: "Reprogramada",
+      };
+
+      const labelsOptions = {
+        confirmed: "Confirmada",
+        canceled: "Cancelada",
+        rescheduled: "Reprogramar",
       };
 
       return (
@@ -193,7 +198,7 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
               <span className="font-medium text-sm">Cambiar status</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {Object.keys(labels).map(key => (
+            {Object.keys(labelsOptions).map(key => (
               <DropdownMenuItem key={key}>
                 <Badge
                   variant="outline"
@@ -203,7 +208,7 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
                   onClick={() => console.log(key)}
                 >
                   <span className="font-bold text-md">
-                    {labels[key as keyof typeof labels]}
+                    {labelsOptions[key as keyof typeof labelsOptions]}
                   </span>
                 </Badge>
               </DropdownMenuItem>

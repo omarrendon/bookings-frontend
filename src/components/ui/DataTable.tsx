@@ -7,8 +7,8 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
+  // getSortedRowModel,
+  // SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -32,18 +32,13 @@ async function getData(): Promise<Reservation[]> {
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  // data: TData[];
-  // table: TanstackTable<TData>; //HERE
 }
 
 export function DataTable<TData, TValue>({
   columns,
-}: // data,
-DataTableProps<TData, TValue>) {
-  //STATES:
+}: DataTableProps<TData, TValue>) {
   const [dataTable, setDataTable] = useState<TData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
@@ -53,14 +48,13 @@ DataTableProps<TData, TValue>) {
     //row selection
     onRowSelectionChange: setRowSelection,
     //sorting:
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
+    // onSortingChange: setSorting,
+    // getSortedRowModel: getSortedRowModel(),
     state: {
       rowSelection,
     },
     //pagination:
     getPaginationRowModel: getPaginationRowModel(),
-    //Control pagination. Default is 10
     initialState: {
       pagination: { pageSize: 10 },
     },

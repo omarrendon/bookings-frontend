@@ -25,7 +25,7 @@ export default function FilterReservations() {
   const [date, setDate] = useState<Date | undefined>(undefined);
   return (
     <div className="w-full">
-      <h2 className="text-lg font-semibold mb-2 text-gray-700">
+      <h2 className="text-lg font-semibold mb-2 text-primary">
         Filtros de búsqueda
       </h2>
       <div className="flex flex-col xl:flex-row gap-4">

@@ -27,14 +27,14 @@ export const menuDataOptions = {
       icon: CalendarCheck,
     },
     {
-      title: "Mis Productos",
-      url: "/dashboard/products",
-      icon: AlignVerticalDistributeCenter,
-    },
-    {
       title: "Mis Horarios",
       url: "/dashboard/schedules",
       icon: BookCheck,
+    },
+    {
+      title: "Mis Productos",
+      url: "/dashboard/products",
+      icon: AlignVerticalDistributeCenter,
     },
   ],
   navSecondary: [
