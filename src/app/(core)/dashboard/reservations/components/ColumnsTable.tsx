@@ -11,10 +11,32 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+
 // Types
 import { Reservation } from "@/types/Reservation";
+import { Checkbox } from "@/components/ui/checkbox";
+import { BadgeCheck, BadgeX } from "lucide-react";
 
 export const ColumnsTable: ColumnDef<Reservation>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={value => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "id",
     header: ({ column }) => {
@@ -119,15 +141,12 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
     cell: ({ row }) => {
       const { proofOfPayment } = row.original;
       return (
-        <div className=" flex justify-center">
-          <Badge
-            variant="outline"
-            className={`${
-              proofOfPayment ? "bg-green-500" : "bg-red-600"
-            } text-white justify-center p-1 w-full text-center`}
-          >
-            {proofOfPayment ? "Aprobado" : "Pendiente"}
-          </Badge>
+        <div className="flex justify-start items-center gap-2">
+          {proofOfPayment ? (
+            <BadgeCheck color="green" />
+          ) : (
+            <BadgeX color="red" />
+          )}
         </div>
       );
     },
@@ -136,7 +155,7 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
     accessorKey: "status",
     header: ({ column }) => {
       return (
-        <div className="flex justify-between py-2 text-left">
+        <div className="flex justify-between  text-center">
           <span className="font-bold">Status</span>
         </div>
       );
@@ -164,7 +183,7 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
           <DropdownMenuTrigger asChild>
             <Badge
               variant="outline"
-              className={`${colors[status]} text-white justify-center w-full p-1`}
+              className={`${colors[status]} text-white justify-center w-[100px] p-1`}
             >
               <span className="font-bold text-md">{labels[status]}</span>
             </Badge>
@@ -195,4 +214,32 @@ export const ColumnsTable: ColumnDef<Reservation>[] = [
       );
     },
   },
+  // {
+  //   id: "actions",
+  //   header: "Acciones",
+  //   cell: ({ row }) => {
+  //     const reservation = row.original;
+  //     return (
+  //       <DropdownMenu>
+  //         <DropdownMenuTrigger asChild>
+  //           <Button variant="ghost" className="w-8 h-8 p-0">
+  //             <MoreHorizontal />
+  //           </Button>
+  //         </DropdownMenuTrigger>
+  //         <DropdownMenuContent align="end">
+  //           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+  //           <DropdownMenuItem
+  //             onClick={() => navigator.clipboard.writeText(reservation.id)}
+  //           >
+  //             Copiar ID de reservación
+  //           </DropdownMenuItem>
+  //           <DropdownMenuSeparator />
+  //           <DropdownMenuItem>Ver detalles</DropdownMenuItem>
+  //           <DropdownMenuItem>Editar</DropdownMenuItem>
+  //           <DropdownMenuItem>Cancelar reservación</DropdownMenuItem>
+  //         </DropdownMenuContent>
+  //       </DropdownMenu>
+  //     );
+  //   },
+  // },
 ];

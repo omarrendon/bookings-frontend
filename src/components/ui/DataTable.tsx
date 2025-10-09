@@ -1,21 +1,15 @@
 "use client";
 // Dependencies
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // Components
 import {
   ColumnDef,
-  ColumnFiltersState,
-  ColumnOrderState,
   flexRender,
   getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
   useReactTable,
-  VisibilityState,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -26,28 +20,34 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTablePagination } from "./DataTablePagination";
+// Types
+import { Reservation } from "@/types/Reservation";
+// Data
+import { reservationData } from "@/app/(core)/dashboard/reservations/components/data";
 
-// import { DataTablePagination } from "../reusable/pagination-controls";
+async function getData(): Promise<Reservation[]> {
+  // Fetch data from your API here and return it.
+  return reservationData; // Simply returning fake data
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  // data: TData[];
   // table: TanstackTable<TData>; //HERE
 }
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
-}: DataTableProps<TData, TValue>) {
+}: // data,
+DataTableProps<TData, TValue>) {
   //STATES:
+  const [dataTable, setDataTable] = useState<TData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
 
   const table = useReactTable({
-    data,
+    data: dataTable,
     columns,
     getCoreRowModel: getCoreRowModel(),
     //row selection
@@ -56,40 +56,36 @@ export function DataTable<TData, TValue>({
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
       rowSelection,
-      columnOrder,
     },
     //pagination:
     getPaginationRowModel: getPaginationRowModel(),
-    //Order of columns
-    onColumnOrderChange: setColumnOrder,
-
-    //filters
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-
-    //Faceted filters:
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedRowModel: getFacetedRowModel(),
-
-    //Visibility:
-    onColumnVisibilityChange: setColumnVisibility,
-
     //Control pagination. Default is 10
     initialState: {
-      pagination: { pageSize: 20 },
-    },
-
-    //This can be added to insert custom functions, accessible :table.options.meta.methodName
-    meta: {
-      myOwnMethod: () => {
-        console.log("Custom method");
-      },
+      pagination: { pageSize: 10 },
     },
   });
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const result = await getData();
+        setDataTable(result as TData[]);
+      } catch (error) {
+        // Handle error
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    // Render a loading indicator or message
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
