@@ -1,5 +1,4 @@
 // Components
-import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogHeader,
@@ -7,8 +6,8 @@ import {
   Dialog,
   DialogDescription,
 } from "@/components/ui/dialog";
-// Icons
-import { CircleX } from "lucide-react";
+import SecondaryButton from "./SecondaryButton";
+import PrimaryButton from "./PrimaryButton";
 
 interface CustomModalProps {
   isOpen: boolean;
@@ -43,21 +42,11 @@ export default function CustomModal({
             {description}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
-            className="mr-2 text-primary font-semibold hover:cursor-pointer"
-            onClick={onClose}
-          >
+        <div className="flex justify-center ">
+          <SecondaryButton className="mr-2" onClick={onClose}>
             {cancelBtnLabel}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onConfirm}
-            className="bg-primary text-secondary hover:bg-primary/9 font-semibold hover:cursor-pointer hover:text-primary"
-          >
-            {actionBtnLabel}
-          </Button>
+          </SecondaryButton>
+          <PrimaryButton onClick={onConfirm}>{actionBtnLabel}</PrimaryButton>
         </div>
       </DialogContent>
     </Dialog>

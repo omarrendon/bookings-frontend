@@ -3,6 +3,7 @@
 import * as React from "react";
 // Components
 import Link from "next/link";
+import Title from "@/components/ui/Title";
 import { NavSecondary } from "./NavSecondary";
 import { NavMain } from "./NavMain";
 import { NavUser } from "./NavUser";
@@ -31,8 +32,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5 "
             >
               <Link href="/dashboard" className="flex items-center gap-2 ">
-                <GalleryVerticalEnd className="size-4" />
-                <span className="text-base font-semibold">Bookea.me</span>
+                <GalleryVerticalEnd className="size-4 text-primary" />
+                <Title text="Bookea.me" />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

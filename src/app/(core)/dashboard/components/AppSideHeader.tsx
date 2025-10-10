@@ -1,7 +1,7 @@
 "use client";
 // Components
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import SubTitle from "@/components/ui/SubTitle";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 // Utils
@@ -19,23 +19,9 @@ export function SiteHeader() {
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mx-2 h-4" />
         <div className="flex justify-between w-full items-center">
-          <h1 className="text-base font-medium">{routeName[0]}</h1>
+          <SubTitle text={routeName[0]} className="hidden md:block " />
           <div className="ml-auto flex items-center gap-2">
-            <Button
-              variant="ghost"
-              asChild
-              size="sm"
-              className="hidden sm:flex "
-            >
-              <Link
-                href="/dashboard"
-                rel="noopener noreferrer"
-                target="_blank"
-                className="dark:text-foreground"
-              >
-                Cerrar sesión
-              </Link>
-            </Button>
+            <SecondaryButton>Cerrar sesión</SecondaryButton>
           </div>
         </div>
       </div>

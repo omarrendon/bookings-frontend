@@ -6,6 +6,8 @@ interface TitleProps {
 }
 export default function Title({ text, className }: TitleProps) {
   return (
-    <h2 className={`text-xl font-bold text-primary ${className}`}>{text}</h2>
+    <h2 className={`text-xl font-semibold text-primary ${className}`}>
+      {text}
+    </h2>
   );
 }

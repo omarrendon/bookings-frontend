@@ -35,7 +35,7 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:cursor-pointer hover:bg-primary/10 "
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
@@ -72,10 +72,10 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive hover:bg-destructive/10 focus:bg-destructive/10 !hover:cursor-pointer">
+            <DropdownMenuItem className="text-primary hover:bg-primary/10 focus:bg-primary/10 !hover:cursor-pointer hover:text-primary focus:text-primary">
               {/* <IconLogout /> */}
-              <CircleX color="red" className="mr-2" />
-              <span>Cerrar sesión</span>
+              <CircleX className="mr-2 text-primary" />
+              <span className="font-semibold">Cerrar sesión</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

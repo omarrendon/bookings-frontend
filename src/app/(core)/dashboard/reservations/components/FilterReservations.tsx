@@ -2,6 +2,9 @@
 // Dependencies
 import { useState } from "react";
 // Components
+import Title from "@/components/ui/Title";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import Calendar from "@/components/ui/Calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 // Icons
 import { ChevronDownIcon } from "lucide-react";
 
@@ -25,13 +29,11 @@ export default function FilterReservations() {
   const [date, setDate] = useState<Date | undefined>(undefined);
   return (
     <div className="w-full">
-      <h2 className="text-lg font-semibold mb-2 text-primary">
-        Filtros de búsqueda
-      </h2>
+      <Title text="Filtros de búsqueda" className="mb-2" />
       <div className="flex flex-col xl:flex-row gap-4">
         <Select>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Theme" />
+            <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="light">Light</SelectItem>
@@ -44,7 +46,7 @@ export default function FilterReservations() {
             <Button
               variant="outline"
               id="date"
-              className="w-full xl:w-78 justify-between font-normal"
+              className="w-full xl:w-78 justify-between font-normal text-gray-500"
             >
               {date ? date.toLocaleDateString() : "Buscar por fecha"}
               <ChevronDownIcon />
@@ -59,10 +61,8 @@ export default function FilterReservations() {
         <Input type="text" placeholder="Número de teléfono" />
       </div>
       <div className="flex justify-end mt-4 sm:space-x-2 space-y-2 sm:space-y-0 flex-col sm:flex-row">
-        <Button variant="outline" className="mr-2">
-          Limpiar Campos
-        </Button>
-        <Button variant="outline">Buscar</Button>
+        <SecondaryButton>Limpiar Filtros</SecondaryButton>
+        <PrimaryButton>Buscar</PrimaryButton>
       </div>
     </div>
   );

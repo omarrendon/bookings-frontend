@@ -12,7 +12,7 @@ import { BadgeAlert, BadgeCheck, BadgeX } from "lucide-react";
 export default function ReservationsPage() {
   const [isOpenModalConfirmation, setIsOpenModalConfirmation] = useState(false);
   const [isOpenModalCancellation, setIsOpenModalCancellation] = useState(false);
-  const [isOpenModalReschedule, setIsOpenModalReschedule] = useState(true);
+  const [isOpenModalReschedule, setIsOpenModalReschedule] = useState(false);
 
   return (
     <div className="flex w-full flex-col gap-6 ">

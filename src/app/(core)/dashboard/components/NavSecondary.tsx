@@ -29,7 +29,7 @@ export function NavSecondary({
             const Icon = item.icon;
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton className="hover:bg-primary/10" asChild>
                   <Link href={item.url}>
                     <Icon />
                     <span>{item.title}</span>

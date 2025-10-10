@@ -29,8 +29,12 @@ export function NavMain({
           {items.map(item => {
             const Icon = item.icon;
             return (
-              <SidebarMenuItem className="px-1" key={item.title}>
-                <SidebarMenuButton tooltip={item.title}>
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  tooltip={item.title}
+                  className="hover:bg-primary/10"
+                  asChild
+                >
                   <Link href={item.url} className="flex items-center gap-2">
                     {Icon && <Icon className="size-4" />}
                     <span>{item.title}</span>
