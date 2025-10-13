@@ -53,7 +53,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   isDeleting = false,
 }) => {
   const isImage = fileType.startsWith("image/");
-  console.log({ isImage });
+  // console.log({ isImage });
   return (
     <div
       className={cn(
@@ -118,6 +118,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
       isDeleting: false,
     }))
   );
+  // console.log({ files });
 
   const prevValueRef = useRef<string[]>(value);
   const isControlled = !!onChange;

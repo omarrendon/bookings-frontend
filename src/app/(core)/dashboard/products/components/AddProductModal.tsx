@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // Components
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import { MultiImageUpload } from "@/components/ui/MultipleImageUpload";
 import {
   Dialog,
   DialogContent,
@@ -22,8 +23,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-// Schemas
-import { productFormSchema } from "@/lib/schemas/productFormaSchema";
 import {
   InputGroup,
   InputGroupAddon,
@@ -31,15 +30,18 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import { Barcode, SearchIcon, StretchHorizontal } from "lucide-react";
-import { MultiImageUpload } from "@/components/ui/MultipleImageUpload";
+// Schemas
+import { productFormSchema } from "@/lib/schemas/productFormaSchema";
+// Icons
+import { Barcode } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+type FormValues = z.infer<typeof productFormSchema>;
 
 interface AddProductModalProps {
   isOpen?: boolean;
   onClose?: () => void;
 }
-
-type FormValues = z.infer<typeof productFormSchema>;
 
 export default function AddProductModal({
   isOpen,
@@ -47,26 +49,25 @@ export default function AddProductModal({
 }: AddProductModalProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(productFormSchema),
-
     defaultValues: {
       name: "",
       description: "",
-      price: 0,
-      stock: 0,
-      estimated_delivery_time: 0,
-      gallery_images: [],
+      price: "0",
+      // gallery_images: undefined,
+      // stock: 0,
+      estimated_delivery_time: "0",
     },
   });
 
   const onSubmit = (data: FormValues) => {
-    console.log(data);
+    console.log("Submitting form with data:", data);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose} modal>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-          <DialogContent>
+        <DialogContent>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             <DialogHeader className="flex flex-col items-start">
               <DialogTitle className="text-lg font-semibold -mt-3  text-gray-500">
                 Agregar Producto
@@ -80,16 +81,23 @@ export default function AddProductModal({
               <div className="grid gap-3">
                 <FormField
                   control={form.control}
-                  name="product_name"
+                  name="name"
                   render={({ field }) => (
                     <>
                       <FormLabel>Nombre del Producto</FormLabel>
-                      <InputGroup>
+                      <FormControl>
+                        <Input
+                          placeholder="Ingresa el nombre del producto"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      {/* <InputGroup>
                         <InputGroupInput placeholder="Nombre del Producto" />
                         <InputGroupAddon>
                           <Barcode />
                         </InputGroupAddon>
-                      </InputGroup>
+                      </InputGroup> */}
                     </>
                   )}
                 />
@@ -102,14 +110,21 @@ export default function AddProductModal({
                   render={({ field }) => (
                     <>
                       <FormLabel>Descripción</FormLabel>
-                      <InputGroup>
+                      <FormControl>
+                        <Input
+                          placeholder="Agrega la descripción del producto"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      {/* <InputGroup>
                         <InputGroupTextarea placeholder="Agrega la descripción del producto" />
                         <InputGroupAddon align="block-end">
                           <InputGroupText className="text-muted-foreground text-xs">
                             Máximo 150 caracteres
                           </InputGroupText>
                         </InputGroupAddon>
-                      </InputGroup>
+                      </InputGroup> */}
                     </>
                   )}
                 />
@@ -142,8 +157,8 @@ export default function AddProductModal({
                         <FormLabel>Tiempo Estimado</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            placeholder="Ej. 2h"
+                            type="text"
+                            placeholder="Ej. 2h 30m"
                             {...field}
                           />
                         </FormControl>
@@ -153,7 +168,7 @@ export default function AddProductModal({
                   />
                 </div>
               </div>
-              <div className="grid gap-3">
+              {/* <div className="grid gap-3">
                 <FormField
                   control={form.control}
                   name="gallery_images"
@@ -167,17 +182,19 @@ export default function AddProductModal({
                     </FormItem>
                   )}
                 />
-              </div>
+              </div> */}
             </div>
 
-            <div className="flex justify-center ">
-              <SecondaryButton className="mr-2" onClick={onClose}>
+            <div className="flex justify-center mt-2">
+              <SecondaryButton className="mr-2 flex-1" onClick={onClose}>
                 Cancelar
               </SecondaryButton>
-              <PrimaryButton type="submit">Agregar</PrimaryButton>
+              <PrimaryButton className="flex-1" type="submit">
+                Agregar
+              </PrimaryButton>
             </div>
-          </DialogContent>
-        </form>
+          </form>
+        </DialogContent>
       </Form>
     </Dialog>
   );
