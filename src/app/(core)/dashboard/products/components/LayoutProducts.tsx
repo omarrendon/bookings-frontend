@@ -11,7 +11,7 @@ export default function LayoutProducts() {
   return (
     <div className="flex h-full w-full flex-col p-4">
       {products && products.length > 0 ? (
-        <div className="grid h-full w-full grid-cols-1 gap-6 lg:grid-cols-3 ">
+        <div className="grid h-full w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {products.map((product, index) => (
             <ServiceCard
               key={index}
@@ -19,6 +19,7 @@ export default function LayoutProducts() {
               price="$100"
               time="30 minutos"
               title={`Producto ${index + 1}`}
+              isEditable
             />
           ))}
         </div>

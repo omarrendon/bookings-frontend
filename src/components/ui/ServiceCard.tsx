@@ -1,7 +1,10 @@
-import React from "react";
-import { Card, CardContent } from "./card";
+// Components
 import Image from "next/image";
-import { Button } from "./button";
+import Title from "./Title";
+import PrimaryButton from "./PrimaryButton";
+import { Card, CardContent } from "./card";
+// Icons
+import { BadgeX, SquarePen } from "lucide-react";
 
 interface ServiceCardProps {
   title: string;
@@ -9,6 +12,9 @@ interface ServiceCardProps {
   price: string;
   time: string;
   imageUrl?: string;
+  isEditable?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 export default function ServiceCard({
@@ -17,9 +23,29 @@ export default function ServiceCard({
   price,
   time,
   imageUrl,
+  isEditable = false,
+  onEdit,
+  onDelete,
 }: ServiceCardProps) {
+  const handleEditProduct = () => {
+    onEdit?.();
+    // Logic to edit the product
+  };
+
+  const handleDeleteProduct = () => {
+    onDelete?.();
+    // Logic to delete the product
+  };
+
   return (
-    <Card className="border hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full">
+    <Card className="border hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full relative">
+      {isEditable && (
+        <BadgeX
+          className="absolute top-1 right-1 bg-white/80 backdrop-blur-sm rounded-full p-1 hover:bg-white shadow-md z-10 hover:cursor-pointer"
+          size={30}
+          onClick={handleDeleteProduct}
+        />
+      )}
       <Image
         src={
           imageUrl ||
@@ -31,15 +57,16 @@ export default function ServiceCard({
         className="w-full h-60 object-cover -mt-6"
       />
       <CardContent className="px-4 flex flex-col flex-grow">
-        <h3 className="text-xl font-semibold ">{title}</h3>
+        <Title text={title} />
         <p className="text-gray-600 mb-2 flex-grow">{description}</p>
         <div className="flex justify-between items-center mb-4">
-          <span className="text-pink-500 font-bold">{price}</span>
+          <span className="text-primary font-bold">{price}</span>
           <span className="text-sm text-gray-500">{time}</span>
         </div>
-        <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer">
-          Reservar
-        </Button>
+        <PrimaryButton className="w-full" size="icon">
+          <SquarePen />
+          {isEditable ? "Editar" : "Reservar"}
+        </PrimaryButton>
       </CardContent>
     </Card>
   );

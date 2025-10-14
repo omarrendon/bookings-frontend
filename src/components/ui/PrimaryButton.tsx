@@ -8,6 +8,7 @@ interface PrimaryButtonProps extends React.ComponentProps<"button"> {
   onClick?: () => void;
   className?: string;
   asChild?: boolean;
+  size?: "default" | "sm" | "lg" | "icon" | "icon-sm" | "icon-lg" | null;
   type?: "button" | "submit" | "reset";
 }
 
@@ -16,6 +17,7 @@ export default function PrimaryButton({
   onClick,
   className,
   type,
+  size,
   ...props
 }: PrimaryButtonProps) {
   const handleClick = type === "submit" ? undefined : onClick;
@@ -26,6 +28,7 @@ export default function PrimaryButton({
       className={`bg-primary text-secondary hover:bg-primary/20 hover:text-primary font-semibold hover:cursor-pointer hover:shadow-lg ${className}`}
       onClick={handleClick}
       type={type}
+      size={size}
       {...props}
     >
       {children}
