@@ -1,12 +1,14 @@
 "use client";
 // Dependencies
+import { useState } from "react";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 // Components
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
-import { MultiImageUpload } from "@/components/ui/MultipleImageUpload";
 import {
   Dialog,
   DialogContent,
@@ -33,8 +35,7 @@ import {
 // Schemas
 import { productFormSchema } from "@/lib/schemas/productFormaSchema";
 // Icons
-import { Barcode } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Barcode, XCircleIcon } from "lucide-react";
 
 type FormValues = z.infer<typeof productFormSchema>;
 
@@ -47,15 +48,20 @@ export default function AddProductModal({
   isOpen,
   onClose,
 }: AddProductModalProps) {
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const inputErrorClass = "border rounded-md border-red-500";
+  const inputTextErrorClass = "text-red-500";
   const form = useForm<FormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: "",
       description: "",
-      price: "0",
-      // gallery_images: undefined,
+      price: "",
+      estimated_delivery_hours: "",
+      estimated_delivery_minutes: "",
+      gallery_images: undefined,
       // stock: 0,
-      estimated_delivery_time: "0",
     },
   });
 
@@ -66,9 +72,12 @@ export default function AddProductModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose} modal>
       <Form {...form}>
-        <DialogContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-            <DialogHeader className="flex flex-col items-start">
+        <DialogContent className="max-h-[90vh] flex flex-col">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="w-full flex flex-col h-full"
+          >
+            <DialogHeader className="flex flex-col items-start flex-shrink-0">
               <DialogTitle className="text-lg font-semibold -mt-3  text-gray-500">
                 Agregar Producto
               </DialogTitle>
@@ -76,7 +85,7 @@ export default function AddProductModal({
                 Aquí puedes agregar un nuevo producto a tu inventario.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4">
+            <div className="grid gap-4 flex-1 overflow-y-auto pr-2 max-h-[60vh] sm:max-h-none">
               {/* Product Name */}
               <div className="grid gap-3">
                 <FormField
@@ -85,19 +94,26 @@ export default function AddProductModal({
                   render={({ field }) => (
                     <>
                       <FormLabel>Nombre del Producto</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ingresa el nombre del producto"
+                      <InputGroup
+                        className={`${
+                          form.formState.errors.name ? inputErrorClass : ""
+                        }`}
+                      >
+                        <InputGroupInput
+                          placeholder="Nombre del Producto"
                           {...field}
                         />
-                      </FormControl>
-                      <FormMessage />
-                      {/* <InputGroup>
-                        <InputGroupInput placeholder="Nombre del Producto" />
                         <InputGroupAddon>
-                          <Barcode />
+                          <Barcode
+                            className={`${
+                              form.formState.errors.name
+                                ? inputTextErrorClass
+                                : ""
+                            }`}
+                          />
                         </InputGroupAddon>
-                      </InputGroup> */}
+                      </InputGroup>
+                      <FormMessage />
                     </>
                   )}
                 />
@@ -110,38 +126,83 @@ export default function AddProductModal({
                   render={({ field }) => (
                     <>
                       <FormLabel>Descripción</FormLabel>
-                      <FormControl>
-                        <Input
+                      <InputGroup
+                        className={`${
+                          form.formState.errors.description
+                            ? inputErrorClass
+                            : ""
+                        }`}
+                      >
+                        <InputGroupTextarea
                           placeholder="Agrega la descripción del producto"
                           {...field}
                         />
-                      </FormControl>
-                      <FormMessage />
-                      {/* <InputGroup>
-                        <InputGroupTextarea placeholder="Agrega la descripción del producto" />
                         <InputGroupAddon align="block-end">
                           <InputGroupText className="text-muted-foreground text-xs">
                             Máximo 150 caracteres
                           </InputGroupText>
                         </InputGroupAddon>
-                      </InputGroup> */}
+                      </InputGroup>
+                      <FormMessage />
                     </>
                   )}
                 />
               </div>
-              {/* Price, Estimated Delivery Time */}
+              {/* Price */}
+              <div className="grid gap-3">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <>
+                      <FormLabel>Precio del Producto</FormLabel>
+                      <InputGroup
+                        className={`${
+                          form.formState.errors.price ? inputErrorClass : ""
+                        }`}
+                      >
+                        <InputGroupAddon>
+                          <InputGroupText
+                            className={`${
+                              form.formState.errors.price
+                                ? inputTextErrorClass
+                                : ""
+                            }`}
+                          >
+                            $
+                          </InputGroupText>
+                        </InputGroupAddon>
+                        <InputGroupInput placeholder="0.00" {...field} />
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupText
+                            className={`${
+                              form.formState.errors.price
+                                ? inputTextErrorClass
+                                : ""
+                            }`}
+                          >
+                            MXN
+                          </InputGroupText>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      <FormMessage />
+                    </>
+                  )}
+                />
+              </div>
+              {/* Estimated Delivery Time */}
               <div className="grid gap-3">
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="price"
+                    name="estimated_delivery_hours"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Precio</FormLabel>
+                        <FormLabel>Horas Estimadas</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            placeholder="Ej. 250.00"
+                            placeholder="Ej. 2 horas"
                             {...field}
                           />
                         </FormControl>
@@ -151,14 +212,14 @@ export default function AddProductModal({
                   />
                   <FormField
                     control={form.control}
-                    name="estimated_delivery_time"
+                    name="estimated_delivery_minutes"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tiempo Estimado</FormLabel>
+                        <FormLabel>Minutos Estimados</FormLabel>
                         <FormControl>
                           <Input
-                            type="text"
-                            placeholder="Ej. 2h 30m"
+                            type="number"
+                            placeholder="Ej. 30 minutos"
                             {...field}
                           />
                         </FormControl>
@@ -168,24 +229,67 @@ export default function AddProductModal({
                   />
                 </div>
               </div>
-              {/* <div className="grid gap-3">
+              <div className="grid gap-3">
                 <FormField
                   control={form.control}
                   name="gallery_images"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Imágenes del Producto</FormLabel>
+                      <FormLabel>
+                        Subir imagen del comprobante de pago
+                      </FormLabel>
                       <FormControl>
-                        <MultiImageUpload />
+                        <Input
+                          key={preview || "empty"}
+                          type="file"
+                          accept="image/*"
+                          onChange={e => {
+                            field.onChange(e.target.files);
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setPreview(URL.createObjectURL(file));
+                              form.setValue("gallery_images", e.target.files);
+                            } else {
+                              setPreview(null);
+                              form.setValue("gallery_images", null);
+                            }
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div> */}
+                {preview && (
+                  <div className="relative w-fit">
+                    <p className="text-sm text-gray-500 mb-2">Vista previa:</p>
+                    <Image
+                      src={preview}
+                      alt="Preview"
+                      width={10}
+                      height={10}
+                      className="w-32 h-24 sm:w-50 sm:h-40 object-cover rounded-md border"
+                    />
+                    <Button
+                      type="button"
+                      className="absolute -top-2 -right-2 bg-transparent rounded-full p-1 hover:bg-gray-100"
+                      onClick={() => {
+                        setPreview(null);
+                        form.setValue("gallery_images", null);
+                      }}
+                      aria-label="Eliminar imagen"
+                    >
+                      <XCircleIcon
+                        className="w-5 h-5 text-gray-500 hover:text-red-500"
+                        color="black"
+                        size={20}
+                      />
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div className="flex justify-center mt-2">
+            <div className="flex justify-center mt-6 mb-4 w-full flex-shrink-0 border-t pt-4">
               <SecondaryButton className="mr-2 flex-1" onClick={onClose}>
                 Cancelar
               </SecondaryButton>

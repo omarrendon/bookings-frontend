@@ -18,11 +18,7 @@ export default function PrimaryButton({
   type,
   ...props
 }: PrimaryButtonProps) {
-  console.log("Rendering PrimaryButton", props);
-
-  // Si el tipo es "submit", no usar onClick para permitir que el formulario maneje la acción
   const handleClick = type === "submit" ? undefined : onClick;
-  console.log("Button type:", type);
 
   return (
     <Button

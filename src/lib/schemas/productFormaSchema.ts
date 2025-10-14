@@ -1,23 +1,22 @@
+// Dependecies
 import { z } from "zod";
 
 export const productFormSchema = z.object({
   name: z
     .string({
-      message: "El nombre debe ser un texto",
+      message: "Este campo es obligatorio",
     })
-    .min(2, "El nombre debe tener al menos 2 caracteres")
+    .min(2, "Este campo es obligatorio")
     .max(100, "El nombre no puede exceder 100 caracteres"),
   description: z
-    .string({
-      message: "La descripción debe ser un texto",
-    })
+    .string()
     .max(500, "La descripción no puede exceder 500 caracteres")
     .optional(),
   price: z
-    .string({ message: "El precio es un campo obligatorio" })
+    .string({ message: "Este campo es obligatorio" })
     .regex(
       /^\d+(\.\d{1,2})?$/,
-      "El precio debe ser un número positivo con hasta 2 decimales"
+      "Este campo es obligatorio y debe ser un número positivo con hasta 2 decimales"
     ),
   // stock: z
   //   .number({
@@ -26,25 +25,17 @@ export const productFormSchema = z.object({
   //   .int("El stock debe ser un número entero")
   //   .min(0, "El stock no puede ser negativo")
   //   .optional(),
-  // gallery_images: z
-  //   .custom<FileList | null>()
-  //   .refine(files => !!files && files.length > 0, {
-  //     message: "Se requiere al menos una imagen",
-  //   })
-  //   .optional(),
-  estimated_delivery_time: z
-    .string({ message: "El tiempo estimado es un campo obligatorio" })
-    .regex(
-      /^\d+(\.\d{1,2})?$/,
-      "El tiempo de entrega debe ser un número positivo con hasta 2 decimales"
-    ),
+  gallery_images: z
+    .custom<FileList | null>()
+    .refine(files => !!files && files.length > 0, {
+      message: "Se requiere al menos una imagen",
+    })
+    .optional(),
+  estimated_delivery_hours: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/, "Este campo es obligatorio"),
+  estimated_delivery_minutes: z
+    .string()
+    .regex(/^([0-5]?[0-9])?$/, "Los minutos deben ser un número entre 0 y 59")
+    .optional(),
 });
-
-// // Tipo TypeScript derivado del schema
-// export type ProductFormData = z.infer<typeof productFormSchema>;
-
-// // Schema para validación parcial (útil para updates)
-// export const productFormPartialSchema = productFormSchema.partial();
-
-// // Tipo para datos parciales
-// export type ProductFormPartialData = z.infer<typeof productFormPartialSchema>;
