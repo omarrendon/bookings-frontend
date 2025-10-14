@@ -1,3 +1,4 @@
+// Components
 import Title from "@/components/ui/Title";
 import LayoutProducts from "./components/LayoutProducts";
 
