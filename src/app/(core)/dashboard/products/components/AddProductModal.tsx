@@ -4,6 +4,7 @@ import { useState } from "react";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 // Components
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -42,13 +43,19 @@ type FormValues = z.infer<typeof productFormSchema>;
 interface AddProductModalProps {
   isOpen?: boolean;
   onClose?: () => void;
+  isEditable?: boolean;
+  onSuccess?: () => void;
 }
 
 export default function AddProductModal({
   isOpen,
   onClose,
+  isEditable,
+  onSuccess,
 }: AddProductModalProps) {
   const [preview, setPreview] = useState<string | null>(null);
+
+  console.log("isEditable:", isEditable);
 
   const inputErrorClass = "border rounded-md border-red-500";
   const inputTextErrorClass = "text-red-500";
@@ -67,6 +74,22 @@ export default function AddProductModal({
 
   const onSubmit = (data: FormValues) => {
     console.log("Submitting form with data:", data);
+
+    if (isEditable) {
+      toast.success("Producto actualizado", {
+        description: "El producto se ha actualizado correctamente",
+      });
+    } else {
+      toast.success("Producto agregado", {
+        description: "El producto se ha agregado correctamente",
+      });
+    }
+
+    // Llamar al callback de éxito si existe
+    onSuccess?.();
+
+    // Cerrar el modal
+    onClose?.();
   };
 
   return (

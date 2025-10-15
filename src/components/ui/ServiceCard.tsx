@@ -15,6 +15,7 @@ interface ServiceCardProps {
   isEditable?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  onReserve?: () => void;
 }
 
 export default function ServiceCard({
@@ -26,6 +27,7 @@ export default function ServiceCard({
   isEditable = false,
   onEdit,
   onDelete,
+  onReserve,
 }: ServiceCardProps) {
   const handleEditProduct = () => {
     onEdit?.();
@@ -35,6 +37,16 @@ export default function ServiceCard({
   const handleDeleteProduct = () => {
     onDelete?.();
     // Logic to delete the product
+  };
+
+  const handleActionProduct = () => {
+    if (isEditable) {
+      handleEditProduct();
+    } else {
+      // Logic to reserve the product
+      onReserve?.();
+      console.log("Reserving product:", title);
+    }
   };
 
   return (
@@ -63,7 +75,11 @@ export default function ServiceCard({
           <span className="text-primary font-bold">{price}</span>
           <span className="text-sm text-gray-500">{time}</span>
         </div>
-        <PrimaryButton className="w-full" size="icon">
+        <PrimaryButton
+          className="w-full"
+          size="icon"
+          onClick={handleActionProduct}
+        >
           <SquarePen />
           {isEditable ? "Editar" : "Reservar"}
         </PrimaryButton>
