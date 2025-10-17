@@ -97,19 +97,3 @@ export const getFullCalendarDays = (date: Date) => {
     currentDay: getDate(date),
   };
 };
-
-// se debe de motrar los siguinetes 7 dias de la fecha actual
-// y los 7 dias anteriores
-// si es inicio de mes, mostrar los dias del mes anterior
-// si es fin de mes, mostrar los dias del mes siguiente
-// si es inicio de año, mostrar los dias del año anterior
-// si es fin de año, mostrar los dias del año siguiente
-// siempre mostrar 15 dias en total
-// si es inicio de semana, mostrar los dias anteriores del mes anterior
-// si es fin de semana, mostrar los dias siguientes del mes siguiente
-// siempre mostrar 15 dias en total
-
-// Ejemplo: hoy es 1 de marzo, se deben de mostrar los dias 22, 23, 24, 25, 26, 27, 28 de febrero y 1, 2, 3, 4, 5, 6, 7 de marzo
-
-// Ejemplo: hoy es 30 de marzo, se deben de mostrar los dias 24, 25, 26, 27, 28, 29, 30 de marzo y 31 de marzo y 1, 2, 3, 4, 5 de abril
-// Ejemplo: hoy es 31 de diciembre, se deben de mostrar los dias 25, 26, 27, 28, 29, 30, 31 de diciembre y 1, 2, 3, 4, 5, 6 de enero
