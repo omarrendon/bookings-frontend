@@ -67,33 +67,30 @@ export const getListOfDateAndDayOfWeek = (date: Date) => {
   }));
 };
 
-export const getPreviosDays = (date: Date, days: number): Date[] => {
-  return Array.from({ length: days }, (_, i) => {
-    return format(add(date, { days: -i - 1 }), "yyyy-MM-dd") as unknown as Date;
-  });
+export const generateTimeSlots = () => {
+  const slots = [];
+  for (let hour = 0; hour < 24; hour++) {
+    for (const minute of [0, 30]) {
+      const timeString = `${hour.toString().padStart(2, "0")}:${minute
+        .toString()
+        .padStart(2, "0")}`;
+      slots.push(timeString);
+    }
+  }
+  return slots;
 };
 
-export const getNextDays = (date: Date, days: number): Date[] => {
-  return Array.from({ length: days }, (_, i) => {
-    return format(add(date, { days: i + 1 }), "yyyy-MM-dd") as unknown as Date;
-  });
+export const timeToMinutes = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
 };
 
-export const getFullCalendarDays = (date: Date) => {
-  const numberOfDay = getDay(date); // 0 (Domingo) - 6 (Sábado)
-  let previousDays: Date[] = [];
-  let nextDays: Date[] = [];
-
-  console.log({ numberOfDay });
-
-  previousDays = getPreviosDays(date, 7 + numberOfDay).splice(8 - numberOfDay);
-  // console.log({ previousDays });
-  nextDays = getNextDays(date, 7);
-  console.log({ nextDays });
-
-  return {
-    previousDays,
-    nextDays,
-    currentDay: getDate(date),
-  };
-};
+export const DAYS = [
+  { id: "monday", name: "Monday", spanish: "Lunes" },
+  { id: "tuesday", name: "Tuesday", spanish: "Martes" },
+  { id: "wednesday", name: "Wednesday", spanish: "Miércoles" },
+  { id: "thursday", name: "Thursday", spanish: "Jueves" },
+  { id: "friday", name: "Friday", spanish: "Viernes" },
+  { id: "saturday", name: "Saturday", spanish: "Sábado" },
+  { id: "sunday", name: "Sunday", spanish: "Domingo" },
+];
