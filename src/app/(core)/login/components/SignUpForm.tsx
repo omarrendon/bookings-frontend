@@ -15,13 +15,13 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 // Schemas
-import { singUpFormSchema } from "@/lib/schemas/loginFormSchema";
+import { signUpFormSchema } from "@/lib/schemas/loginFormSchema";
 
-type FormValues = z.infer<typeof singUpFormSchema>;
+type FormValues = z.infer<typeof signUpFormSchema>;
 
-export default function SingUpForm() {
+export default function SignUpForm() {
   const form = useForm<FormValues>({
-    resolver: zodResolver(singUpFormSchema),
+    resolver: zodResolver(signUpFormSchema),
     defaultValues: {
       email: "",
       password: "",

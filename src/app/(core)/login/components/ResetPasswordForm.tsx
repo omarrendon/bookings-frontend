@@ -83,7 +83,7 @@ export default function ResetPasswordForm() {
               )}
             />
             <Button type="submit" className="w-full cursor-pointer ">
-              Enviar instrucciones
+              Restablecer contraseña
             </Button>
           </form>
         </Form>

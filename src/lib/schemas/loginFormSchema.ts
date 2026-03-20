@@ -31,7 +31,7 @@ export const resetPasswordFormSchema = z
     path: ["confirmNewPassword"],
   });
 
-export const singUpFormSchema = z.object({
+export const signUpFormSchema = z.object({
   name: z
     .string({
       error: "El nombre es obligatorio",
