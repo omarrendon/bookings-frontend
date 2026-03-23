@@ -13,6 +13,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 // Schemas
 import { signUpFormSchema } from "@/lib/schemas/loginFormSchema";
@@ -29,8 +30,10 @@ export default function SignUpForm() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
+  const { isSubmitting } = form.formState;
+
+  const onSubmit = async () => {
+    // TODO: Call registration API
   };
   return (
     <div className="w-full flex flex-col max-w-lg ">
@@ -62,6 +65,7 @@ export default function SignUpForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -79,6 +83,7 @@ export default function SignUpForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -96,14 +101,16 @@ export default function SignUpForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
             <Button
               type="submit"
-              className="w-full bg-blue-400 hover:bg-blue-500 text-white"
+              disabled={isSubmitting}
+              className="w-full cursor-pointer"
             >
-              Crear cuenta
+              {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
             </Button>
             <div className="text-sm text-center">
               ¿Ya tienes una cuenta?{" "}

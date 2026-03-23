@@ -13,6 +13,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 // Schemas
 import { loginFormSchema } from "@/lib/schemas/loginFormSchema";
@@ -28,8 +29,10 @@ export default function LoginForm() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
+  const { isSubmitting } = form.formState;
+
+  const onSubmit = async () => {
+    // TODO: Call authentication API
   };
   return (
     <div className="w-full flex flex-col my-10 px-4">
@@ -59,6 +62,7 @@ export default function LoginForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -84,18 +88,19 @@ export default function LoginForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full cursor-pointer mt-4">
-              Iniciar sesión
+            <Button type="submit" disabled={isSubmitting} className="w-full cursor-pointer mt-4">
+              {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
             </Button>
           </form>
         </Form>
         <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t" />
         <div className="text-center text-sm">
           ¿No tienes una cuenta?{" "}
-          <Link href="#" className="underline underline-offset-4">
+          <Link href="/login/sign-up" className="underline underline-offset-4">
             Regístrate
           </Link>
         </div>

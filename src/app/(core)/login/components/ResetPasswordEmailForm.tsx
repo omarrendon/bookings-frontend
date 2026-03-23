@@ -12,6 +12,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 // Schemas
 import { resetPasswordEmailFormSchema } from "@/lib/schemas/loginFormSchema";
@@ -26,8 +27,10 @@ export default function ResetPasswordEmailForm() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Form data:", data);
+  const { isSubmitting } = form.formState;
+
+  const onSubmit = async () => {
+    // TODO: Call send reset email API
   };
 
   return (
@@ -49,23 +52,23 @@ export default function ResetPasswordEmailForm() {
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="grid gap-3">
+                <FormItem className="grid gap-1">
                   <FormLabel htmlFor="email">Correo electrónico</FormLabel>
                   <FormControl>
                     <Input
                       id="email"
                       type="email"
                       placeholder="miemail@example.com"
-                      required
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit" className="w-full cursor-pointer ">
-              Enviar instrucciones
+            <Button type="submit" disabled={isSubmitting} className="w-full cursor-pointer">
+              {isSubmitting ? "Enviando..." : "Enviar instrucciones"}
             </Button>
           </form>
         </Form>

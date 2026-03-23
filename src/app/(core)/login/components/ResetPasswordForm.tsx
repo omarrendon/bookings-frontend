@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 // Schemas
 import { resetPasswordFormSchema } from "@/lib/schemas/loginFormSchema";
 import {
@@ -15,6 +14,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 
 type FormValues = z.infer<typeof resetPasswordFormSchema>;
@@ -28,8 +28,10 @@ export default function ResetPasswordForm() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Form data:", data);
+  const { isSubmitting } = form.formState;
+
+  const onSubmit = async () => {
+    // TODO: Call reset password API
   };
 
   return (
@@ -60,6 +62,7 @@ export default function ResetPasswordForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -79,11 +82,12 @@ export default function ResetPasswordForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full cursor-pointer ">
-              Restablecer contraseña
+            <Button type="submit" disabled={isSubmitting} className="w-full cursor-pointer">
+              {isSubmitting ? "Restableciendo..." : "Restablecer contraseña"}
             </Button>
           </form>
         </Form>
