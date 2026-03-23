@@ -5,8 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 // Components
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -17,6 +18,12 @@ import {
 } from "@/components/ui/form";
 // Schemas
 import { signUpFormSchema } from "@/lib/schemas/loginFormSchema";
+// Utils
+import {
+  getPasswordStrength,
+  strengthColors,
+  strengthLabels,
+} from "@/utils/utils";
 
 type FormValues = z.infer<typeof signUpFormSchema>;
 
@@ -25,12 +32,16 @@ export default function SignUpForm() {
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
       email: "",
+      lastName: "",
       password: "",
       name: "",
+      acceptTerms: false,
     },
   });
 
   const { isSubmitting } = form.formState;
+  const passwordValue = form.watch("password");
+  const strength = getPasswordStrength(passwordValue ?? "");
 
   const onSubmit = async () => {
     // TODO: Call registration API
@@ -71,6 +82,24 @@ export default function SignUpForm() {
             />
             <FormField
               control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem className="grid gap-1">
+                  <FormLabel htmlFor="lastName">Apellido</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Apellido"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem className="grid gap-1">
@@ -101,6 +130,64 @@ export default function SignUpForm() {
                       {...field}
                     />
                   </FormControl>
+                  {passwordValue && (
+                    <div className="grid gap-1 my-1">
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4].map(level => (
+                          <div
+                            key={level}
+                            className={`h-1 flex-1 rounded-full transition-colors ${
+                              level <= strength
+                                ? strengthColors[strength]
+                                : "bg-muted"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        Fortaleza: {strengthLabels[strength]}
+                      </span>
+                    </div>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="acceptTerms"
+              render={({ field }) => (
+                <FormItem className="grid gap-1">
+                  <div className="flex items-center gap-2">
+                    <FormControl>
+                      <Checkbox
+                        id="acceptTerms"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel
+                      htmlFor="acceptTerms"
+                      className="text-sm text-muted-foreground flex items-center gap-1"
+                    >
+                      <div>
+                        Acepto los{" "}
+                        <Link
+                          href={"#"}
+                          className="underline underline-offset-4 hover:text-primary"
+                        >
+                          términos y condiciones
+                        </Link>{" "}
+                        y las{" "}
+                        <Link
+                          href={"#"}
+                          className="underline underline-offset-4 hover:text-primary"
+                        >
+                          política de privacidad.
+                        </Link>
+                      </div>
+                    </FormLabel>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -115,7 +202,7 @@ export default function SignUpForm() {
             <div className="text-sm text-center">
               ¿Ya tienes una cuenta?{" "}
               <Link href="/login" className="text-blue-600 hover:underline">
-                Inicia sesión
+                Iniciar sesión
               </Link>
             </div>
           </form>
