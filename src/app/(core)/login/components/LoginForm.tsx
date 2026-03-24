@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 // Schemas
 import { loginFormSchema } from "@/lib/schemas/loginFormSchema";
 
@@ -34,7 +35,12 @@ export default function LoginForm() {
   const { isSubmitting } = form.formState;
 
   const onSubmit = async () => {
-    // TODO: Call authentication API
+    try {
+      // TODO: Call authentication API
+      toast.success("Sesión iniciada correctamente");
+    } catch {
+      toast.error("Credenciales incorrectas. Inténtalo de nuevo.");
+    }
   };
   return (
     <div className="w-full flex flex-col my-10 px-4">

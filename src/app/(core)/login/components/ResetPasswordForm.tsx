@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 // Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 // Schemas
 import { resetPasswordFormSchema } from "@/lib/schemas/loginFormSchema";
 import {
@@ -31,7 +32,12 @@ export default function ResetPasswordForm() {
   const { isSubmitting } = form.formState;
 
   const onSubmit = async () => {
-    // TODO: Call reset password API
+    try {
+      // TODO: Call reset password API
+      toast.success("Contraseña restablecida correctamente.");
+    } catch {
+      toast.error("No se pudo restablecer la contraseña. Inténtalo de nuevo.");
+    }
   };
 
   return (

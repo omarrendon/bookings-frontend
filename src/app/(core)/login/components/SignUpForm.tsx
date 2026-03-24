@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 // Schemas
 import { signUpFormSchema } from "@/lib/schemas/loginFormSchema";
 // Utils
@@ -44,7 +45,12 @@ export default function SignUpForm() {
   const strength = getPasswordStrength(passwordValue ?? "");
 
   const onSubmit = async () => {
-    // TODO: Call registration API
+    try {
+      // TODO: Call registration API
+      toast.success("Cuenta creada correctamente. ¡Bienvenido!");
+    } catch {
+      toast.error("No se pudo crear la cuenta. Inténtalo de nuevo.");
+    }
   };
   return (
     <div className="w-full flex flex-col max-w-lg ">

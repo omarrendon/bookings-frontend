@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 // Schemas
 import { resetPasswordEmailFormSchema } from "@/lib/schemas/loginFormSchema";
 
@@ -30,7 +31,12 @@ export default function ResetPasswordEmailForm() {
   const { isSubmitting } = form.formState;
 
   const onSubmit = async () => {
-    // TODO: Call send reset email API
+    try {
+      // TODO: Call send reset email API
+      toast.success("Instrucciones enviadas. Revisa tu correo.");
+    } catch {
+      toast.error("No se pudo enviar el correo. Inténtalo de nuevo.");
+    }
   };
 
   return (

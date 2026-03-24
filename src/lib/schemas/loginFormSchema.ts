@@ -16,13 +16,12 @@ export const resetPasswordEmailFormSchema = z.object({
 export const resetPasswordFormSchema = z
   .object({
     newPassword: z
-      .string({
-        error: "La nueva contraseña es obligatoria",
-      })
-      .min(6, {
-        message: "La nueva contraseña debe tener al menos 6 caracteres",
-      })
-      .max(100, { message: "La nueva contraseña es demasiado larga" }),
+      .string({ error: "La nueva contraseña es obligatoria" })
+      .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
+      .max(100, { message: "La contraseña es demasiado larga" })
+      .regex(/[A-Z]/, { message: "Debe contener al menos una letra mayúscula" })
+      .regex(/[0-9]/, { message: "Debe contener al menos un número" })
+      .regex(/[^A-Za-z0-9]/, { message: "Debe contener al menos un carácter especial" }),
     confirmNewPassword: z.string({
       error: "La confirmación de la nueva contraseña es obligatoria",
     }),
@@ -48,8 +47,11 @@ export const signUpFormSchema = z.object({
   email: z.email({ message: "El correo electrónico no es válido" }),
   password: z
     .string()
-    .min(6, { message: "La contraseña debe tener al menos 6 caracteres" })
-    .max(100, { message: "La contraseña es demasiado larga" }),
+    .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
+    .max(100, { message: "La contraseña es demasiado larga" })
+    .regex(/[A-Z]/, { message: "Debe contener al menos una letra mayúscula" })
+    .regex(/[0-9]/, { message: "Debe contener al menos un número" })
+    .regex(/[^A-Za-z0-9]/, { message: "Debe contener al menos un carácter especial" }),
   acceptTerms: z.boolean().refine(val => val === true, {
     message: "Debes aceptar los términos y condiciones",
   }),
