@@ -21,7 +21,9 @@ export const resetPasswordFormSchema = z
       .max(100, { message: "La contraseña es demasiado larga" })
       .regex(/[A-Z]/, { message: "Debe contener al menos una letra mayúscula" })
       .regex(/[0-9]/, { message: "Debe contener al menos un número" })
-      .regex(/[^A-Za-z0-9]/, { message: "Debe contener al menos un carácter especial" }),
+      .regex(/[^A-Za-z0-9]/, {
+        message: "Debe contener al menos un carácter especial",
+      }),
     confirmNewPassword: z.string({
       error: "La confirmación de la nueva contraseña es obligatoria",
     }),
@@ -31,28 +33,30 @@ export const resetPasswordFormSchema = z
     path: ["confirmNewPassword"],
   });
 
-export const signUpFormSchema = z.object({
-  name: z
-    .string({
-      error: "El nombre es obligatorio",
-    })
-    .min(2, { message: "El nombre es un campo obligatorio" })
-    .max(50, { message: "El nombre es demasiado largo" }),
-  lastName: z
-    .string({
-      error: "El apellido es obligatorio",
-    })
-    .min(2, { message: "El apellido es un campo obligatorio" })
-    .max(50, { message: "El apellido es demasiado largo" }),
-  email: z.email({ message: "El correo electrónico no es válido" }),
-  password: z
-    .string()
-    .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
-    .max(100, { message: "La contraseña es demasiado larga" })
-    .regex(/[A-Z]/, { message: "Debe contener al menos una letra mayúscula" })
-    .regex(/[0-9]/, { message: "Debe contener al menos un número" })
-    .regex(/[^A-Za-z0-9]/, { message: "Debe contener al menos un carácter especial" }),
-  acceptTerms: z.boolean().refine(val => val === true, {
-    message: "Debes aceptar los términos y condiciones",
-  }),
-});
+export const signUpFormSchema = z
+  .object({
+    name: z
+      .string({ error: "El nombre es obligatorio" })
+      .min(2, { message: "El nombre es un campo obligatorio" })
+      .max(50, { message: "El nombre es demasiado largo" }),
+    lastName: z
+      .string({ error: "El apellido es obligatorio" })
+      .min(2, { message: "El apellido es un campo obligatorio" })
+      .max(50, { message: "El apellido es demasiado largo" }),
+    email: z.email({ message: "El correo electrónico no es válido" }),
+    password: z
+      .string()
+      .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
+      .max(100, { message: "La contraseña es demasiado larga" })
+      .regex(/[A-Z]/, { message: "Debe contener al menos una letra mayúscula" })
+      .regex(/[0-9]/, { message: "Debe contener al menos un número" })
+      .regex(/[^A-Za-z0-9]/, { message: "Debe contener al menos un carácter especial" }),
+    confirmPassword: z.string({ error: "La confirmación de la contraseña es obligatoria" }),
+    acceptTerms: z
+      .boolean()
+      .refine(val => val === true, { message: "Debes aceptar los términos y condiciones" }),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  });

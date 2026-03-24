@@ -35,6 +35,7 @@ export default function SignUpForm() {
       email: "",
       lastName: "",
       password: "",
+      confirmPassword: "",
       name: "",
       acceptTerms: false,
     },
@@ -155,6 +156,24 @@ export default function SignUpForm() {
                       </span>
                     </div>
                   )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem className="grid gap-1">
+                  <FormLabel htmlFor="confirmPassword">Confirmar contraseña</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirmar contraseña"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
