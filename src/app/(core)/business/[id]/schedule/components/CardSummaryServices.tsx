@@ -71,9 +71,7 @@ export default function CardSummaryServices() {
           <span className="font-bold text-2xl">$60</span>
         </div>
         <div className="flex flex-col items-start">
-          <span className="font-bold text-md.  text-gray-600">
-            Tiempo total
-          </span>
+          <span className="font-bold text-md text-gray-600">Tiempo total</span>
           <span className="font-bold text-lg">1 hr 30 mins</span>
         </div>
       </div>

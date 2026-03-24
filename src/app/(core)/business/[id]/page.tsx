@@ -17,7 +17,6 @@ export default async function BusinessDetailPage({
   params,
 }: BusinessDetailPageProps) {
   const { id } = await params;
-  console.log("Business ID:", id);
 
   return (
     <div>

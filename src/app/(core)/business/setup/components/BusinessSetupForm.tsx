@@ -1,11 +1,22 @@
 "use client";
 // Dependencies
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 // Icons
-import { Globe, MapPin, Share2, ImagePlus, Plus, Trash2, Upload, X } from "lucide-react";
+import {
+  Globe,
+  MapPin,
+  Share2,
+  ImagePlus,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+  ChevronsUpDown,
+  Check,
+} from "lucide-react";
 // Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +43,7 @@ import {
   type BusinessSetupValues,
 } from "@/lib/schemas/businessSetupSchema";
 // Utils
-import { SOCIAL_PLATFORMS } from "@/utils/utils";
+import { SOCIAL_PLATFORMS, MEXICAN_STATES } from "@/utils/utils";
 
 export default function BusinessSetupForm() {
   const form = useForm<BusinessSetupValues>({
@@ -86,7 +97,9 @@ export default function BusinessSetupForm() {
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     const remaining = MAX_GALLERY - galleryPreviews.length;
-    const newPreviews = files.slice(0, remaining).map(f => URL.createObjectURL(f));
+    const newPreviews = files
+      .slice(0, remaining)
+      .map(f => URL.createObjectURL(f));
     setGalleryPreviews(prev => [...prev, ...newPreviews]);
     // TODO: Upload files and push returned URLs to gallery_images
     if (galleryInputRef.current) galleryInputRef.current.value = "";
@@ -95,6 +108,30 @@ export default function BusinessSetupForm() {
   const handleRemoveGalleryImage = (index: number) => {
     setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
   };
+
+  const [stateOpen, setStateOpen] = useState(false);
+  const [stateQuery, setStateQuery] = useState("");
+  const stateDropdownRef = useRef<HTMLDivElement>(null);
+
+  const filteredStates = stateQuery.trim()
+    ? MEXICAN_STATES.filter(s =>
+        s.toLowerCase().includes(stateQuery.toLowerCase())
+      )
+    : MEXICAN_STATES;
+
+  useEffect(() => {
+    if (!stateOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        stateDropdownRef.current &&
+        !stateDropdownRef.current.contains(e.target as Node)
+      ) {
+        setStateOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [stateOpen]);
 
   const onSubmit = async () => {
     try {
@@ -280,7 +317,48 @@ export default function BusinessSetupForm() {
                       Estado <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="CDMX" {...field} />
+                      <div className="relative" ref={stateDropdownRef}>
+                        <div className="relative">
+                          <Input
+                            placeholder="Buscar estado..."
+                            value={stateOpen ? stateQuery : (field.value ?? "")}
+                            onFocus={() => {
+                              setStateQuery(field.value ?? "");
+                              setStateOpen(true);
+                            }}
+                            onChange={e => {
+                              setStateQuery(e.target.value);
+                              field.onChange(e.target.value);
+                              setStateOpen(true);
+                            }}
+                            onBlur={field.onBlur}
+                            className="pr-8"
+                          />
+                          <ChevronsUpDown className="absolute right-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                        </div>
+                        {stateOpen && filteredStates.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 max-h-52 overflow-y-auto rounded-md border bg-popover shadow-md">
+                            {filteredStates.map(state => (
+                              <button
+                                key={state}
+                                type="button"
+                                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground text-left"
+                                onMouseDown={e => {
+                                  e.preventDefault();
+                                  field.onChange(state);
+                                  setStateQuery(state);
+                                  setStateOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={`size-4 shrink-0 ${field.value === state ? "opacity-100" : "opacity-0"}`}
+                                />
+                                {state}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -309,7 +387,7 @@ export default function BusinessSetupForm() {
                 <FormItem className="grid gap-1">
                   <FormLabel>País</FormLabel>
                   <FormControl>
-                    <Input placeholder="México" {...field} />
+                    <Input placeholder="México" {...field} disabled />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -440,7 +518,9 @@ export default function BusinessSetupForm() {
               <span className="text-sm font-medium">
                 Haz clic para seleccionar una imagen
               </span>
-              <span className="text-xs">PNG, JPG, WEBP — máx. recomendado 2MB</span>
+              <span className="text-xs">
+                PNG, JPG, WEBP — máx. recomendado 2MB
+              </span>
             </button>
           )}
         </div>
@@ -467,7 +547,10 @@ export default function BusinessSetupForm() {
           />
           <div className="grid grid-cols-3 gap-2">
             {galleryPreviews.map((src, index) => (
-              <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
+              <div
+                key={index}
+                className="relative aspect-square rounded-lg overflow-hidden border"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={src}
@@ -496,7 +579,8 @@ export default function BusinessSetupForm() {
           </div>
           {galleryPreviews.length === 0 && (
             <p className="text-xs text-muted-foreground text-center -mt-1">
-              Puedes agregar hasta {MAX_GALLERY} imágenes para mostrar tu negocio.
+              Puedes agregar hasta {MAX_GALLERY} imágenes para mostrar tu
+              negocio.
             </p>
           )}
         </div>
