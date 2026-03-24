@@ -15,3 +15,14 @@ export const getPasswordStrength = (password: string): number => {
   if (/[^A-Za-z0-9]/.test(password)) score++;
   return score;
 };
+
+export const SOCIAL_PLATFORMS = [
+  "Instagram",
+  "Facebook",
+  "Twitter / X",
+  "TikTok",
+  "LinkedIn",
+  "YouTube",
+  "WhatsApp",
+  "Otro",
+];
