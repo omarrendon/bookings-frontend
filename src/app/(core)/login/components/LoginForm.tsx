@@ -7,13 +7,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 // Schemas
 import { loginFormSchema } from "@/lib/schemas/loginFormSchema";
 
@@ -25,11 +28,19 @@ export default function LoginForm() {
     defaultValues: {
       email: "",
       password: "",
+      rememberMe: false,
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
+  const { isSubmitting } = form.formState;
+
+  const onSubmit = async () => {
+    try {
+      // TODO: Call authentication API
+      toast.success("Sesión iniciada correctamente");
+    } catch {
+      toast.error("Credenciales incorrectas. Inténtalo de nuevo.");
+    }
   };
   return (
     <div className="w-full flex flex-col my-10 px-4">
@@ -59,6 +70,7 @@ export default function LoginForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -84,18 +96,37 @@ export default function LoginForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full cursor-pointer mt-4">
-              Iniciar sesión
+            <FormField
+              control={form.control}
+              name="rememberMe"
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-2">
+                  <FormControl>
+                    <Checkbox
+                      id="rememberMe"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel htmlFor="rememberMe" className="cursor-pointer font-normal">
+                    Recuérdame
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+            <Button type="submit" disabled={isSubmitting} className="w-full cursor-pointer mt-2">
+              {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
             </Button>
           </form>
         </Form>
         <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t" />
         <div className="text-center text-sm">
           ¿No tienes una cuenta?{" "}
-          <Link href="#" className="underline underline-offset-4">
+          <Link href="/login/sign-up" className="underline underline-offset-4">
             Regístrate
           </Link>
         </div>

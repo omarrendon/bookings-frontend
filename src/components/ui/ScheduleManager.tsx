@@ -3,12 +3,12 @@
 import { useState } from "react";
 // Utils
 import { DAYS, generateTimeSlots, timeToMinutes } from "@/utils/dates/utils";
-// Icons
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
-import { Switch } from "./switch";
+// Components
 import Text from "./Text";
 import SubTitle from "./SubTitle";
-import { Select } from "./select";
+import { Switch } from "./switch";
+// Icons
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 
 const TIME_SLOTS = generateTimeSlots();
 

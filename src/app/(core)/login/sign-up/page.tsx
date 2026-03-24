@@ -1,6 +1,6 @@
 // Components
 import Link from "next/link";
-import SingUpForm from "../components/SingUpForm";
+import SingUpForm from "../components/SignUpForm";
 import { GalleryVerticalEnd } from "lucide-react";
 import Image from "next/image";
 
