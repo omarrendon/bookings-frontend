@@ -60,6 +60,11 @@ export interface Business {
   gallery_images?: string[];
   created_at: string;
 }
+export interface BusinessResponse {
+  data: Business;
+  message: string;
+  success: boolean;
+}
 
 export interface CreateBusinessRequest {
   name: string;
@@ -90,9 +95,20 @@ export interface Product {
   description?: string;
   price: number;
   gallery_images?: string[];
-  estimated_delivery_hours: number;
-  estimated_delivery_minutes?: number;
+  estimated_delivery_time: number;
   created_at: string;
+}
+
+export interface ProductResponse {
+  data: Product;
+  message: string;
+  success: boolean;
+}
+
+export interface ProductsListResponse {
+  data: Product[];
+  message: string;
+  success: boolean;
 }
 
 export interface CreateProductRequest {

@@ -4,14 +4,15 @@ import type {
   CreateProductRequest,
   UpdateProductRequest,
   UploadResponse,
+  ProductsListResponse,
 } from "./types";
 
 export const productsApi = {
   getByBusiness: (businessId: string) =>
-    apiClient.get<Product[]>(`/businesses/${businessId}/products`),
+    apiClient.get<Product[]>(`/products/${businessId}`),
 
-  getById: (businessId: string, productId: string) =>
-    apiClient.get<Product>(`/businesses/${businessId}/products/${productId}`),
+  getById: (businessId: string) =>
+    apiClient.get<ProductsListResponse>(`/products/${businessId}`),
 
   create: (businessId: string, data: CreateProductRequest) =>
     apiClient.post<Product>(`/businesses/${businessId}/products`, data),
@@ -23,13 +24,14 @@ export const productsApi = {
     ),
 
   delete: (businessId: string, productId: string) =>
-    apiClient.delete<void>(
-      `/businesses/${businessId}/products/${productId}`,
-    ),
+    apiClient.delete<void>(`/businesses/${businessId}/products/${productId}`),
 
   uploadGallery: (files: File[]) => {
     const formData = new FormData();
     files.forEach(file => formData.append("files", file));
-    return apiClient.upload<UploadResponse[]>("/products/upload-gallery", formData);
+    return apiClient.upload<UploadResponse[]>(
+      "/products/upload-gallery",
+      formData,
+    );
   },
 };

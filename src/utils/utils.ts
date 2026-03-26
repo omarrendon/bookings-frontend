@@ -61,3 +61,24 @@ export const MEXICAN_STATES = [
   "Yucatán",
   "Zacatecas",
 ];
+
+export const formatAdress = (business: {
+  street: string;
+  external_number: string;
+  internal_number?: string;
+  neighborhood?: string;
+  city: string;
+  state: string;
+  zip_code: string;
+}): string => {
+  return [
+    `${business.street} ${business.external_number}`,
+    business.internal_number,
+    business.neighborhood,
+    business.city,
+    business.state,
+    business.zip_code,
+  ]
+    .filter(Boolean)
+    .join(", ");
+};

@@ -1,4 +1,3 @@
-// Components
 import Image from "next/image";
 import {
   Carousel,
@@ -8,34 +7,42 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-export default function LayoutImages() {
+interface LayoutImagesProps {
+  images: string[];
+}
+
+export default function LayoutImages({ images }: LayoutImagesProps) {
   return (
-    <div className="w-full flex flex-col items-center">
-      <h2 className="text-2xl md:text-2xl font-bold mb-4 ">
-        Galería de imágenes
-      </h2>
-      <Carousel
-        opts={{
-          align: "start",
-        }}
-        className="max-w-full"
-      >
-        <CarouselContent>
-          {Array.from({ length: 10 }).map((_, index) => (
-            <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-              <Image
-                src={`https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg`}
-                alt={`Imagen ${index + 1}`}
-                width={800}
-                height={800}
-                className="rounded-md h-full w-full object-cover"
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
-    </div>
+    <section id="fotos" className="py-14 bg-muted/40">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold tracking-tight">Galería</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {images.length} {images.length === 1 ? "foto" : "fotos"}
+          </p>
+        </div>
+        <Carousel opts={{ align: "start", loop: true }} className="w-full">
+          <CarouselContent className="-ml-3">
+            {images.map((src, index) => (
+              <CarouselItem
+                key={index}
+                className="pl-3 basis-full sm:basis-1/2 lg:basis-1/3"
+              >
+                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden group">
+                  <Image
+                    src={src}
+                    alt={`Imagen ${index + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="shadow-md" />
+          <CarouselNext className="shadow-md" />
+        </Carousel>
+      </div>
+    </section>
   );
 }
