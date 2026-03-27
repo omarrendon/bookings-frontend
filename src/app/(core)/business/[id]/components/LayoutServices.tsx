@@ -82,7 +82,7 @@ export default function LayoutServices({
                       className="rounded-full text-xs gap-1"
                       asChild
                     >
-                      <Link href={`/business/${businessId}/schedule`}>
+                      <Link href={`/business/${businessId}/products`}>
                         Reservar
                         <ChevronRight className="size-3" />
                       </Link>

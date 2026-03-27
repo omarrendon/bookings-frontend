@@ -40,7 +40,7 @@ export default async function BusinessDetailPage({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <NavigationBar />
+      <NavigationBar id={id} />
       <main className="flex-1">
         <HeaderBusiness
           id={id}

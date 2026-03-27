@@ -45,7 +45,7 @@ export default function HeaderBusiness({
             size="lg"
             className="rounded-full px-8 font-semibold shadow-lg gap-2"
           >
-            <Link href={`/business/${id}/schedule`}>
+            <Link href={`/business/${id}/products`}>
               <CalendarDays className="size-4" />
               Reservar ahora
             </Link>

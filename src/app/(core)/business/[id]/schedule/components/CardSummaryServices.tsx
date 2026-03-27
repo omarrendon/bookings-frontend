@@ -1,79 +1,71 @@
-// Components
 import Image from "next/image";
+import { Clock, CreditCard } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+
+const FALLBACK_IMAGE =
+  "https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg";
+
+const MOCK_SERVICES = [
+  { id: 1, name: "Corte de Cabello", duration: "30 mins", price: 20 },
+  { id: 2, name: "Coloración", duration: "60 mins", price: 40 },
+];
 
 export default function CardSummaryServices() {
+  const total = MOCK_SERVICES.reduce((sum, s) => sum + s.price, 0);
+
   return (
-    <div className="w-full flex flex-col gap-4">
-      <h2 className="text-lg md:text-xl text-center text-pink-400 font-medium">
-        Servicios Seleccionados
-      </h2>
-      <div className="p-4 rounded-lg grid gap-4 md:grid-cols-2 lg:grid-cols-3 sm:grid-cols-1">
-        <div className="w-full flex row gap-3 p-4 border rounded-lg">
-          <Image
-            src="https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg"
-            alt="Corte de Cabello"
-            width={120}
-            height={80}
-            className="rounded-md object-cover"
-          />
-          <div className="flex flex-col">
-            <span className="font-semibold">Corte de Cabello</span>
-            <span className="text-sm text-gray-600">Duración: 30 mins</span>
-            <span className="font-bold">$20</span>
-          </div>
-        </div>
-        <div className="w-full flex row gap-3 p-4 border rounded-lg">
-          <Image
-            src="https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg"
-            alt="Corte de Cabello"
-            width={120}
-            height={80}
-            className="rounded-md object-cover"
-          />
-          <div className="flex flex-col">
-            <span className="font-semibold">Corte de Cabello</span>
-            <span className="text-sm text-gray-600">Duración: 30 mins</span>
-            <span className="font-bold">$20</span>
-          </div>
-        </div>
-        <div className="w-full flex row gap-3 p-4 border rounded-lg">
-          <Image
-            src="https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg"
-            alt="Corte de Cabello"
-            width={120}
-            height={80}
-            className="rounded-md object-cover"
-          />
-          <div className="flex flex-col">
-            <span className="font-semibold">Corte de Cabello</span>
-            <span className="text-sm text-gray-600">Duración: 30 mins</span>
-            <span className="font-bold">$20</span>
-          </div>
-        </div>
-        <div className="w-full flex row gap-3 p-4 border rounded-lg">
-          <Image
-            src="https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg"
-            alt="Corte de Cabello"
-            width={120}
-            height={80}
-            className="rounded-md object-cover"
-          />
-          <div className="flex flex-col">
-            <span className="font-semibold">Corte de Cabello</span>
-            <span className="text-sm text-gray-600">Duración: 30 mins</span>
-            <span className="font-bold">$20</span>
-          </div>
-        </div>
+    <div className="bg-card rounded-2xl border overflow-hidden sticky top-28">
+      {/* Header */}
+      <div className="px-5 py-4 border-b">
+        <h2 className="font-semibold tracking-tight">Resumen de reserva</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          {MOCK_SERVICES.length}{" "}
+          {MOCK_SERVICES.length === 1
+            ? "servicio seleccionado"
+            : "servicios seleccionados"}
+        </p>
       </div>
-      <div className="w-full flex row gap-3  justify-between px-4 bg-pink-50 p-4  rounded-lg">
-        <div className="flex flex-col items-start">
-          <span className="font-bold text-md text-gray-600">Total a pagar</span>
-          <span className="font-bold text-2xl">$60</span>
+
+      {/* Services list */}
+      <div className="divide-y">
+        {MOCK_SERVICES.map(service => (
+          <div key={service.id} className="flex gap-3 p-4">
+            <div className="relative size-14 rounded-xl overflow-hidden flex-shrink-0">
+              <Image
+                src={FALLBACK_IMAGE}
+                alt={service.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm line-clamp-1">{service.name}</p>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                <Clock className="size-3" />
+                {service.duration}
+              </div>
+              <p className="font-bold text-sm mt-1">${service.price}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Totals + CTA */}
+      <div className="p-4 bg-muted/40 border-t space-y-3">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span className="font-medium">${total}</span>
         </div>
-        <div className="flex flex-col items-start">
-          <span className="font-bold text-md text-gray-600">Tiempo total</span>
-          <span className="font-bold text-lg">1 hr 30 mins</span>
+        <Separator />
+        <div className="flex justify-between items-center">
+          <span className="font-semibold">Total</span>
+          <span className="font-bold text-xl">${total}</span>
         </div>
+        <Button className="w-full rounded-full gap-2 cursor-pointer" size="lg">
+          <CreditCard className="size-4" />
+          Confirmar reserva
+        </Button>
       </div>
     </div>
   );

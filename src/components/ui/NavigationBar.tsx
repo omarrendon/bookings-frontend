@@ -3,10 +3,15 @@
 import { useEffect, useState } from "react";
 import { NavMenu } from "./NavMenu";
 import { NavigationSheet } from "./NavigationSheet";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Button } from "./button";
 
-export default function NavigationBar() {
+interface NavigationBarProps {
+  id: string;
+}
+
+export default function NavigationBar({ id }: NavigationBarProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -29,12 +34,18 @@ export default function NavigationBar() {
           {/* Desktop Menu */}
           <NavMenu className="hidden sm:block" />
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              className="hidden md:inline-flex rounded-full cursor-pointer border-white/20 text-black hover:bg-white/10 hover:text-white"
+            <Link
+              href={`/business/${id}/products`}
+              className="hidden md:inline-flex rounded-full  border-white/20 text-black hover:bg-white/10 hover:text-white"
             >
-              Reservar Ahora
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:cursor-pointer"
+              >
+                Reservar Ahora
+              </Button>
+            </Link>
             {/* Mobile Menu */}
             <div className="sm:hidden z-10">
               <NavigationSheet />
