@@ -1,179 +1,188 @@
 "use client";
-// Components
-import { Card, CardContent } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Phone,
   MessageCircle,
   MapPin,
-  Facebook,
+  Globe,
   Instagram,
+  Facebook,
+  Linkedin,
   Twitter,
-  Mail,
+  Youtube,
+  Twitch,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { SocialLink } from "@/lib/api/types";
 
-const businessData = {
-  phone: "(+876) 765 665",
-  whatsapp: "(+876) 765 665",
-  email: "mail@influenca.id",
-  address: "London Eye London",
-  location:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-  socialMedia: {
-    facebook: "https://facebook.com/business",
-    instagram: "https://instagram.com/business",
-    twitter: "https://twitter.com/business",
-  },
+interface ContactBusinessProps {
+  phone?: string;
+  address: string;
+  socialLinks?: SocialLink[] | Record<string, string>;
+}
+
+const socialIconMap: Record<string, LucideIcon> = {
+  instagram: Instagram,
+  facebook: Facebook,
+  linkedin: Linkedin,
+  twitter: Twitter,
+  x: Twitter,
+  youtube: Youtube,
+  twitch: Twitch,
+  whatsapp: MessageCircle,
+  web: Globe,
+  website: Globe,
 };
 
-export default function ContactBusiness() {
-  const handleWhatsAppClick = () => {
-    const phoneNumber = businessData.whatsapp.replace(/[^\d]/g, "");
+const getSocialIcon = (platform: string): LucideIcon =>
+  socialIconMap[platform.trim().toLowerCase()] ?? Globe;
+
+const getHref = (url: string): string =>
+  /^https?:\/\//i.test(url) ? url : `https://${url}`;
+
+export default function ContactBusiness({
+  phone,
+  address,
+  socialLinks,
+}: ContactBusinessProps) {
+  const normalizedSocialLinks: SocialLink[] = Array.isArray(socialLinks)
+    ? socialLinks
+    : socialLinks
+      ? Object.entries(socialLinks).map(([platform, url]) => ({
+          platform,
+          url,
+        }))
+      : [];
+
+  const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
+
+  const handleCall = () => phone && window.open(`tel:${phone}`, "_self");
+
+  const handleWhatsApp = () => {
+    if (!phone) return;
+    const number = phone.replace(/[^\d]/g, "");
     const message = encodeURIComponent(
-      "Hola, me gustaría más información sobre sus servicios."
+      "Hola, me gustaría más información sobre sus servicios.",
     );
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
-  };
-
-  const handleCallClick = () => {
-    window.open(`tel:${businessData.phone}`, "_self");
-  };
-
-  const handleEmailClick = () => {
-    window.open(`mailto:${businessData.email}`, "_self");
+    window.open(`https://wa.me/${number}?text=${message}`, "_blank");
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <h2 className="text-2xl md:text-2xl font-bold mb-8">
-        Información de Contacto
-      </h2>
+    <section id="contacto" className="py-14 px-6 sm:px-10 lg:px-16 bg-muted/40">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-2xl font-bold tracking-tight mb-8">Contacto</h2>
 
-      {/* Primera fila: Teléfono/WhatsApp y Email */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6  w-full mb-10 px-10">
-        {/* Card de Teléfono/WhatsApp */}
-        <Card className="border hover:shadow-lg transition-shadow duration-300 bg-teal-100">
-          <CardContent className="p-6 flex flex-col items-center text-center">
-            <div className="flex items-center justify-center mb-4">
-              <Phone className="w-8 h-8 text-teal-600 mr-2" />
-              <span className="text-xl font-bold text-teal-800">
-                {businessData.phone}
-              </span>
+        {/* Info row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          {/* Teléfono */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              <Phone className="size-4" />
+              Teléfono
             </div>
-            <p className="text-gray-600 mb-4 text-sm">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor
-            </p>
-            <div className="flex gap-2 w-full">
+            <p className="text-base font-medium">{phone ?? "No disponible"}</p>
+            <div className="flex gap-2">
               <Button
-                onClick={handleCallClick}
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white"
+                size="sm"
+                variant="outline"
+                disabled={!phone}
+                onClick={handleCall}
+                className="rounded-full gap-1.5 text-xs hover:cursor-pointer"
               >
-                <Phone className="w-4 h-4 mr-2" />
+                <Phone className="size-3" />
                 Llamar
               </Button>
               <Button
-                onClick={handleWhatsAppClick}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                size="sm"
+                variant="outline"
+                disabled={!phone}
+                onClick={handleWhatsApp}
+                className="rounded-full gap-1.5 text-xs hover:cursor-pointer"
               >
-                <MessageCircle className="w-4 h-4 mr-2" />
+                <MessageCircle className="size-3" />
                 WhatsApp
               </Button>
             </div>
-          </CardContent>
-        </Card>
-        {/* Card de Redes Sociales */}
-        <Card className="border hover:shadow-lg transition-shadow duration-300 bg-purple-50">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-bold text-purple-800 mb-4 text-center">
-              Síguenos en Redes Sociales
-            </h3>
-            <div className="flex justify-center gap-4">
-              <Button
-                onClick={() =>
-                  window.open(businessData.socialMedia.facebook, "_blank")
-                }
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white p-3"
-              >
-                <Facebook className="w-5 h-5" />
-              </Button>
-              <Button
-                onClick={() =>
-                  window.open(businessData.socialMedia.instagram, "_blank")
-                }
-                size="sm"
-                className="bg-pink-600 hover:bg-pink-700 text-white p-3"
-              >
-                <Instagram className="w-5 h-5" />
-              </Button>
-              <Button
-                onClick={() =>
-                  window.open(businessData.socialMedia.twitter, "_blank")
-                }
-                size="sm"
-                className="bg-sky-600 hover:bg-sky-700 text-white p-3"
-              >
-                <Twitter className="w-5 h-5" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Card de Dirección */}
-        <Card className="border hover:shadow-lg transition-shadow duration-300 bg-gray-50">
-          <CardContent className="p-6 flex flex-col items-center text-center">
-            <div className="flex items-center justify-center mb-4">
-              <MapPin className="w-8 h-8 text-gray-600 mr-2" />
-              <span className="text-xl font-bold text-gray-800">
-                {businessData.address}
-              </span>
+          <Separator className="sm:hidden" />
+
+          {/* Dirección */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              <MapPin className="size-4" />
+              Dirección
             </div>
-            <p className="text-gray-600 mb-4 text-sm">
-              {businessData.location}
-            </p>
+            <p className="text-base font-medium leading-snug">{address}</p>
             <Button
+              size="sm"
+              variant="outline"
+              className="rounded-full gap-1.5 text-xs w-fit hover:cursor-pointer"
               onClick={() =>
                 window.open(
-                  `https://maps.google.com/?q=${encodeURIComponent(
-                    businessData.address
-                  )}`,
-                  "_blank"
+                  `https://maps.google.com/?q=${encodeURIComponent(address)}`,
+                  "_blank",
                 )
               }
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white"
             >
-              <MapPin className="w-4 h-4 mr-2" />
+              <MapPin className="size-3" />
               Ver en Maps
             </Button>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
 
-      {/* Mapa */}
-      <div className="w-full">
-        <div className="w-full h-64 md:h-80 bg-gray-200 relative">
+          <Separator className="sm:hidden" />
+
+          {/* Redes sociales */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              <Globe className="size-4" />
+              Redes sociales
+            </div>
+            {normalizedSocialLinks.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {normalizedSocialLinks.map(({ platform, url }) => {
+                  const Icon = getSocialIcon(platform);
+                  const href = getHref(url);
+                  return (
+                    <Button
+                      key={`${platform}-${url}`}
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full gap-1.5 text-xs hover:cursor-pointer"
+                      disabled={!href}
+                      onClick={() =>
+                        href &&
+                        window.open(href, "_blank", "noopener,noreferrer")
+                      }
+                    >
+                      <Icon className="size-3" />
+                      {platform}
+                    </Button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Sin redes sociales registradas.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Mapa */}
+        <div className="w-full h-72 md:h-96 rounded-2xl overflow-hidden border">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2483.540769105379!2d-0.11960568422901434!3d51.503399879636206!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487604b900d26973%3A0x4291f3172409ea92!2sLondon%20Eye!5e0!3m2!1sen!2suk!4v1635000000000!5m2!1sen!2suk"
+            src={mapSrc}
             className="w-full h-full border-0"
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             title="Ubicación del negocio"
           />
-          <div className="absolute top-4 left-4 bg-white p-3 rounded-lg shadow-lg">
-            <div className="flex items-center">
-              <MapPin className="w-5 h-5 text-red-600 mr-2" />
-              <div>
-                <p className="font-semibold text-sm">London Eye London</p>
-                <p className="text-xs text-gray-600">
-                  London SE1 7PB, Reino Unido
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

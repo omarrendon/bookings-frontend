@@ -11,7 +11,7 @@ export const customerFormSchema = z.object({
     .min(10, { message: "El teléfono es obligatorio" })
     .max(15, { message: "El teléfono es demasiado largo" }),
   proof_of_payment: z
-    .custom<FileList | null>()
+    .custom<FileList | undefined>()
     .refine(files => !!files && files.length > 0, {
       message: "Se requiere un comprobante de pago",
     }),

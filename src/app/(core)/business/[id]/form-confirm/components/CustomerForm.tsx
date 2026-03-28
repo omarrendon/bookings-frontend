@@ -1,7 +1,7 @@
 "use client";
 // Dependencies
-import z from "zod";
-import { useState } from "react";
+import { z } from "zod";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 // Components
@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 import ModalErrorForm from "./ModalErrorForm";
 // Schemas
 import { customerFormSchema } from "@/lib/schemas/customerFormSchema";
@@ -26,6 +27,7 @@ type FormValues = z.infer<typeof customerFormSchema>;
 
 export default function CustomerForm() {
   const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(customerFormSchema),
@@ -37,8 +39,15 @@ export default function CustomerForm() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
+  const { isSubmitting } = form.formState;
+
+  const onSubmit = async () => {
+    try {
+      // TODO: Call booking API
+      toast.success("Reserva enviada correctamente.");
+    } catch {
+      toast.error("No se pudo enviar la reserva. Inténtalo de nuevo.");
+    }
   };
 
   return (
@@ -109,18 +118,17 @@ export default function CustomerForm() {
                 <FormLabel>Subir imagen del comprobante de pago</FormLabel>
                 <FormControl>
                   <Input
-                    key={preview || "empty"}
+                    ref={fileInputRef}
                     type="file"
                     accept="image/*"
                     onChange={e => {
-                      field.onChange(e.target.files);
                       const file = e.target.files?.[0];
                       if (file) {
+                        field.onChange(e.target.files);
                         setPreview(URL.createObjectURL(file));
-                        form.setValue("proof_of_payment", e.target.files);
                       } else {
+                        field.onChange(undefined);
                         setPreview(null);
-                        form.setValue("proof_of_payment", null);
                       }
                     }}
                   />
@@ -144,7 +152,8 @@ export default function CustomerForm() {
                 className="absolute top-1 -right-5 bg-transparent rounded-full p-1  hover:bg-gray-100"
                 onClick={() => {
                   setPreview(null);
-                  form.setValue("proof_of_payment", null);
+                  form.resetField("proof_of_payment");
+                  if (fileInputRef.current) fileInputRef.current.value = "";
                 }}
                 aria-label="Eliminar imagen"
               >
@@ -158,9 +167,10 @@ export default function CustomerForm() {
           )}
           <Button
             type="submit"
+            disabled={isSubmitting}
             className="mt-4 bg-pink-600 hover:bg-pink-700 text-white"
           >
-            Enviar
+            {isSubmitting ? "Enviando..." : "Enviar"}
           </Button>
         </form>
       </Form>

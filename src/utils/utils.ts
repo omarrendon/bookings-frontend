@@ -15,3 +15,70 @@ export const getPasswordStrength = (password: string): number => {
   if (/[^A-Za-z0-9]/.test(password)) score++;
   return score;
 };
+
+export const SOCIAL_PLATFORMS = [
+  "Instagram",
+  "Facebook",
+  "Twitter / X",
+  "TikTok",
+  "LinkedIn",
+  "YouTube",
+  "WhatsApp",
+  "Otro",
+];
+
+export const MEXICAN_STATES = [
+  "Aguascalientes",
+  "Baja California",
+  "Baja California Sur",
+  "Campeche",
+  "Chiapas",
+  "Chihuahua",
+  "Ciudad de México",
+  "Coahuila",
+  "Colima",
+  "Durango",
+  "Estado de México",
+  "Guanajuato",
+  "Guerrero",
+  "Hidalgo",
+  "Jalisco",
+  "Michoacán",
+  "Morelos",
+  "Nayarit",
+  "Nuevo León",
+  "Oaxaca",
+  "Puebla",
+  "Querétaro",
+  "Quintana Roo",
+  "San Luis Potosí",
+  "Sinaloa",
+  "Sonora",
+  "Tabasco",
+  "Tamaulipas",
+  "Tlaxcala",
+  "Veracruz",
+  "Yucatán",
+  "Zacatecas",
+];
+
+export const formatAdress = (business: {
+  street: string;
+  external_number: string;
+  internal_number?: string;
+  neighborhood?: string;
+  city: string;
+  state: string;
+  zip_code: string;
+}): string => {
+  return [
+    `${business.street} ${business.external_number}`,
+    business.internal_number,
+    business.neighborhood,
+    business.city,
+    business.state,
+    business.zip_code,
+  ]
+    .filter(Boolean)
+    .join(", ");
+};

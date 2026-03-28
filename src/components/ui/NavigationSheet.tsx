@@ -1,6 +1,5 @@
 // Components
 import { NavMenu } from "./NavMenu";
-import { Logo } from "../../app/(core)/business/[id]/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 // Icons
@@ -15,8 +14,9 @@ export const NavigationSheet = () => {
         </Button>
       </SheetTrigger>
       <SheetContent className="px-6 py-3">
-        <Logo />
-        <NavMenu orientation="vertical" className="mt-6 [&>div]:h-full" />
+        <div className="[&_a]:text-foreground [&_a]:opacity-70 hover:[&_a]:opacity-100">
+          <NavMenu orientation="vertical" className="mt-6 [&>div]:h-full" />
+        </div>
       </SheetContent>
     </Sheet>
   );

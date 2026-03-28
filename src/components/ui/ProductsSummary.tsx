@@ -6,13 +6,7 @@ import { Button } from "./button";
 import { Alert, AlertDescription, AlertTitle } from "./alert";
 
 export default function ProductsSummary() {
-  const [isAlertVisible, setIsAlertVisible] = useState(true);
-  // const showAlert = () => {
-  //   setIsAlertVisible(true);
-  // };
-  // const hideAlert = () => {
-  //   setIsAlertVisible(false);
-  // };
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
 
   return (
     <div className="w-full fixed bottom-10  bg-transparent  dark:border-slate-900  mx-auto rounded-full z-50 flex flex-col items-center px-10">
