@@ -82,3 +82,20 @@ export const formatAdress = (business: {
     .filter(Boolean)
     .join(", ");
 };
+
+export const formatPrice = (price: number): string => {
+  const formatter = new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    // minimumFractionDigits: 0,
+    // maximumFractionDigits: 0,
+  });
+  return formatter.format(price);
+};
+
+// const formatTime = (hours: number, minutes?: number): string => {
+//   const parts: string[] = [];
+//   if (hours > 0) parts.push(`${hours} hr${hours !== 1 ? "s" : ""}`);
+//   if (minutes && minutes > 0) parts.push(`${minutes} min`);
+//   return parts.length > 0 ? parts.join(" ") : "—";
+// };

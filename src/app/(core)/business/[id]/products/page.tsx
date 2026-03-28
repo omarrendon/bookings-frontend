@@ -31,9 +31,7 @@ export default async function BusinessProductsPage({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <NavigationBar id={id} />
-
-      <main className="flex-1 pt-28 pb-20 px-6 sm:px-10 lg:px-16">
+      <main className="flex-1 pt-20 pb-20 px-6 sm:px-10 lg:px-16">
         <div className="max-w-6xl mx-auto">
           {/* Back + heading */}
           <div className="mb-10">
