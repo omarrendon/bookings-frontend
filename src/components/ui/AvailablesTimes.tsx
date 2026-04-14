@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
 import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCartStore } from "@/store/cart.store";
 
 interface AvailablesTimesProps {
   slots: string[];
@@ -14,7 +14,7 @@ export default function AvailablesTimes({
   selectedDate,
   isLoading = false,
 }: AvailablesTimesProps) {
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const { selectedTime, setSelectedTime } = useCartStore();
 
   const formattedDate = selectedDate.toLocaleDateString("es-ES", {
     weekday: "long",
@@ -52,11 +52,11 @@ export default function AvailablesTimes({
           {slots.map(slot => (
             <button
               key={slot}
-              onClick={() => setSelectedSlot(slot)}
+              onClick={() => setSelectedTime(slot)}
               className={cn(
                 "px-2 py-2.5 rounded-xl text-xs font-medium border transition-all duration-150",
                 "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
-                selectedSlot === slot
+                selectedTime === slot
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary",
               )}

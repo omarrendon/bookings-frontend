@@ -10,7 +10,8 @@ const FALLBACK_IMAGE =
   "https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg";
 
 export default function CardSummaryServices() {
-  const { selectedProducts } = useCartStore();
+  const { selectedProducts, selectedDate, selectedTime } = useCartStore();
+  const canConfirm = !!selectedDate && !!selectedTime;
   const total = selectedProducts.reduce(
     (sum, product) => sum + product.price,
     0,
@@ -66,7 +67,11 @@ export default function CardSummaryServices() {
           <span className="font-semibold">Total</span>
           <span className="font-bold text-xl">{formatPrice(total)}</span>
         </div>
-        <Button className="w-full rounded-full gap-2 cursor-pointer" size="lg">
+        <Button
+          className="w-full rounded-full gap-2 hover:cursor-pointer"
+          size="lg"
+          disabled={!canConfirm}
+        >
           <CreditCard className="size-4" />
           Confirmar reserva
         </Button>

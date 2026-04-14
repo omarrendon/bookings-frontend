@@ -3,6 +3,8 @@
 import { useState } from "react";
 // Hooks
 import { useMonthSlots } from "@/hooks/useSchedules";
+// Store
+import { useCartStore } from "@/store/cart.store";
 // Components
 import Calendar from "@/components/ui/Calendar";
 import AvailablesTimes from "@/components/ui/AvailablesTimes";
@@ -16,6 +18,14 @@ interface SchedulePickerProps {
 export default function SchedulePicker({ businessId }: SchedulePickerProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
+
+  const { setSelectedDate: storeSetDate } = useCartStore();
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    const p = (n: number) => String(n).padStart(2, "0");
+    storeSetDate(`${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`);
+  };
 
   const { data, isLoading } = useMonthSlots(businessId, displayMonth);
   const daySlots = data?.data?.slots ?? [];
@@ -68,7 +78,7 @@ export default function SchedulePicker({ businessId }: SchedulePickerProps) {
         <div className="p-6">
           <Calendar
             selected={selectedDate}
-            onSelect={setSelectedDate}
+            onSelect={handleDateSelect}
             displayMonth={displayMonth}
             onMonthChange={setDisplayMonth}
             daysWithAvailability={daysWithAvailability}
