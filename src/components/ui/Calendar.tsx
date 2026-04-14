@@ -1,39 +1,42 @@
 "use client";
 // Dependencies
-import React, { useState } from "react";
 import { es } from "react-day-picker/locale";
 // Components
 import { DayPicker } from "react-day-picker";
 // Styles
 import "react-day-picker/style.css";
 
-const hiddenDays = [
-  new Date(2025, 8, 7),
-  new Date(2025, 8, 14),
-  new Date(2025, 8, 21),
-  new Date(2025, 8, 28),
-];
+interface CalendarProps {
+  selected: Date | undefined;
+  onSelect: (date: Date) => void;
+  displayMonth: Date;
+  onMonthChange: (month: Date) => void;
+  daysWithAvailability: Date[];
+  daysWithoutAvailability: Date[];
+  isLoading?: boolean;
+}
 
-const daysWithAvailability = [
-  new Date(2026, 3, 26),
-  new Date(2026, 3, 27),
-  new Date(2026, 3, 28),
-];
-
-const daysWithoutAvailability = [new Date(2026, 3, 29), new Date(2026, 3, 30)];
-
-export default function Calendar() {
-  const [selected, setSelected] = useState<Date>();
-
+export default function Calendar({
+  selected,
+  onSelect,
+  displayMonth,
+  onMonthChange,
+  daysWithAvailability,
+  daysWithoutAvailability,
+  isLoading = false,
+}: CalendarProps) {
   return (
     <div className="w-full flex items-center justify-center">
       <DayPicker
         locale={es}
         animate
         today={new Date()}
+        month={displayMonth}
+        onMonthChange={onMonthChange}
         modifiers={{
           available: daysWithAvailability,
           unavailable: daysWithoutAvailability,
+          loading: isLoading ? [displayMonth] : [],
         }}
         modifiersClassNames={{
           available:
@@ -60,11 +63,11 @@ export default function Calendar() {
           chevron: "fill-muted-foreground",
           month: "text-foreground font-semibold",
         }}
-        disabled={[{ before: new Date() }, ...hiddenDays]}
+        disabled={[{ before: new Date() }]}
         timeZone="America/Mexico_City"
         mode="single"
         selected={selected}
-        onSelect={setSelected}
+        onSelect={(date) => date && onSelect(date)}
       />
     </div>
   );

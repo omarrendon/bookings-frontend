@@ -146,6 +146,27 @@ export interface CreateReservationRequest {
   scheduled_at: string;
 }
 
+// ── Schedules ─────────────────────────────────────────────────────────────────
+
+export interface TimeSlot {
+  start: string; // "09:00"
+  end: string; // "10:00"
+  isBooked: boolean;
+}
+
+export interface DaySlots {
+  date: string; // "YYYY-MM-DD"
+  slots: TimeSlot[];
+}
+
+export interface MonthSlotsResponse {
+  data: {
+    slots: DaySlots[];
+  };
+  message: string;
+  success: boolean;
+}
+
 // ── File Upload ───────────────────────────────────────────────────────────────
 
 export interface UploadResponse {

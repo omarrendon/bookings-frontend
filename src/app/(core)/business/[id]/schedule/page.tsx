@@ -1,11 +1,10 @@
 // Components
 import Link from "next/link";
 import Footer from "@/components/ui/Footer";
-import CardSummaryServices from "./components/CardSummaryServices";
 import SchedulePicker from "./components/SchedulePicker";
+import CardSummaryServices from "./components/CardSummaryServices";
 // Icons
 import { ArrowLeft } from "lucide-react";
-import SummarySidebar from "../components/SummarySidebar";
 
 interface BusinessSchedulePageProps {
   params: Promise<{ id: string }>;
@@ -39,17 +38,11 @@ export default async function BusinessSchedulePage({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* Calendar + times */}
             <div className="lg:col-span-2">
-              <SchedulePicker />
+              <SchedulePicker businessId={id} />
             </div>
-
             {/* Order summary */}
             <div>
               <CardSummaryServices />
-              {/* <SummarySidebar */}
-              {/* selectedProducts={[]} */}
-              {/* total={10} */}
-              {/* handleContinue={() => {}} */}
-              {/* /> */}
             </div>
           </div>
         </div>
