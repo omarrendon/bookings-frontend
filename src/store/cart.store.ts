@@ -2,18 +2,26 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Product } from "@/lib/api/types";
 
+export interface CustomerInfo {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 interface CartState {
   // ── Estado ────────────────────────────────────────────────────────────────
   businessId: string | null;
   selectedProducts: Product[];
   selectedDate: string | null;  // "YYYY-MM-DD"
   selectedTime: string | null;  // "09:00"
+  customerInfo: CustomerInfo | null;
 
   // ── Acciones ──────────────────────────────────────────────────────────────
   setBusinessId: (id: string) => void;
   toggleProduct: (product: Product) => void;
   setSelectedDate: (date: string) => void;
   setSelectedTime: (time: string) => void;
+  setCustomerInfo: (info: CustomerInfo) => void;
   clearCart: () => void;
 }
 
@@ -24,6 +32,7 @@ export const useCartStore = create<CartState>()(
       selectedProducts: [],
       selectedDate: null,
       selectedTime: null,
+      customerInfo: null,
 
       setBusinessId: id =>
         set({ businessId: id }),
@@ -45,8 +54,11 @@ export const useCartStore = create<CartState>()(
       setSelectedTime: time =>
         set({ selectedTime: time }),
 
+      setCustomerInfo: info =>
+        set({ customerInfo: info }),
+
       clearCart: () =>
-        set({ selectedProducts: [], businessId: null, selectedDate: null, selectedTime: null }),
+        set({ selectedProducts: [], businessId: null, selectedDate: null, selectedTime: null, customerInfo: null }),
     }),
     {
       name: "bookea-cart",
@@ -55,6 +67,7 @@ export const useCartStore = create<CartState>()(
         selectedProducts: state.selectedProducts,
         selectedDate: state.selectedDate,
         selectedTime: state.selectedTime,
+        customerInfo: state.customerInfo,
       }),
     },
   ),

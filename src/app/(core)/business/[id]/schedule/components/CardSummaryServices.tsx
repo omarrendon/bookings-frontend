@@ -5,17 +5,23 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/store/cart.store";
 import { formatPrice } from "@/utils/utils";
+import { useRouter } from "next/navigation";
 
 const FALLBACK_IMAGE =
   "https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg";
 
 export default function CardSummaryServices() {
+  const router = useRouter();
   const { selectedProducts, selectedDate, selectedTime } = useCartStore();
   const canConfirm = !!selectedDate && !!selectedTime;
   const total = selectedProducts.reduce(
     (sum, product) => sum + product.price,
     0,
   );
+
+  const handleRedirectToFormConfirm = () => {
+    router.push(`/business/${selectedProducts[0].business_id}/form-confirm`);
+  };
 
   return (
     <div className="bg-card rounded-2xl border overflow-hidden sticky top-28">
@@ -71,6 +77,7 @@ export default function CardSummaryServices() {
           className="w-full rounded-full gap-2 hover:cursor-pointer"
           size="lg"
           disabled={!canConfirm}
+          onClick={handleRedirectToFormConfirm}
         >
           <CreditCard className="size-4" />
           Confirmar reserva
