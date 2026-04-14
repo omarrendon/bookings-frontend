@@ -1,13 +1,14 @@
-import { notFound } from "next/navigation";
+// Components
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import Footer from "@/components/ui/Footer";
+import ProductsSelector from "./components/ProductsSelector";
 // API
 import { productsApi } from "@/lib/api/products.api";
 import { ApiError } from "@/lib/api/client";
-// Components
-import NavigationBar from "@/components/ui/NavigationBar";
-import Footer from "@/components/ui/Footer";
-import ProductsSelector from "./components/ProductsSelector";
+// Icons
+import { ArrowLeft } from "lucide-react";
+// Next.js
+import { notFound } from "next/navigation";
 
 interface BusinessProductsPageProps {
   params: Promise<{ id: string }>;

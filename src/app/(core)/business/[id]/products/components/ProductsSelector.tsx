@@ -1,7 +1,9 @@
 "use client";
 // Dependencies
-import { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+// Store
+import { useCartStore } from "@/store/cart.store";
 // Components
 import ProductCard from "@/app/(core)/business/[id]/components/ProductCard";
 import SummarySidebar from "../../components/SummarySidebar";
@@ -20,23 +22,22 @@ export default function ProductsSelector({
   businessId,
 }: ProductsSelectorProps) {
   const router = useRouter();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const toggle = (id: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  const { businessId: storedBusinessId, selectedProducts, setBusinessId, toggleProduct, clearCart } =
+    useCartStore();
 
-  const selectedProducts = products.filter(p => selectedIds.has(p.id));
+  // Si el negocio cambió, limpiamos el carrito anterior
+  useEffect(() => {
+    if (storedBusinessId && storedBusinessId !== businessId) {
+      clearCart();
+    }
+    setBusinessId(businessId);
+  }, [businessId, storedBusinessId, clearCart, setBusinessId]);
+
   const total = selectedProducts.reduce((sum, p) => sum + p.price, 0);
 
   const handleContinue = () => {
-    const ids = [...selectedIds].join(",");
-    router.push(`/business/${businessId}/schedule?products=${ids}`);
+    router.push(`/business/${businessId}/schedule`);
   };
 
   return (
@@ -63,8 +64,8 @@ export default function ProductsSelector({
                 estimated_delivery_time={product.estimated_delivery_time}
                 businessId={businessId}
                 selectable
-                selected={selectedIds.has(product.id)}
-                onToggle={() => toggle(product.id)}
+                selected={selectedProducts.some(p => p.id === product.id)}
+                onToggle={() => toggleProduct(product)}
               />
             ))}
           </div>

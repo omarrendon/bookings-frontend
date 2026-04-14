@@ -5,6 +5,7 @@ import CardSummaryServices from "./components/CardSummaryServices";
 import SchedulePicker from "./components/SchedulePicker";
 // Icons
 import { ArrowLeft } from "lucide-react";
+import SummarySidebar from "../components/SummarySidebar";
 
 interface BusinessSchedulePageProps {
   params: Promise<{ id: string }>;
@@ -22,11 +23,11 @@ export default async function BusinessSchedulePage({
           {/* Back + heading */}
           <div className="mb-10">
             <Link
-              href={`/business/${id}`}
+              href={`/business/${id}/products`}
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-5"
             >
               <ArrowLeft className="size-4" />
-              Volver al negocio
+              Volver a los servicios
             </Link>
             <h1 className="text-3xl font-bold tracking-tight">Reservar cita</h1>
             <p className="text-muted-foreground mt-1 text-sm">
@@ -44,6 +45,11 @@ export default async function BusinessSchedulePage({
             {/* Order summary */}
             <div>
               <CardSummaryServices />
+              {/* <SummarySidebar */}
+              {/* selectedProducts={[]} */}
+              {/* total={10} */}
+              {/* handleContinue={() => {}} */}
+              {/* /> */}
             </div>
           </div>
         </div>
