@@ -1,13 +1,14 @@
-import { notFound } from "next/navigation";
+// Components
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import Footer from "@/components/ui/Footer";
+import ProductsSelector from "./components/ProductsSelector";
 // API
 import { productsApi } from "@/lib/api/products.api";
 import { ApiError } from "@/lib/api/client";
-// Components
-import NavigationBar from "@/components/ui/NavigationBar";
-import Footer from "@/components/ui/Footer";
-import ProductsSelector from "./components/ProductsSelector";
+// Icons
+import { ArrowLeft } from "lucide-react";
+// Next.js
+import { notFound } from "next/navigation";
 
 interface BusinessProductsPageProps {
   params: Promise<{ id: string }>;
@@ -31,9 +32,7 @@ export default async function BusinessProductsPage({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <NavigationBar id={id} />
-
-      <main className="flex-1 pt-28 pb-20 px-6 sm:px-10 lg:px-16">
+      <main className="flex-1 pt-20 pb-20 px-6 sm:px-10 lg:px-16">
         <div className="max-w-6xl mx-auto">
           {/* Back + heading */}
           <div className="mb-10">

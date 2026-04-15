@@ -1,8 +1,8 @@
 // Components
 import Link from "next/link";
 import Footer from "@/components/ui/Footer";
-import CardSummaryServices from "./components/CardSummaryServices";
 import SchedulePicker from "./components/SchedulePicker";
+import CardSummaryServices from "./components/CardSummaryServices";
 // Icons
 import { ArrowLeft } from "lucide-react";
 
@@ -22,11 +22,11 @@ export default async function BusinessSchedulePage({
           {/* Back + heading */}
           <div className="mb-10">
             <Link
-              href={`/business/${id}`}
+              href={`/business/${id}/products`}
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-5"
             >
               <ArrowLeft className="size-4" />
-              Volver al negocio
+              Volver a los servicios
             </Link>
             <h1 className="text-3xl font-bold tracking-tight">Reservar cita</h1>
             <p className="text-muted-foreground mt-1 text-sm">
@@ -38,9 +38,8 @@ export default async function BusinessSchedulePage({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* Calendar + times */}
             <div className="lg:col-span-2">
-              <SchedulePicker />
+              <SchedulePicker businessId={id} />
             </div>
-
             {/* Order summary */}
             <div>
               <CardSummaryServices />

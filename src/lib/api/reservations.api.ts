@@ -2,6 +2,8 @@ import { apiClient } from "./client";
 import type {
   Reservation,
   CreateReservationRequest,
+  CreateBookingRequest,
+  BookingResponse,
   ReservationStatus,
   UploadResponse,
 } from "./types";
@@ -30,6 +32,9 @@ export const reservationsApi = {
       `/businesses/${businessId}/reservations/${reservationId}/status`,
       { status },
     ),
+
+  book: (data: CreateBookingRequest) =>
+    apiClient.post<BookingResponse>("/reservations", data),
 
   uploadProofOfPayment: (file: File) => {
     const formData = new FormData();

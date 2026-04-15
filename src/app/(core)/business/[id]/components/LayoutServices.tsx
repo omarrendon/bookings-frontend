@@ -1,23 +1,10 @@
-import Link from "next/link";
-import Image from "next/image";
-import { Clock, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import type { Product } from "@/lib/api/types";
-
-const FALLBACK_IMAGE =
-  "https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg";
+import ProductCard from "./ProductCard";
 
 interface LayoutServicesProps {
   products: Product[] | null;
   businessId: string;
 }
-
-const formatTime = (hours: number, minutes?: number): string => {
-  const parts: string[] = [];
-  if (hours > 0) parts.push(`${hours} hr${hours !== 1 ? "s" : ""}`);
-  if (minutes && minutes > 0) parts.push(`${minutes} min`);
-  return parts.length > 0 ? parts.join(" ") : "—";
-};
 
 export default function LayoutServices({
   products,
@@ -42,54 +29,15 @@ export default function LayoutServices({
           {products &&
             products.length > 0 &&
             products.map(product => (
-              <div
+              <ProductCard
                 key={product.id}
-                className="group bg-card rounded-2xl border overflow-hidden hover:shadow-md transition-all duration-300"
-              >
-                {/* Imagen */}
-                <div className="relative aspect-video overflow-hidden">
-                  <Image
-                    src={product.gallery_images?.[0] ?? FALLBACK_IMAGE}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-
-                {/* Contenido */}
-                <div className="p-5">
-                  <h3 className="font-semibold text-base mb-1 line-clamp-1">
-                    {product.name}
-                  </h3>
-                  {product.description && (
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {product.description}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between mt-auto pt-3 border-t">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-lg font-bold text-primary">
-                        ${product.price}
-                      </span>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="size-3" />
-                        {formatTime(product.estimated_delivery_time)}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-full text-xs gap-1"
-                      asChild
-                    >
-                      <Link href={`/business/${businessId}/products`}>
-                        Reservar
-                        <ChevronRight className="size-3" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
+                gallery_images={product.gallery_images}
+                name={product.name}
+                description={product.description}
+                price={product.price}
+                estimated_delivery_time={product.estimated_delivery_time}
+                businessId={businessId}
+              />
             ))}
         </div>
       </div>
