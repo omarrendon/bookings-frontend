@@ -53,12 +53,11 @@ export default function SchedulePicker({ businessId }: SchedulePickerProps) {
     )
     .map(d => toSafeDate(d.date));
 
-  // Slots disponibles del día seleccionado
+  // Slots del día seleccionado (todos, para mostrar ocupados como disabled)
   const pad = (n: number) => String(n).padStart(2, "0");
   const selectedDateKey = `${selectedDate.getFullYear()}-${pad(selectedDate.getMonth() + 1)}-${pad(selectedDate.getDate())}`;
   const selectedDay = daySlots.find(d => d.date === selectedDateKey);
-  const availableSlots =
-    selectedDay?.slots.filter(s => !s.isBooked).map(s => s.start) ?? [];
+  const availableSlots = selectedDay?.slots ?? [];
 
   return (
     <div className="bg-card rounded-2xl border overflow-hidden">

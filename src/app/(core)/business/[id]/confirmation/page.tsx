@@ -1,10 +1,9 @@
 // Components
-import Link from "next/link";
 import Footer from "@/components/ui/Footer";
 import ScheduleDetail from "./components/ScheduleDetail";
+import BackToBusinessButton from "./components/BackToBusinessButton";
 // Icons
-import { CheckCircle2, Home } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckCircle2 } from "lucide-react";
 
 interface BusinessConfirmationPageProps {
   params: Promise<{ id: string }>;
@@ -39,12 +38,7 @@ export default async function BusinessConfirmationPage({
 
           {/* Actions */}
           <div className="mt-8 flex justify-center">
-            <Button asChild variant="outline" className="rounded-full gap-2">
-              <Link href={`/business/${id}`}>
-                <Home className="size-4" />
-                Volver al negocio
-              </Link>
-            </Button>
+            <BackToBusinessButton businessId={id} />
           </div>
 
         </div>

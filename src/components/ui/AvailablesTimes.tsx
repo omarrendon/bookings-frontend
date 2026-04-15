@@ -2,9 +2,10 @@
 import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart.store";
+import type { TimeSlot } from "@/lib/api/types";
 
 interface AvailablesTimesProps {
-  slots: string[];
+  slots: TimeSlot[];
   selectedDate: Date;
   isLoading?: boolean;
 }
@@ -51,17 +52,20 @@ export default function AvailablesTimes({
         <div className="grid grid-cols-3 gap-2">
           {slots.map(slot => (
             <button
-              key={slot}
-              onClick={() => setSelectedTime(slot)}
+              key={slot.start}
+              onClick={() => !slot.isBooked && setSelectedTime(slot.start)}
+              disabled={slot.isBooked}
               className={cn(
                 "px-2 py-2.5 rounded-xl text-xs font-medium border transition-all duration-150",
                 "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
-                selectedTime === slot
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary",
+                slot.isBooked
+                  ? "bg-muted text-muted-foreground border-muted cursor-not-allowed line-through opacity-50"
+                  : selectedTime === slot.start
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary",
               )}
             >
-              {slot}
+              {slot.start}
             </button>
           ))}
         </div>
@@ -71,11 +75,11 @@ export default function AvailablesTimes({
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <span className="inline-block size-2 rounded-full bg-green-500" />
-            Con disponibilidad
+            Disponible
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block size-2 rounded-full bg-red-500" />
-            Sin disponibilidad
+            Ocupado
           </span>
         </div>
       </div>
