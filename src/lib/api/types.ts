@@ -146,6 +146,33 @@ export interface CreateReservationRequest {
   scheduled_at: string;
 }
 
+// ── Booking (POST /api/reservations) ──────────────────────────────────────────
+
+export interface BookingProductItem {
+  product_id: string;
+  quantity?: number;
+}
+
+export interface CreateBookingRequest {
+  business_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  start_time: string;        // ISO 8601 — "2026-04-15T10:00:00.000Z"
+  products: BookingProductItem[];
+  user_id?: string;
+  proof_of_payment?: string; // URL del comprobante
+}
+
+export interface BookingResponse {
+  success: boolean;
+  message: string;
+  data: {
+    reservation: Reservation;
+    products: Product[];
+  };
+}
+
 // ── Schedules ─────────────────────────────────────────────────────────────────
 
 export interface TimeSlot {

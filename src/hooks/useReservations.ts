@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { reservationsApi } from "@/lib/api/reservations.api";
-import type { CreateReservationRequest, ReservationStatus } from "@/lib/api/types";
+import { ApiError } from "@/lib/api/client";
+import type { CreateReservationRequest, CreateBookingRequest, ReservationStatus } from "@/lib/api/types";
 
 export const reservationKeys = {
   all: ["reservations"] as const,
@@ -32,6 +33,41 @@ export function useCreateReservation(businessId: string) {
     },
     onError: () => {
       toast.error("No se pudo enviar la reserva. Inténtalo de nuevo.");
+    },
+  });
+}
+
+export function useBookReservation(businessId: string) {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (data: CreateBookingRequest) => reservationsApi.book(data),
+    onSuccess: () => {
+      toast.success("¡Reserva confirmada!", {
+        description: "Recibirás un correo con los detalles de tu cita.",
+      });
+      router.push(`/business/${businessId}/confirmation`);
+    },
+    onError: (error: unknown) => {
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 400:
+            toast.error("No se pudo crear la reserva", { description: error.message });
+            break;
+          case 404:
+            toast.error("El negocio no fue encontrado.");
+            break;
+          case 409:
+            toast.error("Horario no disponible", {
+              description: "Ya existe una reserva en ese horario. Elige otro.",
+            });
+            break;
+          default:
+            toast.error("Error inesperado. Inténtalo de nuevo.");
+        }
+      } else {
+        toast.error("No se pudo enviar la reserva. Inténtalo de nuevo.");
+      }
     },
   });
 }

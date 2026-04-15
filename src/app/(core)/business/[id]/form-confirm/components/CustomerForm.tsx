@@ -18,6 +18,8 @@ import {
 import { toast } from "sonner";
 // Store
 import { useCartStore } from "@/store/cart.store";
+// Hooks
+import { useBookReservation } from "@/hooks/useReservations";
 // Schemas
 import { customerFormSchema } from "@/lib/schemas/customerFormSchema";
 // Icons
@@ -29,9 +31,16 @@ interface CustomerFormProps {
   businessId: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function CustomerForm(_props: CustomerFormProps) {
-  const { customerInfo, setCustomerInfo } = useCartStore();
+export default function CustomerForm({ businessId }: CustomerFormProps) {
+  const {
+    customerInfo,
+    setCustomerInfo,
+    selectedProducts,
+    selectedDate,
+    selectedTime,
+  } = useCartStore();
+
+  const { mutate: bookReservation, isPending } = useBookReservation(businessId);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(customerFormSchema),
@@ -43,20 +52,33 @@ export default function CustomerForm(_props: CustomerFormProps) {
     },
   });
 
-  const { isSubmitting } = form.formState;
-
   const onSubmit = async (values: FormValues) => {
-    try {
-      setCustomerInfo({
-        name: values.customer_name,
-        email: values.customer_email,
-        phone: values.customer_phone,
-      });
-      // TODO: Call booking API
-      toast.success("Reserva enviada correctamente.");
-    } catch {
-      toast.error("No se pudo enviar la reserva. Inténtalo de nuevo.");
+    if (!selectedDate || !selectedTime) {
+      toast.warning("Selecciona fecha y hora antes de continuar.");
+      return;
     }
+    if (selectedProducts.length === 0) {
+      toast.warning("No tienes servicios seleccionados.");
+      return;
+    }
+
+    setCustomerInfo({
+      name: values.customer_name,
+      email: values.customer_email,
+      phone: values.customer_phone,
+    });
+
+    bookReservation({
+      business_id: businessId,
+      customer_name: values.customer_name,
+      customer_email: values.customer_email,
+      customer_phone: values.customer_phone,
+      start_time: `${selectedDate}T${selectedTime}:00`,
+      products: selectedProducts.map(product => ({
+        product_id: product.id.toString(),
+        quantity: 1,
+      })),
+    });
   };
 
   return (
@@ -194,11 +216,11 @@ export default function CustomerForm(_props: CustomerFormProps) {
           <Button
             type="submit"
             size="lg"
-            disabled={isSubmitting}
+            disabled={isPending}
             className="mt-2 w-full rounded-full gap-2"
           >
-            {isSubmitting ? "Enviando..." : "Confirmar reserva"}
-            {!isSubmitting && <ArrowRight className="size-4" />}
+            {isPending ? "Enviando..." : "Confirmar reserva"}
+            {<ArrowRight className="size-4" />}
           </Button>
         </form>
       </Form>
