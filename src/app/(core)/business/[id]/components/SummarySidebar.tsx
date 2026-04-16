@@ -6,7 +6,7 @@ import { Product } from "@/lib/api/types";
 import { Separator } from "@/components/ui/separator";
 // Utils
 import { cn } from "@/lib/utils";
-import { formatPrice } from "@/utils/utils";
+import { formatPrice, formatDuration } from "@/utils/utils";
 // Icons
 import { ArrowRight, Clock, ShoppingBag } from "lucide-react";
 
@@ -57,7 +57,7 @@ export default function SummarySidebar({
                   </p>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                     <Clock className="size-3" />
-                    {product.estimated_delivery_time} hrs
+                    {formatDuration(product.estimated_delivery_time)}
                   </div>
                   <p className="font-bold text-sm mt-0.5">
                     {formatPrice(product.price)}

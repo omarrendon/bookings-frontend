@@ -4,7 +4,7 @@ import { Clock, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/store/cart.store";
-import { formatPrice } from "@/utils/utils";
+import { formatPrice, formatDuration } from "@/utils/utils";
 import { useRouter } from "next/navigation";
 
 const FALLBACK_IMAGE =
@@ -52,7 +52,7 @@ export default function CardSummaryServices() {
               <p className="font-medium text-sm line-clamp-1">{product.name}</p>
               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                 <Clock className="size-3" />
-                {product.estimated_delivery_time} hrs
+                {formatDuration(product.estimated_delivery_time)}
               </div>
               <p className="font-bold text-sm mt-1">
                 {formatPrice(product.price)}

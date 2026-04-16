@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ChevronRight, Clock, Minus, Plus } from "lucide-react";
 // Utils
 import { cn } from "@/lib/utils";
-import { formatPrice } from "@/utils/utils";
+import { formatPrice, formatDuration } from "@/utils/utils";
 
 interface ProductCardProps {
   gallery_images?: string[];
@@ -82,7 +82,7 @@ export default function ProductCard({
             </span>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="size-3" />
-              {estimated_delivery_time} hrs
+              {formatDuration(estimated_delivery_time)}
             </div>
           </div>
 

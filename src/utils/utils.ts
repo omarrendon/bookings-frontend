@@ -83,6 +83,14 @@ export const formatAdress = (business: {
     .join(", ");
 };
 
+export const formatDuration = (minutes: number): string => {
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hrs === 0) return `${mins} min`;
+  if (mins === 0) return `${hrs} hr${hrs > 1 ? "s" : ""}`;
+  return `${hrs} hr${hrs > 1 ? "s" : ""} ${mins} min`;
+};
+
 export const formatPrice = (price: number): string => {
   const formatter = new Intl.NumberFormat("es-MX", {
     style: "currency",
