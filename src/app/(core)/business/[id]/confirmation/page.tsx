@@ -1,7 +1,12 @@
+// API
+import { businessApi } from "@/lib/api/business.api";
+// Utils
+import { formatAdress } from "@/utils/utils";
 // Components
 import Footer from "@/components/ui/Footer";
 import ScheduleDetail from "./components/ScheduleDetail";
 import BackToBusinessButton from "./components/BackToBusinessButton";
+import BusinessContactCard from "./components/BusinessContactCard";
 // Icons
 import { CheckCircle2 } from "lucide-react";
 
@@ -13,6 +18,9 @@ export default async function BusinessConfirmationPage({
   params,
 }: BusinessConfirmationPageProps) {
   const { id } = await params;
+
+  const businessRes = await businessApi.getById(id);
+  const business = businessRes.data;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -35,6 +43,15 @@ export default async function BusinessConfirmationPage({
 
           {/* Booking details */}
           <ScheduleDetail />
+
+          {/* Business contact */}
+          <div className="mt-4">
+            <BusinessContactCard
+              phone={business.phone_number}
+              address={formatAdress(business)}
+              socialLinks={business.social_links}
+            />
+          </div>
 
           {/* Actions */}
           <div className="mt-8 flex justify-center">
