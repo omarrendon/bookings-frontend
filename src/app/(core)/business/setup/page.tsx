@@ -1,32 +1,42 @@
 // Components
 import Link from "next/link";
-import { GalleryVerticalEnd } from "lucide-react";
+import Footer from "@/components/ui/Footer";
 import BusinessSetupForm from "./components/BusinessSetupForm";
+// Icons
+import { GalleryVerticalEnd } from "lucide-react";
 
 export default function BusinessSetupPage() {
   return (
-    <div className="min-h-svh flex flex-col">
-      <div className="p-6 md:p-10">
-        <Link href="/" className="flex items-center gap-2 font-medium w-fit">
-          <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
+    <div className="min-h-screen flex flex-col">
+      {/* Top bar */}
+      <header className="px-6 sm:px-10 lg:px-16 py-5 border-b">
+        <Link href="/" className="flex items-center gap-2 font-semibold w-fit">
+          <div className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-lg">
             <GalleryVerticalEnd className="size-4" />
           </div>
           Bookea.me
         </Link>
-      </div>
-      <div className="flex flex-1 items-start justify-center px-6 pb-10 md:px-10">
-        <div className="w-full max-w-2xl">
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold">Configura tu negocio</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Completa la información para empezar a recibir reservaciones.
+      </header>
+
+      <main className="flex-1 py-12 px-6 sm:px-10 lg:px-16">
+        <div className="max-w-2xl mx-auto">
+
+          {/* Page header */}
+          <div className="mb-10">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Configura tu negocio
+            </h1>
+            <p className="text-muted-foreground mt-2 text-sm">
+              Completa la información para empezar a recibir reservaciones. Los campos marcados con{" "}
+              <span className="text-destructive font-medium">*</span> son obligatorios.
             </p>
           </div>
-          <div className="rounded-xl border p-6">
-            <BusinessSetupForm />
-          </div>
+
+          <BusinessSetupForm />
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }
