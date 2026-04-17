@@ -16,12 +16,13 @@ import {
   X,
   ChevronsUpDown,
   Check,
+  ArrowRight,
+  Images,
 } from "lucide-react";
 // Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import {
   Form,
   FormControl,
@@ -80,8 +81,7 @@ export default function BusinessSetupForm() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const objectUrl = URL.createObjectURL(file);
-    setImagePreview(objectUrl);
+    setImagePreview(URL.createObjectURL(file));
     // TODO: Upload file and set main_image_url with returned URL from API
   };
 
@@ -97,9 +97,7 @@ export default function BusinessSetupForm() {
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     const remaining = MAX_GALLERY - galleryPreviews.length;
-    const newPreviews = files
-      .slice(0, remaining)
-      .map(f => URL.createObjectURL(f));
+    const newPreviews = files.slice(0, remaining).map(f => URL.createObjectURL(f));
     setGalleryPreviews(prev => [...prev, ...newPreviews]);
     // TODO: Upload files and push returned URLs to gallery_images
     if (galleryInputRef.current) galleryInputRef.current.value = "";
@@ -114,18 +112,13 @@ export default function BusinessSetupForm() {
   const stateDropdownRef = useRef<HTMLDivElement>(null);
 
   const filteredStates = stateQuery.trim()
-    ? MEXICAN_STATES.filter(s =>
-        s.toLowerCase().includes(stateQuery.toLowerCase())
-      )
+    ? MEXICAN_STATES.filter(s => s.toLowerCase().includes(stateQuery.toLowerCase()))
     : MEXICAN_STATES;
 
   useEffect(() => {
     if (!stateOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        stateDropdownRef.current &&
-        !stateDropdownRef.current.contains(e.target as Node)
-      ) {
+      if (stateDropdownRef.current && !stateDropdownRef.current.contains(e.target as Node)) {
         setStateOpen(false);
       }
     };
@@ -144,26 +137,22 @@ export default function BusinessSetupForm() {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-8"
-      >
-        {/* Sección 1: Información del negocio */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
+
+        {/* ── Sección 1: Información del negocio ── */}
+        <div className="bg-card rounded-2xl border overflow-hidden">
+          <div className="px-6 py-5 border-b flex items-center gap-2">
             <Globe className="size-4 text-primary" />
-            <h3 className="font-semibold text-sm">Información del negocio</h3>
+            <h3 className="font-semibold tracking-tight">Información del negocio</h3>
           </div>
-          <Separator />
-          <div className="grid gap-4">
+          <div className="p-6 flex flex-col gap-5">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
+                <FormItem>
                   <FormLabel>
-                    Nombre del negocio{" "}
-                    <span className="text-destructive">*</span>
+                    Nombre del negocio <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="Mi negocio" {...field} />
@@ -176,12 +165,13 @@ export default function BusinessSetupForm() {
               control={form.control}
               name="description"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
+                <FormItem>
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Describe tu negocio brevemente..."
                       className="resize-none"
+                      rows={3}
                       {...field}
                     />
                   </FormControl>
@@ -194,7 +184,7 @@ export default function BusinessSetupForm() {
                 control={form.control}
                 name="phone_number"
                 render={({ field }) => (
-                  <FormItem className="grid gap-1">
+                  <FormItem>
                     <FormLabel>Teléfono</FormLabel>
                     <FormControl>
                       <Input placeholder="5512345678" type="tel" {...field} />
@@ -207,14 +197,10 @@ export default function BusinessSetupForm() {
                 control={form.control}
                 name="website"
                 render={({ field }) => (
-                  <FormItem className="grid gap-1">
+                  <FormItem>
                     <FormLabel>Sitio web</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="https://tunegocio.com"
-                        type="url"
-                        {...field}
-                      />
+                      <Input placeholder="https://tunegocio.com" type="url" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -224,20 +210,19 @@ export default function BusinessSetupForm() {
           </div>
         </div>
 
-        {/* Sección 2: Dirección */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
+        {/* ── Sección 2: Dirección ── */}
+        <div className="bg-card rounded-2xl border overflow-hidden">
+          <div className="px-6 py-5 border-b flex items-center gap-2">
             <MapPin className="size-4 text-primary" />
-            <h3 className="font-semibold text-sm">Dirección</h3>
+            <h3 className="font-semibold tracking-tight">Dirección</h3>
           </div>
-          <Separator />
-          <div className="grid gap-4">
+          <div className="p-6 flex flex-col gap-5">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="street"
                 render={({ field }) => (
-                  <FormItem className="grid gap-1 sm:col-span-2">
+                  <FormItem className="sm:col-span-2">
                     <FormLabel>
                       Calle <span className="text-destructive">*</span>
                     </FormLabel>
@@ -252,7 +237,7 @@ export default function BusinessSetupForm() {
                 control={form.control}
                 name="external_number"
                 render={({ field }) => (
-                  <FormItem className="grid gap-1">
+                  <FormItem>
                     <FormLabel>
                       No. Ext. <span className="text-destructive">*</span>
                     </FormLabel>
@@ -269,7 +254,7 @@ export default function BusinessSetupForm() {
                 control={form.control}
                 name="internal_number"
                 render={({ field }) => (
-                  <FormItem className="grid gap-1">
+                  <FormItem>
                     <FormLabel>No. Int.</FormLabel>
                     <FormControl>
                       <Input placeholder="A" {...field} />
@@ -282,7 +267,7 @@ export default function BusinessSetupForm() {
                 control={form.control}
                 name="neighborhood"
                 render={({ field }) => (
-                  <FormItem className="grid gap-1">
+                  <FormItem>
                     <FormLabel>Colonia</FormLabel>
                     <FormControl>
                       <Input placeholder="Centro" {...field} />
@@ -297,7 +282,7 @@ export default function BusinessSetupForm() {
                 control={form.control}
                 name="city"
                 render={({ field }) => (
-                  <FormItem className="grid gap-1">
+                  <FormItem>
                     <FormLabel>
                       Ciudad <span className="text-destructive">*</span>
                     </FormLabel>
@@ -312,7 +297,7 @@ export default function BusinessSetupForm() {
                 control={form.control}
                 name="state"
                 render={({ field }) => (
-                  <FormItem className="grid gap-1">
+                  <FormItem>
                     <FormLabel>
                       Estado <span className="text-destructive">*</span>
                     </FormLabel>
@@ -337,7 +322,7 @@ export default function BusinessSetupForm() {
                           <ChevronsUpDown className="absolute right-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
                         </div>
                         {stateOpen && filteredStates.length > 0 && (
-                          <div className="absolute z-50 w-full mt-1 max-h-52 overflow-y-auto rounded-md border bg-popover shadow-md">
+                          <div className="absolute z-50 w-full mt-1 max-h-52 overflow-y-auto rounded-xl border bg-popover shadow-md">
                             {filteredStates.map(state => (
                               <button
                                 key={state}
@@ -368,7 +353,7 @@ export default function BusinessSetupForm() {
                 control={form.control}
                 name="zip_code"
                 render={({ field }) => (
-                  <FormItem className="grid gap-1">
+                  <FormItem>
                     <FormLabel>
                       C.P. <span className="text-destructive">*</span>
                     </FormLabel>
@@ -384,7 +369,7 @@ export default function BusinessSetupForm() {
               control={form.control}
               name="country"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
+                <FormItem>
                   <FormLabel>País</FormLabel>
                   <FormControl>
                     <Input placeholder="México" {...field} disabled />
@@ -396,208 +381,223 @@ export default function BusinessSetupForm() {
           </div>
         </div>
 
-        {/* Sección 3: Redes sociales */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
+        {/* ── Sección 3: Redes sociales ── */}
+        <div className="bg-card rounded-2xl border overflow-hidden">
+          <div className="px-6 py-5 border-b flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Share2 className="size-4 text-primary" />
-              <h3 className="font-semibold text-sm">Redes sociales</h3>
+              <h3 className="font-semibold tracking-tight">Redes sociales</h3>
             </div>
             <Button
               type="button"
               variant="outline"
               size="sm"
+              className="rounded-full gap-1.5 text-xs"
               onClick={() => append({ platform: "", url: "" })}
             >
-              <Plus className="size-4" />
+              <Plus className="size-3.5" />
               Agregar
             </Button>
           </div>
-          <Separator />
-          {fields.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-2">
-              No has agregado ninguna red social.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {fields.map((field, index) => (
-                <div key={field.id} className="flex gap-2 items-start">
-                  <FormField
-                    control={form.control}
-                    name={`social_links.${index}.platform`}
-                    render={({ field }) => (
-                      <FormItem className="grid gap-1 w-40 shrink-0">
-                        <FormControl>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Plataforma" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {SOCIAL_PLATFORMS.map(p => (
-                                <SelectItem key={p} value={p}>
-                                  {p}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`social_links.${index}.url`}
-                    render={({ field }) => (
-                      <FormItem className="grid gap-1 flex-1">
-                        <FormControl>
-                          <Input
-                            placeholder="https://instagram.com/tunegocio"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="p-6">
+            {fields.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center gap-2">
+                <Share2 className="size-8 text-muted-foreground/40" />
+                <p className="text-sm text-muted-foreground">
+                  No has agregado ninguna red social.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full gap-1.5 text-xs mt-1"
+                  onClick={() => append({ platform: "", url: "" })}
+                >
+                  <Plus className="size-3.5" />
+                  Agregar red social
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex gap-2 items-start">
+                    <FormField
+                      control={form.control}
+                      name={`social_links.${index}.platform`}
+                      render={({ field }) => (
+                        <FormItem className="w-40 shrink-0">
+                          <FormControl>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Plataforma" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {SOCIAL_PLATFORMS.map(p => (
+                                  <SelectItem key={p} value={p}>
+                                    {p}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`social_links.${index}.url`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input placeholder="https://instagram.com/tunegocio" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                      onClick={() => remove(index)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Sección 4: Imagen principal */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
+        {/* ── Sección 4: Imagen principal ── */}
+        <div className="bg-card rounded-2xl border overflow-hidden">
+          <div className="px-6 py-5 border-b flex items-center gap-2">
             <ImagePlus className="size-4 text-primary" />
-            <h3 className="font-semibold text-sm">Imagen principal</h3>
+            <h3 className="font-semibold tracking-tight">Imagen principal</h3>
           </div>
-          <Separator />
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageChange}
-          />
-          {imagePreview ? (
-            <div className="relative w-full rounded-lg overflow-hidden border aspect-video">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imagePreview}
-                alt="Vista previa"
-                className="w-full h-full object-cover"
-              />
-              <button
-                type="button"
-                onClick={handleRemoveImage}
-                className="absolute top-2 right-2 bg-background/80 hover:bg-background text-foreground rounded-full p-1 transition-colors"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-8 text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer"
-            >
-              <Upload className="size-8" />
-              <span className="text-sm font-medium">
-                Haz clic para seleccionar una imagen
-              </span>
-              <span className="text-xs">
-                PNG, JPG, WEBP — máx. recomendado 2MB
-              </span>
-            </button>
-          )}
-        </div>
-
-        {/* Sección 5: Galería de imágenes */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ImagePlus className="size-4 text-primary" />
-              <h3 className="font-semibold text-sm">Galería de imágenes</h3>
-            </div>
-            <span className="text-xs text-muted-foreground">
-              {galleryPreviews.length} / {MAX_GALLERY}
-            </span>
-          </div>
-          <Separator />
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={handleGalleryChange}
-          />
-          <div className="grid grid-cols-3 gap-2">
-            {galleryPreviews.map((src, index) => (
-              <div
-                key={index}
-                className="relative aspect-square rounded-lg overflow-hidden border"
-              >
+          <div className="p-6">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageChange}
+            />
+            {imagePreview ? (
+              <div className="relative w-full rounded-xl overflow-hidden border aspect-video">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={src}
-                  alt={`Imagen ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
+                <img src={imagePreview} alt="Vista previa" className="w-full h-full object-cover" />
                 <button
                   type="button"
-                  onClick={() => handleRemoveGalleryImage(index)}
-                  className="absolute top-1 right-1 bg-background/80 hover:bg-background text-foreground rounded-full p-0.5 transition-colors"
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 size-7 rounded-full bg-background/80 hover:bg-background flex items-center justify-center transition-colors shadow-sm"
                 >
-                  <X className="size-3" />
+                  <X className="size-4" />
                 </button>
               </div>
-            ))}
-            {galleryPreviews.length < MAX_GALLERY && (
+            ) : (
               <button
                 type="button"
-                onClick={() => galleryInputRef.current?.click()}
-                className="aspect-square flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/40 transition-colors py-10 cursor-pointer"
               >
-                <Plus className="size-5" />
-                <span className="text-xs">Agregar</span>
+                <Upload className="size-7 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  Haz clic para seleccionar una imagen
+                </span>
+                <span className="text-xs text-muted-foreground/70">
+                  PNG, JPG, WEBP — máx. recomendado 2 MB
+                </span>
               </button>
             )}
           </div>
-          {galleryPreviews.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center -mt-1">
-              Puedes agregar hasta {MAX_GALLERY} imágenes para mostrar tu
-              negocio.
-            </p>
-          )}
         </div>
 
-        <div className="flex flex-col gap-2 pt-2">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full cursor-pointer"
-          >
-            {isSubmitting ? "Guardando..." : "Guardar y continuar"}
-          </Button>
-          <p className="text-xs text-muted-foreground text-center">
-            Los campos marcados con <span className="text-destructive">*</span>{" "}
-            son obligatorios
-          </p>
+        {/* ── Sección 5: Galería ── */}
+        <div className="bg-card rounded-2xl border overflow-hidden">
+          <div className="px-6 py-5 border-b flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Images className="size-4 text-primary" />
+              <h3 className="font-semibold tracking-tight">Galería de imágenes</h3>
+            </div>
+            <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+              {galleryPreviews.length} / {MAX_GALLERY}
+            </span>
+          </div>
+          <div className="p-6">
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleGalleryChange}
+            />
+            {galleryPreviews.length === 0 ? (
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/40 transition-colors py-10 cursor-pointer"
+              >
+                <Images className="size-7 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  Haz clic para agregar imágenes
+                </span>
+                <span className="text-xs text-muted-foreground/70">
+                  Puedes agregar hasta {MAX_GALLERY} imágenes
+                </span>
+              </button>
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                {galleryPreviews.map((src, index) => (
+                  <div
+                    key={index}
+                    className="relative aspect-square rounded-xl overflow-hidden border"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt={`Imagen ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGalleryImage(index)}
+                      className="absolute top-1.5 right-1.5 size-6 rounded-full bg-background/80 hover:bg-background flex items-center justify-center transition-colors shadow-sm"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                ))}
+                {galleryPreviews.length < MAX_GALLERY && (
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="aspect-square flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/40 text-muted-foreground transition-colors cursor-pointer"
+                  >
+                    <Plus className="size-5" />
+                    <span className="text-xs">Agregar</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* ── Submit ── */}
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isSubmitting}
+          className="w-full rounded-full gap-2"
+        >
+          {isSubmitting ? "Guardando..." : "Guardar y continuar"}
+          {!isSubmitting && <ArrowRight className="size-4" />}
+        </Button>
+
       </form>
     </Form>
   );

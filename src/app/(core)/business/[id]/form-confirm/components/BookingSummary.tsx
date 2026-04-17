@@ -5,7 +5,7 @@ import { useCartStore } from "@/store/cart.store";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 // Utils
-import { formatPrice } from "@/utils/utils";
+import { formatPrice, formatDuration } from "@/utils/utils";
 // Icons
 import { CalendarDays, Clock, ShoppingBag } from "lucide-react";
 
@@ -59,7 +59,7 @@ export default function BookingSummary() {
                 </p>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                   <Clock className="size-3" />
-                  {product.estimated_delivery_time} hrs
+                  {formatDuration(product.estimated_delivery_time)}
                 </div>
                 <p className="font-bold text-sm mt-0.5">
                   {formatPrice(product.price)}
