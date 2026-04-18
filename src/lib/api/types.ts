@@ -8,9 +8,22 @@ export interface User {
   created_at: string;
 }
 
+// Usuario devuelto por el endpoint de login (shape reducido)
+export interface LoginUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
+// Wrapper estándar de respuesta exitosa del backend
 export interface AuthResponse {
-  user: User;
-  token: string;
+  success: boolean;
+  message: string;
+  data: {
+    token: string;
+    user: LoginUser;
+  };
 }
 
 export interface LoginRequest {

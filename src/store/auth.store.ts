@@ -1,13 +1,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { User } from "@/lib/api/types";
+import type { LoginUser } from "@/lib/api/types";
 
 interface AuthState {
-  user: User | null;
-  token: string | null;
+  user: LoginUser | null;
+  token: string | null;        // solo en memoria — nunca persiste a localStorage
   isAuthenticated: boolean;
-  setSession: (user: User, token: string) => void;
+  isAuthLoading: boolean;      // true mientras se ejecuta el silent refresh inicial
+  setSession: (user: LoginUser, token: string) => void;
   clearSession: () => void;
+  setAuthLoading: (loading: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -16,20 +18,22 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      isAuthLoading: true, // se resetea a true en cada carga de página
 
-      setSession: (user, token) => set({ user, token, isAuthenticated: true }),
+      setSession: (user, token) =>
+        set({ user, token, isAuthenticated: true }),
 
       clearSession: () =>
         set({ user: null, token: null, isAuthenticated: false }),
+
+      setAuthLoading: (isAuthLoading) => set({ isAuthLoading }),
     }),
     {
-      // Esta clave DEBE coincidir con la usada en client.ts → getToken()
       name: "bookea-auth",
-      // Solo persistimos los datos, no las funciones
+      // Solo persistimos el usuario para mostrar nombre/email en la UI.
+      // El token NO persiste — se recupera via silent refresh con la cookie httpOnly.
       partialize: state => ({
         user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
       }),
     },
   ),

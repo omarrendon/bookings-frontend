@@ -20,13 +20,23 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
-    onSuccess: ({ user, token }) => {
-      setSession(user, token);
+    onSuccess: (response) => {
+      setSession(response.data.user, response.data.token);
+      toast.success("Sesión iniciada correctamente");
       router.push("/dashboard");
     },
     onError: (error: unknown) => {
-      if (error instanceof ApiError && error.status === 401) {
-        toast.error("Correo o contraseña incorrectos.");
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 401:
+            toast.error("Correo o contraseña incorrectos.");
+            break;
+          case 429:
+            toast.error("Demasiados intentos. Espera unos minutos e intenta de nuevo.");
+            break;
+          default:
+            toast.error("No se pudo iniciar sesión. Inténtalo de nuevo.");
+        }
       } else {
         toast.error("No se pudo iniciar sesión. Inténtalo de nuevo.");
       }

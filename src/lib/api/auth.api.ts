@@ -20,6 +20,10 @@ export const authApi = {
   resetPassword: (data: ResetPasswordRequest) =>
     apiClient.post<void>("/auth/reset-password", data),
 
+  // Usa la cookie httpOnly del refreshToken para obtener un nuevo access token
+  refresh: () =>
+    apiClient.post<AuthResponse>("/auth/refresh", {}),
+
   logout: () =>
     apiClient.post<void>("/auth/logout", {}),
 };
