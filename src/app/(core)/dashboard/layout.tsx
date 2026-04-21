@@ -4,6 +4,7 @@ import React from "react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import { SiteHeader } from "./components/AppSideHeader";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 interface Props {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface Props {
 
 export default function layout({ children }: Props) {
   return (
+    <ProtectedRoute>
     <SidebarProvider
       style={
         {
@@ -31,5 +33,6 @@ export default function layout({ children }: Props) {
         </div>
       </SidebarInset>
     </SidebarProvider>
+    </ProtectedRoute>
   );
 }

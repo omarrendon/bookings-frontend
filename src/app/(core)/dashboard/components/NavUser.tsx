@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/sidebar";
 // Icons
 import { CircleX, EllipsisVertical } from "lucide-react";
+// Hooks
+import { useLogout } from "@/hooks/useAuth";
 
 export function NavUser({
   user,
@@ -28,6 +30,7 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const { logout } = useLogout();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -72,7 +75,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-primary hover:bg-primary/10 focus:bg-primary/10 !hover:cursor-pointer hover:text-primary focus:text-primary">
+            <DropdownMenuItem onClick={logout} className="text-primary hover:bg-primary/10 focus:bg-primary/10 !hover:cursor-pointer hover:text-primary focus:text-primary">
               {/* <IconLogout /> */}
               <CircleX className="mr-2 text-primary" />
               <span className="font-semibold">Cerrar sesión</span>
