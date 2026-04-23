@@ -9,12 +9,12 @@ import type {
 
 export const businessApi = {
   create: (data: CreateBusinessRequest) =>
-    apiClient.post<Business>("/businesses", data),
+    apiClient.post<BusinessResponse>("/businesses", data),
 
   getById: (id: string) => apiClient.get<BusinessResponse>(`/businesses/${id}`),
 
   update: (id: string, data: UpdateBusinessRequest) =>
-    apiClient.put<Business>(`/businesses/${id}`, data),
+    apiClient.put<BusinessResponse>(`/businesses/${id}`, data),
 
   uploadImage: (file: File) => {
     const formData = new FormData();

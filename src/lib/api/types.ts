@@ -12,6 +12,7 @@ export interface User {
 export interface LoginUser {
   id: number;
   name: string;
+  last_name: string;
   email: string;
   role: string;
 }
@@ -36,6 +37,7 @@ export interface SignUpRequest {
   last_name: string;
   email: string;
   password: string;
+  role: string;
 }
 
 export interface RequestPasswordResetRequest {
@@ -44,7 +46,7 @@ export interface RequestPasswordResetRequest {
 
 export interface ResetPasswordRequest {
   token: string;
-  new_password: string;
+  newPassword: string;
 }
 
 // ── Business ──────────────────────────────────────────────────────────────────
@@ -211,4 +213,5 @@ export interface MonthSlotsResponse {
 
 export interface UploadResponse {
   url: string;
+  publicId: string;
 }

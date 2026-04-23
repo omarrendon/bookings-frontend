@@ -46,12 +46,14 @@ export function useLogin() {
 
 export function useSignUp() {
   const router = useRouter();
+  const setSession = useAuthStore(state => state.setSession);
 
   return useMutation({
     mutationFn: (data: SignUpRequest) => authApi.signUp(data),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      setSession(response.data.user, response.data.token);
       toast.success("Cuenta creada correctamente. ¡Bienvenido!");
-      router.push("/login");
+      router.push("/business/setup");
     },
     onError: (error: unknown) => {
       if (error instanceof ApiError && error.status === 409) {
@@ -85,10 +87,13 @@ export function useResetPassword() {
       toast.success("Contraseña restablecida correctamente.");
       router.push("/login");
     },
-    onError: () => {
-      toast.error(
-        "No se pudo restablecer la contraseña. El enlace puede haber expirado.",
-      );
+    onError: (error: unknown) => {
+      if (error instanceof ApiError && error.status === 400) {
+        toast.error("El enlace expiró o ya fue utilizado. Solicita uno nuevo.");
+        router.push("/login/reset-password");
+      } else {
+        toast.error("No se pudo restablecer la contraseña. Inténtalo de nuevo.");
+      }
     },
   });
 }

@@ -15,9 +15,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
 // Schemas
 import { resetPasswordEmailFormSchema } from "@/lib/schemas/loginFormSchema";
+// Hooks
+import { useRequestPasswordReset } from "@/hooks/useAuth";
 // Icons
 import { ArrowLeft, Mail } from "lucide-react";
 
@@ -32,14 +33,10 @@ export default function ResetPasswordEmailForm() {
   });
 
   const { isSubmitting } = form.formState;
+  const requestReset = useRequestPasswordReset();
 
-  const onSubmit = async () => {
-    try {
-      // TODO: Call send reset email API
-      toast.success("Instrucciones enviadas. Revisa tu correo.");
-    } catch {
-      toast.error("No se pudo enviar el correo. Inténtalo de nuevo.");
-    }
+  const onSubmit = async (values: FormValues) => {
+    await requestReset.mutateAsync({ email: values.email });
   };
 
   return (

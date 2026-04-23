@@ -27,8 +27,8 @@ export function useCreateBusiness() {
 
   return useMutation({
     mutationFn: (data: CreateBusinessRequest) => businessApi.create(data),
-    onSuccess: business => {
-      setBusiness(business);
+    onSuccess: response => {
+      setBusiness(response.data);
       toast.success("Negocio configurado correctamente. ¡Bienvenido!");
       router.push("/dashboard");
     },
@@ -44,11 +44,11 @@ export function useUpdateBusiness(id: string) {
 
   return useMutation({
     mutationFn: (data: UpdateBusinessRequest) => businessApi.update(id, data),
-    onSuccess: business => {
+    onSuccess: response => {
       // Actualiza el store de Zustand
-      updateBusiness(business);
+      updateBusiness(response.data);
       // Actualiza también la caché de React Query sin hacer un refetch
-      queryClient.setQueryData(businessKeys.detail(id), business);
+      queryClient.setQueryData(businessKeys.detail(id), response);
       toast.success("Negocio actualizado correctamente.");
     },
     onError: () => {

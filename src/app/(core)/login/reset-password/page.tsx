@@ -1,5 +1,6 @@
 // Components
 import Link from "next/link";
+import { Suspense } from "react";
 import ResetPasswordEmailForm from "../components/ResetPasswordEmailForm";
 import ResetPasswordForm from "../components/ResetPasswordForm";
 // Icons
@@ -9,8 +10,9 @@ interface Props {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-// Acepta solo caracteres URL-safe y longitud mínima razonable para un token
-const TOKEN_REGEX = /^[A-Za-z0-9._\-]{20,}$/;
+// Valida formato UUID v4 — único formato que genera el backend con crypto.randomUUID()
+const TOKEN_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export default async function ResetPasswordPage({ searchParams }: Props) {
   const params = await searchParams;
@@ -30,7 +32,13 @@ export default async function ResetPasswordPage({ searchParams }: Props) {
       {/* Form centrado */}
       <div className="flex flex-1 items-center justify-center py-10">
         <div className="w-full max-w-sm">
-          {isValidToken ? <ResetPasswordForm /> : <ResetPasswordEmailForm />}
+          {isValidToken ? (
+            <Suspense>
+              <ResetPasswordForm />
+            </Suspense>
+          ) : (
+            <ResetPasswordEmailForm />
+          )}
         </div>
       </div>
 

@@ -16,17 +16,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
 // Schemas
 import { signUpFormSchema } from "@/lib/schemas/loginFormSchema";
 // Utils
 import { getPasswordStrength, strengthColors, strengthLabels } from "@/utils/utils";
+// Hooks
+import { useSignUp } from "@/hooks/useAuth";
 // Icons
 import { ArrowRight } from "lucide-react";
 
 type FormValues = z.infer<typeof signUpFormSchema>;
 
 export default function SignUpForm() {
+  const signUp = useSignUp();
   const form = useForm<FormValues>({
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
@@ -40,16 +42,18 @@ export default function SignUpForm() {
   });
 
   const { isSubmitting } = form.formState;
+  const isPending = isSubmitting || signUp.isPending;
   const passwordValue = form.watch("password");
   const strength = getPasswordStrength(passwordValue ?? "");
 
-  const onSubmit = async () => {
-    try {
-      // TODO: Call registration API
-      toast.success("Cuenta creada correctamente. ¡Bienvenido!");
-    } catch {
-      toast.error("No se pudo crear la cuenta. Inténtalo de nuevo.");
-    }
+  const onSubmit = async (values: FormValues) => {
+    await signUp.mutateAsync({
+      name: values.name,
+      last_name: values.lastName,
+      email: values.email,
+      password: values.password,
+      role: "owner",
+    });
   };
 
   return (
@@ -194,11 +198,11 @@ export default function SignUpForm() {
             <Button
               type="submit"
               size="lg"
-              disabled={isSubmitting}
+              disabled={isPending}
               className="w-full rounded-full gap-2 mt-1"
             >
-              {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
-              {!isSubmitting && <ArrowRight className="size-4" />}
+              {isPending ? "Creando cuenta..." : "Crear cuenta"}
+              {!isPending && <ArrowRight className="size-4" />}
             </Button>
           </form>
         </Form>

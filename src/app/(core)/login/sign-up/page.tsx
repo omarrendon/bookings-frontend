@@ -33,12 +33,12 @@ export default function SignUpPage() {
       </div>
 
       {/* ── Panel derecho: imagen ── */}
-      <div className="relative hidden lg:block">
+      <div className="relative hidden lg:block bg-gradient-to-b from-[#f5f0ff] via-[#e8d5f5] to-[#2d1a4a]">
         <Image
-          src="https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg"
+          src="https://res.cloudinary.com/dv34psubp/image/upload/v1776917555/Bookeame/bookeame_p0vklp.png"
           fill
           alt="Bookea.me"
-          className="object-cover"
+          className="object-contain"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />

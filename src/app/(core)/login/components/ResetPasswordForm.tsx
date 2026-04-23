@@ -3,10 +3,10 @@
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "next/navigation";
 // Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 // Schemas
 import { resetPasswordFormSchema } from "@/lib/schemas/loginFormSchema";
 import {
@@ -17,12 +17,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+// Hooks
+import { useResetPassword } from "@/hooks/useAuth";
 // Icons
 import { KeyRound, ArrowRight } from "lucide-react";
 
 type FormValues = z.infer<typeof resetPasswordFormSchema>;
 
 export default function ResetPasswordForm() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") ?? "";
+  const resetPassword = useResetPassword();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(resetPasswordFormSchema),
     defaultValues: {
@@ -33,13 +39,8 @@ export default function ResetPasswordForm() {
 
   const { isSubmitting } = form.formState;
 
-  const onSubmit = async () => {
-    try {
-      // TODO: Call reset password API
-      toast.success("Contraseña restablecida correctamente.");
-    } catch {
-      toast.error("No se pudo restablecer la contraseña. Inténtalo de nuevo.");
-    }
+  const onSubmit = async (values: FormValues) => {
+    await resetPassword.mutateAsync({ token, newPassword: values.newPassword });
   };
 
   return (
