@@ -1,18 +1,11 @@
+import { useAuthStore } from "@/store/auth.store";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-// Lee el token del store de Zustand persistido en localStorage.
-// La clave "bookea-auth" debe coincidir con el nombre del store en auth.store.ts.
+// Lee el token directamente del estado en memoria de Zustand.
+// El token nunca se persiste en localStorage — vive solo en memoria por seguridad.
 const getToken = (): string | null => {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("bookea-auth");
-    if (!raw) return null;
-    return (
-      (JSON.parse(raw) as { state?: { token?: string } })?.state?.token ?? null
-    );
-  } catch {
-    return null;
-  }
+  return useAuthStore.getState().token;
 };
 
 // ── Error tipado ──────────────────────────────────────────────────────────────
@@ -42,6 +35,7 @@ async function request<T>(
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...rest,
+    credentials: "include", // necesario para enviar/recibir cookies httpOnly (refreshToken)
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -89,6 +83,7 @@ export const apiClient = {
     const token = getToken();
     const res = await fetch(`${API_URL}${endpoint}`, {
       method: "POST",
+      credentials: "include", // necesario para enviar/recibir cookies httpOnly (refreshToken)
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData,
     });

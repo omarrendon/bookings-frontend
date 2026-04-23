@@ -8,30 +8,52 @@ import { GalleryVerticalEnd } from "lucide-react";
 export default function LoginPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <Link href="/" className="flex items-center gap-2 font-medium">
-            <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-4" />
-            </div>
-            Bookea.me
-          </Link>
-        </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-md">
+
+      {/* ── Panel izquierdo: formulario ── */}
+      <div className="flex flex-col p-6 md:p-10">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 font-semibold w-fit">
+          <div className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-lg">
+            <GalleryVerticalEnd className="size-4" />
+          </div>
+          Bookea.me
+        </Link>
+
+        {/* Form centrado verticalmente */}
+        <div className="flex flex-1 items-center justify-center py-10">
+          <div className="w-full max-w-sm">
             <LoginForm />
           </div>
         </div>
+
+        {/* Copyright */}
+        <p className="text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Bookea.me. Todos los derechos reservados.
+        </p>
       </div>
-      <div className="bg-muted relative hidden lg:block">
+
+      {/* ── Panel derecho: imagen ── */}
+      <div className="relative hidden lg:block bg-gradient-to-b from-[#f5f0ff] via-[#e8d5f5] to-[#2d1a4a]">
         <Image
-          src="https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg"
-          width={1920}
-          height={1080}
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          src="https://res.cloudinary.com/dv34psubp/image/upload/v1776917555/Bookeame/bookeame_p0vklp.png"
+          fill
+          alt="Bookea.me"
+          className="object-contain"
+          priority
         />
+        {/* Gradiente oscuro en la parte inferior */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+        {/* Branding superpuesto */}
+        <div className="absolute bottom-10 left-10 right-10 text-white">
+          <p className="text-3xl font-bold leading-tight">
+            Gestiona tus reservas fácilmente
+          </p>
+          <p className="text-sm text-white/70 mt-2 leading-relaxed max-w-sm">
+            Conecta con tus clientes y administra tu agenda en un solo lugar.
+          </p>
+        </div>
       </div>
+
     </div>
   );
 }

@@ -16,19 +16,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
 // Schemas
 import { signUpFormSchema } from "@/lib/schemas/loginFormSchema";
 // Utils
-import {
-  getPasswordStrength,
-  strengthColors,
-  strengthLabels,
-} from "@/utils/utils";
+import { getPasswordStrength, strengthColors, strengthLabels } from "@/utils/utils";
+// Hooks
+import { useSignUp } from "@/hooks/useAuth";
+// Icons
+import { ArrowRight } from "lucide-react";
 
 type FormValues = z.infer<typeof signUpFormSchema>;
 
 export default function SignUpForm() {
+  const signUp = useSignUp();
   const form = useForm<FormValues>({
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
@@ -42,111 +42,100 @@ export default function SignUpForm() {
   });
 
   const { isSubmitting } = form.formState;
+  const isPending = isSubmitting || signUp.isPending;
   const passwordValue = form.watch("password");
   const strength = getPasswordStrength(passwordValue ?? "");
 
-  const onSubmit = async () => {
-    try {
-      // TODO: Call registration API
-      toast.success("Cuenta creada correctamente. ¡Bienvenido!");
-    } catch {
-      toast.error("No se pudo crear la cuenta. Inténtalo de nuevo.");
-    }
+  const onSubmit = async (values: FormValues) => {
+    await signUp.mutateAsync({
+      name: values.name,
+      last_name: values.lastName,
+      email: values.email,
+      password: values.password,
+      role: "owner",
+    });
   };
+
   return (
-    <div className="w-full flex flex-col max-w-lg ">
-      <div className="text-center">
-        <h2 className="text-xl md:text-2xl font-bold ">
-          Crear cuenta para tu negocio
-        </h2>
-        <span className="text-sm text-gray-600 ">
-          Completa el formulario para crear una cuenta para tu negocio.
-        </span>
+    <div className="flex flex-col gap-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Crear cuenta</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Completa el formulario para registrar tu negocio
+        </p>
       </div>
-      <div className="grid gap-6 rounded-xl border p-4 my-4">
+
+      {/* Card */}
+      <div className="bg-card rounded-2xl border overflow-hidden">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="w-full flex flex-col gap-4"
+            className="p-6 flex flex-col gap-5"
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="grid gap-1">
-                  <FormLabel htmlFor="name">Nombre completo</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Nombre completo"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem className="grid gap-1">
-                  <FormLabel htmlFor="lastName">Apellido</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="lastName"
-                      type="text"
-                      placeholder="Apellido"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Nombre + Apellido */}
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ana" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Apellido</FormLabel>
+                    <FormControl>
+                      <Input placeholder="López" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Email */}
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
-                  <FormLabel htmlFor="email">Correo electrónico</FormLabel>
+                <FormItem>
+                  <FormLabel>Correo electrónico</FormLabel>
                   <FormControl>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Correo electrónico"
-                      {...field}
-                    />
+                    <Input type="email" placeholder="miemail@ejemplo.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {/* Contraseña */}
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
-                  <FormLabel htmlFor="password">Contraseña</FormLabel>
+                <FormItem>
+                  <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Contraseña"
-                      {...field}
-                    />
+                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   {passwordValue && (
-                    <div className="grid gap-1 my-1">
+                    <div className="flex flex-col gap-1 mt-1">
                       <div className="flex gap-1">
                         {[1, 2, 3, 4].map(level => (
                           <div
                             key={level}
                             className={`h-1 flex-1 rounded-full transition-colors ${
-                              level <= strength
-                                ? strengthColors[strength]
-                                : "bg-muted"
+                              level <= strength ? strengthColors[strength] : "bg-muted"
                             }`}
                           />
                         ))}
@@ -160,79 +149,75 @@ export default function SignUpForm() {
                 </FormItem>
               )}
             />
+
+            {/* Confirmar contraseña */}
             <FormField
               control={form.control}
               name="confirmPassword"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
-                  <FormLabel htmlFor="confirmPassword">Confirmar contraseña</FormLabel>
+                <FormItem>
+                  <FormLabel>Confirmar contraseña</FormLabel>
                   <FormControl>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirmar contraseña"
-                      {...field}
-                    />
+                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {/* Términos */}
             <FormField
               control={form.control}
               name="acceptTerms"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
-                  <div className="flex items-center gap-2">
+                <FormItem>
+                  <div className="flex items-start gap-2">
                     <FormControl>
                       <Checkbox
-                        id="acceptTerms"
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        className="mt-0.5"
                       />
                     </FormControl>
-                    <FormLabel
-                      htmlFor="acceptTerms"
-                      className="text-sm text-muted-foreground flex items-center gap-1"
-                    >
-                      <div>
-                        Acepto los{" "}
-                        <Link
-                          href={"#"}
-                          className="underline underline-offset-4 hover:text-primary"
-                        >
-                          términos y condiciones
-                        </Link>{" "}
-                        y las{" "}
-                        <Link
-                          href={"#"}
-                          className="underline underline-offset-4 hover:text-primary"
-                        >
-                          política de privacidad.
-                        </Link>
-                      </div>
+                    <FormLabel className="text-sm text-muted-foreground font-normal leading-snug cursor-pointer">
+                      Acepto los{" "}
+                      <Link href="#" className="text-primary underline-offset-4 hover:underline">
+                        términos y condiciones
+                      </Link>{" "}
+                      y la{" "}
+                      <Link href="#" className="text-primary underline-offset-4 hover:underline">
+                        política de privacidad
+                      </Link>
                     </FormLabel>
                   </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <Button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full cursor-pointer"
+              size="lg"
+              disabled={isPending}
+              className="w-full rounded-full gap-2 mt-1"
             >
-              {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
+              {isPending ? "Creando cuenta..." : "Crear cuenta"}
+              {!isPending && <ArrowRight className="size-4" />}
             </Button>
-            <div className="text-sm text-center">
-              ¿Ya tienes una cuenta?{" "}
-              <Link href="/login" className="text-blue-600 hover:underline">
-                Iniciar sesión
-              </Link>
-            </div>
           </form>
         </Form>
       </div>
+
+      {/* Footer link */}
+      <p className="text-center text-sm text-muted-foreground">
+        ¿Ya tienes una cuenta?{" "}
+        <Link
+          href="/login"
+          className="text-primary font-medium hover:underline underline-offset-4"
+        >
+          Iniciar sesión
+        </Link>
+      </p>
     </div>
   );
 }

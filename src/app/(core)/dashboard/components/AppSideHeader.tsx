@@ -1,17 +1,19 @@
 "use client";
 // Components
-import SecondaryButton from "@/components/ui/SecondaryButton";
 import SubTitle from "@/components/ui/SubTitle";
 import { Separator } from "@/components/ui/separator";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 // Utils
 import { getTranslatePath } from "@/utils/getTranslatePath";
 // Hooks
 import { usePathname } from "next/navigation";
+import { useLogout } from "@/hooks/useAuth";
 
 export function SiteHeader() {
   const pathname = usePathname();
   const routeName = getTranslatePath(pathname);
+  const { logout } = useLogout();
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b transition-all ease-linear">
@@ -21,7 +23,7 @@ export function SiteHeader() {
         <div className="flex justify-between w-full items-center">
           <SubTitle text={routeName[0]} className="hidden md:block " />
           <div className="ml-auto flex items-center gap-2">
-            <SecondaryButton>Cerrar sesión</SecondaryButton>
+            <SecondaryButton onClick={logout}>Cerrar sesión</SecondaryButton>
           </div>
         </div>
       </div>

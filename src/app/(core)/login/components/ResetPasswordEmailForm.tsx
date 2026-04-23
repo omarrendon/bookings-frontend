@@ -4,6 +4,7 @@ import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 // Components
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,9 +15,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
 // Schemas
 import { resetPasswordEmailFormSchema } from "@/lib/schemas/loginFormSchema";
+// Hooks
+import { useRequestPasswordReset } from "@/hooks/useAuth";
+// Icons
+import { ArrowLeft, Mail } from "lucide-react";
 
 type FormValues = z.infer<typeof resetPasswordEmailFormSchema>;
 
@@ -29,56 +33,65 @@ export default function ResetPasswordEmailForm() {
   });
 
   const { isSubmitting } = form.formState;
+  const requestReset = useRequestPasswordReset();
 
-  const onSubmit = async () => {
-    try {
-      // TODO: Call send reset email API
-      toast.success("Instrucciones enviadas. Revisa tu correo.");
-    } catch {
-      toast.error("No se pudo enviar el correo. Inténtalo de nuevo.");
-    }
+  const onSubmit = async (values: FormValues) => {
+    await requestReset.mutateAsync({ email: values.email });
   };
 
   return (
-    <>
-      <div className="w-full mb-6 text-center">
-        <h2 className="text-2xl font-bold ">Restablecer contraseña</h2>
-        <span className="text-sm text-gray-600 ">
-          Ingresa tu correo electrónico para recibir instrucciones de
-          restablecimiento de contraseña.
-        </span>
+    <div className="flex flex-col gap-6">
+      {/* Header */}
+      <div>
+        <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+          <Mail className="size-6 text-primary" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Restablecer contraseña</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Ingresa tu correo y te enviaremos las instrucciones para recuperar tu cuenta.
+        </p>
       </div>
-      <div className="grid gap-6 rounded-xl border p-4">
+
+      {/* Card */}
+      <div className="bg-card rounded-2xl border overflow-hidden">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="w-full flex flex-col gap-4"
+            className="p-6 flex flex-col gap-5"
           >
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
-                  <FormLabel htmlFor="email">Correo electrónico</FormLabel>
+                <FormItem>
+                  <FormLabel>Correo electrónico</FormLabel>
                   <FormControl>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="miemail@example.com"
-                      {...field}
-                    />
+                    <Input type="email" placeholder="miemail@ejemplo.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <Button type="submit" disabled={isSubmitting} className="w-full cursor-pointer">
+            <Button
+              type="submit"
+              size="lg"
+              disabled={isSubmitting}
+              className="w-full rounded-full gap-2"
+            >
               {isSubmitting ? "Enviando..." : "Enviar instrucciones"}
             </Button>
           </form>
         </Form>
       </div>
-    </>
+
+      {/* Volver */}
+      <Link
+        href="/login"
+        className="inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="size-3.5" />
+        Volver al inicio de sesión
+      </Link>
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { businessApi } from "@/lib/api/business.api";
 // Icons
 import {
   Globe,
@@ -45,8 +46,12 @@ import {
 } from "@/lib/schemas/businessSetupSchema";
 // Utils
 import { SOCIAL_PLATFORMS, MEXICAN_STATES } from "@/utils/utils";
+// Hooks
+import { useCreateBusiness } from "@/hooks/useBusiness";
 
 export default function BusinessSetupForm() {
+  const createBusiness = useCreateBusiness();
+
   const form = useForm<BusinessSetupValues>({
     resolver: zodResolver(businessSetupSchema),
     defaultValues: {
@@ -78,11 +83,17 @@ export default function BusinessSetupForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setImagePreview(URL.createObjectURL(file));
-    // TODO: Upload file and set main_image_url with returned URL from API
+    try {
+      const { url } = await businessApi.uploadImage(file);
+      form.setValue("main_image_url", url);
+    } catch {
+      toast.error("No se pudo subir la imagen. Inténtalo de nuevo.");
+      handleRemoveImage();
+    }
   };
 
   const handleRemoveImage = () => {
@@ -94,13 +105,22 @@ export default function BusinessSetupForm() {
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
-  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     const remaining = MAX_GALLERY - galleryPreviews.length;
-    const newPreviews = files.slice(0, remaining).map(f => URL.createObjectURL(f));
+    const selected = files.slice(0, remaining);
+    const newPreviews = selected.map(f => URL.createObjectURL(f));
     setGalleryPreviews(prev => [...prev, ...newPreviews]);
-    // TODO: Upload files and push returned URLs to gallery_images
     if (galleryInputRef.current) galleryInputRef.current.value = "";
+    try {
+      const results = await businessApi.uploadGallery(selected);
+      const newUrls = results.map(r => r.url);
+      const current = form.getValues("gallery_images") ?? [];
+      form.setValue("gallery_images", [...current, ...newUrls]);
+    } catch {
+      toast.error("No se pudieron subir las imágenes. Inténtalo de nuevo.");
+      setGalleryPreviews(prev => prev.slice(0, prev.length - newPreviews.length));
+    }
   };
 
   const handleRemoveGalleryImage = (index: number) => {
@@ -126,13 +146,13 @@ export default function BusinessSetupForm() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [stateOpen]);
 
-  const onSubmit = async () => {
-    try {
-      // TODO: Call create business API
-      toast.success("Negocio configurado correctamente. ¡Bienvenido!");
-    } catch {
-      toast.error("No se pudo guardar la configuración. Inténtalo de nuevo.");
-    }
+  const onSubmit = async (values: BusinessSetupValues) => {
+    // Elimina strings vacíos para no enviar campos opcionales vacíos al backend
+    const payload = Object.fromEntries(
+      Object.entries(values).filter(([, v]) => v !== "" && v !== undefined),
+    ) as BusinessSetupValues;
+
+    await createBusiness.mutateAsync(payload);
   };
 
   return (

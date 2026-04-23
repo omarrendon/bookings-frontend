@@ -16,13 +16,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
 // Schemas
 import { loginFormSchema } from "@/lib/schemas/loginFormSchema";
+// Hooks
+import { useLogin } from "@/hooks/useAuth";
+// Icons
+import { ArrowRight } from "lucide-react";
 
 type FormValues = z.infer<typeof loginFormSchema>;
 
 export default function LoginForm() {
+  const { mutate: login, isPending } = useLogin();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -32,41 +37,40 @@ export default function LoginForm() {
     },
   });
 
-  const { isSubmitting } = form.formState;
-
-  const onSubmit = async () => {
-    try {
-      // TODO: Call authentication API
-      toast.success("Sesión iniciada correctamente");
-    } catch {
-      toast.error("Credenciales incorrectas. Inténtalo de nuevo.");
-    }
+  const onSubmit = (values: FormValues) => {
+    login({
+      email: values.email,
+      password: values.password,
+    });
   };
+
   return (
-    <div className="w-full flex flex-col my-10 px-4">
-      <div className="w-full mb-6 text-center">
-        <h2 className="text-2xl font-bold ">Inicia sesión con tu cuenta</h2>
-        <span className="text-sm text-gray-600 ">
-          Ingresa tu correo electrónico y contraseña para continuar.
-        </span>
+    <div className="flex flex-col gap-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Iniciar sesión</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Ingresa tus credenciales para acceder a tu cuenta
+        </p>
       </div>
-      <div className="grid gap-6 rounded-xl border p-4">
+
+      {/* Card */}
+      <div className="bg-card rounded-2xl border overflow-hidden">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="w-full flex flex-col gap-4"
+            className="p-6 flex flex-col gap-5"
           >
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
-                  <FormLabel htmlFor="email">Correo electrónico</FormLabel>
+                <FormItem>
+                  <FormLabel>Correo electrónico</FormLabel>
                   <FormControl>
                     <Input
-                      id="email"
                       type="email"
-                      placeholder="miemail@example.com"
+                      placeholder="miemail@ejemplo.com"
                       {...field}
                     />
                   </FormControl>
@@ -78,23 +82,18 @@ export default function LoginForm() {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="grid gap-1">
+                <FormItem>
                   <div className="flex items-center justify-between">
-                    <FormLabel htmlFor="password">Contraseña</FormLabel>
+                    <FormLabel>Contraseña</FormLabel>
                     <Link
                       href="/login/reset-password"
-                      className="text-sm underline-offset-4 hover:underline"
+                      className="text-xs text-muted-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
                     >
                       ¿Olvidaste tu contraseña?
                     </Link>
                   </div>
                   <FormControl>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="********"
-                      {...field}
-                    />
+                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -107,30 +106,39 @@ export default function LoginForm() {
                 <FormItem className="flex items-center gap-2">
                   <FormControl>
                     <Checkbox
-                      id="rememberMe"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                  <FormLabel htmlFor="rememberMe" className="cursor-pointer font-normal">
+                  <FormLabel className="cursor-pointer font-normal text-sm text-muted-foreground">
                     Recuérdame
                   </FormLabel>
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting} className="w-full cursor-pointer mt-2">
-              {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
+            <Button
+              type="submit"
+              size="lg"
+              disabled={isPending}
+              className="w-full rounded-full gap-2 mt-1"
+            >
+              {isPending ? "Iniciando sesión..." : "Iniciar sesión"}
+              {!isPending && <ArrowRight className="size-4" />}
             </Button>
           </form>
         </Form>
-        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t" />
-        <div className="text-center text-sm">
-          ¿No tienes una cuenta?{" "}
-          <Link href="/login/sign-up" className="underline underline-offset-4">
-            Regístrate
-          </Link>
-        </div>
       </div>
+
+      {/* Footer link */}
+      <p className="text-center text-sm text-muted-foreground">
+        ¿No tienes una cuenta?{" "}
+        <Link
+          href="/login/sign-up"
+          className="text-primary font-medium hover:underline underline-offset-4"
+        >
+          Regístrate
+        </Link>
+      </p>
     </div>
   );
 }

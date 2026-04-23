@@ -20,13 +20,23 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
-    onSuccess: ({ user, token }) => {
-      setSession(user, token);
+    onSuccess: (response) => {
+      setSession(response.data.user, response.data.token);
+      toast.success("Sesión iniciada correctamente");
       router.push("/dashboard");
     },
     onError: (error: unknown) => {
-      if (error instanceof ApiError && error.status === 401) {
-        toast.error("Correo o contraseña incorrectos.");
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 401:
+            toast.error("Correo o contraseña incorrectos.");
+            break;
+          case 429:
+            toast.error("Demasiados intentos. Espera unos minutos e intenta de nuevo.");
+            break;
+          default:
+            toast.error("No se pudo iniciar sesión. Inténtalo de nuevo.");
+        }
       } else {
         toast.error("No se pudo iniciar sesión. Inténtalo de nuevo.");
       }
@@ -36,12 +46,14 @@ export function useLogin() {
 
 export function useSignUp() {
   const router = useRouter();
+  const setSession = useAuthStore(state => state.setSession);
 
   return useMutation({
     mutationFn: (data: SignUpRequest) => authApi.signUp(data),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      setSession(response.data.user, response.data.token);
       toast.success("Cuenta creada correctamente. ¡Bienvenido!");
-      router.push("/login");
+      router.push("/business/setup");
     },
     onError: (error: unknown) => {
       if (error instanceof ApiError && error.status === 409) {
@@ -75,10 +87,13 @@ export function useResetPassword() {
       toast.success("Contraseña restablecida correctamente.");
       router.push("/login");
     },
-    onError: () => {
-      toast.error(
-        "No se pudo restablecer la contraseña. El enlace puede haber expirado.",
-      );
+    onError: (error: unknown) => {
+      if (error instanceof ApiError && error.status === 400) {
+        toast.error("El enlace expiró o ya fue utilizado. Solicita uno nuevo.");
+        router.push("/login/reset-password");
+      } else {
+        toast.error("No se pudo restablecer la contraseña. Inténtalo de nuevo.");
+      }
     },
   });
 }
