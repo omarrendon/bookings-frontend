@@ -45,15 +45,15 @@ export function useLogin() {
 }
 
 export function useSignUp() {
-  const router = useRouter();
   const setSession = useAuthStore(state => state.setSession);
+  const setPostAuthRedirect = useAuthStore(state => state.setPostAuthRedirect);
 
   return useMutation({
     mutationFn: (data: SignUpRequest) => authApi.signUp(data),
     onSuccess: (response) => {
+      setPostAuthRedirect("/dashboard/business");
       setSession(response.data.user, response.data.token);
       toast.success("Cuenta creada correctamente. ¡Bienvenido!");
-      router.push("/business/setup");
     },
     onError: (error: unknown) => {
       if (error instanceof ApiError && error.status === 409) {

@@ -15,7 +15,10 @@ export default function PublicOnlyRoute({
 
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
-      router.replace("/dashboard");
+      const { postAuthRedirect, setPostAuthRedirect } = useAuthStore.getState();
+      const destination = postAuthRedirect ?? "/dashboard";
+      setPostAuthRedirect(null);
+      router.replace(destination);
     }
   }, [isAuthLoading, isAuthenticated, router]);
 

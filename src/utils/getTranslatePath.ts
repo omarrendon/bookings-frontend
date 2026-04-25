@@ -3,7 +3,7 @@ export function getTranslatePath(pathname: string): string[] {
     .split("/")
     .filter(
       segment =>
-        segment.length > 0 && segment !== "(core)" && segment !== "dashboard"
+        segment.length > 0 && segment !== "(core)" && segment !== "dashboard",
     );
   if (segments.length === 0) {
     segments = ["dashboard"];
