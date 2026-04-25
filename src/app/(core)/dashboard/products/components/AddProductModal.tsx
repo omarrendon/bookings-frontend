@@ -192,6 +192,11 @@ export default function AddProductModal({
         if (selectedFiles.length > 0) {
           await productsApi.uploadGallery(response.data.id.toString(), selectedFiles);
         }
+
+        // Refetch con las imágenes ya subidas
+        await queryClient.invalidateQueries({
+          queryKey: productKeys.byBusiness(businessId),
+        });
       }
 
       onSuccess?.();

@@ -4,6 +4,7 @@ import type {
   UpdateProductRequest,
   UploadGalleryResponse,
   DeleteImageResponse,
+  DeleteProductResponse,
   ProductsListResponse,
   ProductResponse,
 } from "./types";
@@ -21,8 +22,8 @@ export const productsApi = {
   update: (productId: string, data: UpdateProductRequest) =>
     apiClient.put<ProductResponse>(`/products/${productId}`, data),
 
-  delete: (businessId: string, productId: string) =>
-    apiClient.delete<void>(`/businesses/${businessId}/products/${productId}`),
+  delete: (productId: string) =>
+    apiClient.delete<DeleteProductResponse>(`/products/${productId}`),
 
   deleteImage: (imageId: number) =>
     apiClient.delete<DeleteImageResponse>(`/products/images/${imageId}`),

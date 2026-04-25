@@ -242,3 +242,8 @@ export interface DeleteImageResponse {
   success: boolean;
   message: string;
 }
+
+export interface DeleteProductResponse {
+  success: boolean;
+  message: string;
+}
