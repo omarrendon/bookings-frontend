@@ -26,9 +26,9 @@ export const productFormSchema = z.object({
   //   .min(0, "El stock no puede ser negativo")
   //   .optional(),
   gallery_images: z
-    .custom<FileList | null>()
-    .refine(files => !!files && files.length > 0, {
-      message: "Se requiere al menos una imagen",
+    .custom<File[] | null>()
+    .refine(files => !files || files.length <= 5, {
+      message: "Máximo 5 imágenes permitidas",
     })
     .optional(),
   estimated_delivery_hours: z

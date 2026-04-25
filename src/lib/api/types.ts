@@ -103,15 +103,29 @@ export type UpdateBusinessRequest = Partial<CreateBusinessRequest>;
 
 // ── Products ──────────────────────────────────────────────────────────────────
 
+export interface ProductImage {
+  id: number;
+  product_id: number;
+  order: number;
+  public_id: string;
+  url: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Product {
-  id: string;
-  business_id: string;
+  id: number;
+  business_id: number;
+  category_id: number | null;
   name: string;
   description?: string;
-  price: number;
-  gallery_images?: string[];
-  estimated_delivery_time: number;
+  price: string;            // el backend lo devuelve como "150.00"
+  stock: number;
+  estimated_delivery_time: string; // minutos en decimal: "30.00"
+  gallery_images: string[] | null;
+  images: ProductImage[];
   created_at: string;
+  updated_at: string;
 }
 
 export interface ProductResponse {
@@ -130,9 +144,11 @@ export interface CreateProductRequest {
   name: string;
   description?: string;
   price: number;
+  estimated_delivery_time: number; // total en minutos
+  business_id: string;
+  stock?: number;
+  category_id?: string;
   gallery_images?: string[];
-  estimated_delivery_hours: number;
-  estimated_delivery_minutes?: number;
 }
 
 export type UpdateProductRequest = Partial<CreateProductRequest>;
@@ -211,7 +227,18 @@ export interface MonthSlotsResponse {
 
 // ── File Upload ───────────────────────────────────────────────────────────────
 
-export interface UploadResponse {
+export interface GalleryImageItem {
+  id: number;
   url: string;
-  publicId: string;
+  order: number;
+}
+
+export interface UploadGalleryResponse {
+  success: boolean;
+  data: GalleryImageItem[];
+}
+
+export interface DeleteImageResponse {
+  success: boolean;
+  message: string;
 }

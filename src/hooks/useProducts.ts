@@ -3,7 +3,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { productsApi } from "@/lib/api/products.api";
-import type { CreateProductRequest, UpdateProductRequest } from "@/lib/api/types";
+import type {
+  CreateProductRequest,
+  UpdateProductRequest,
+} from "@/lib/api/types";
 
 export const productKeys = {
   all: ["products"] as const,
@@ -24,10 +27,11 @@ export function useCreateProduct(businessId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateProductRequest) =>
-      productsApi.create(businessId, data),
+    mutationFn: (data: CreateProductRequest) => productsApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.byBusiness(businessId) });
+      queryClient.invalidateQueries({
+        queryKey: productKeys.byBusiness(businessId),
+      });
       toast.success("Producto creado correctamente.");
     },
     onError: () => {
@@ -46,9 +50,11 @@ export function useUpdateProduct(businessId: string) {
     }: {
       productId: string;
       data: UpdateProductRequest;
-    }) => productsApi.update(businessId, productId, data),
+    }) => productsApi.update(productId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.byBusiness(businessId) });
+      queryClient.invalidateQueries({
+        queryKey: productKeys.byBusiness(businessId),
+      });
       toast.success("Producto actualizado correctamente.");
     },
     onError: () => {
@@ -64,7 +70,9 @@ export function useDeleteProduct(businessId: string) {
     mutationFn: (productId: string) =>
       productsApi.delete(businessId, productId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.byBusiness(businessId) });
+      queryClient.invalidateQueries({
+        queryKey: productKeys.byBusiness(businessId),
+      });
       toast.success("Producto eliminado correctamente.");
     },
     onError: () => {
