@@ -1,141 +1,124 @@
 "use client";
 // Dependencies
 import { useState } from "react";
-// Components
-import Text from "./Text";
-import Title from "./Title";
-import SubTitle from "./SubTitle";
-// Utils
-import { getFormattedLocalDate } from "@/utils/dates/utils";
 // Icons
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+
+const DAY_LABELS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const MONTH_NAMES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+const getWeekDays = (date: Date): Date[] => {
+  const base = new Date(date);
+  const first = base.getDate() - base.getDay();
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(base);
+    d.setDate(first + i);
+    return d;
+  });
+};
+
+const isSameDay = (a: Date, b: Date) =>
+  a.getDate() === b.getDate() &&
+  a.getMonth() === b.getMonth() &&
+  a.getFullYear() === b.getFullYear();
 
 export default function CalendarRow() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  const daysOfWeek = ["D", "L", "M", "M", "J", "V", "S"];
-  const monthNames = [
-    "enero",
-    "febrero",
-    "marzo",
-    "abril",
-    "mayo",
-    "junio",
-    "julio",
-    "agosto",
-    "septiembre",
-    "octubre",
-    "noviembre",
-    "diciembre",
-  ];
-
-  const currentDayInfo = getFormattedLocalDate(new Date().toISOString());
-
-  const getWeekDays = (date: Date) => {
-    const currentDate = new Date(date);
-    const first = currentDate.getDate() - currentDate.getDay();
-
-    const week = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(currentDate);
-      day.setDate(first + i);
-      week.push(day);
-    }
-    return week;
-  };
+  const today = new Date();
+  const [currentDate, setCurrentDate] = useState(today);
+  const [selectedDate, setSelectedDate] = useState(today);
 
   const weekDays = getWeekDays(currentDate);
+  const midWeek = weekDays[3];
 
   const goToPreviousWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() - 7);
-    setCurrentDate(newDate);
+    const d = new Date(currentDate);
+    d.setDate(d.getDate() - 7);
+    setCurrentDate(d);
   };
 
   const goToNextWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + 7);
-    setCurrentDate(newDate);
+    const d = new Date(currentDate);
+    d.setDate(d.getDate() + 7);
+    setCurrentDate(d);
   };
-
-  const isSameDay = (firstDate: Date, secondDate: Date) => {
-    return (
-      firstDate.getDate() === secondDate.getDate() &&
-      firstDate.getMonth() === secondDate.getMonth() &&
-      firstDate.getFullYear() === secondDate.getFullYear()
-    );
-  };
-
-  const isToday = (date: Date) => isSameDay(date, new Date());
 
   return (
-    <div className="flex flex-col bg-white rounded-2xl shadow-xl p-4 md:p-6 w-full gap-3 md:gap-6">
-      <div className=" flex flex-col items-start gap-1">
-        <Title text="Hoy" className="!text-2xl !font-bold" />
-        <SubTitle text={currentDayInfo} />
+    <div className="bg-card rounded-2xl border overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-5 border-b flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="size-4 text-primary" />
+          <h3 className="font-semibold tracking-tight">Semana actual</h3>
+        </div>
+        <span className="text-sm text-muted-foreground capitalize">
+          {MONTH_NAMES[midWeek.getMonth()]} {midWeek.getFullYear()}
+        </span>
       </div>
-      <div className="flex items-center justify-between md:gap-2">
-        <div className="md:p-2 hover:bg-gray-100 rounded-full transition-colors hover:cursor-pointer">
-          <ChevronLeft
+
+      {/* Week grid */}
+      <div className="px-6 py-5 flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          {/* Prev */}
+          <button
+            type="button"
             onClick={goToPreviousWeek}
-            className="w-6 h-6 text-gray-600"
-          />
-        </div>
+            className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+            aria-label="Semana anterior"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
 
-        <div className="flex-1 grid grid-cols-7 gap-2">
-          {weekDays.map((day, index) => {
-            const isSelected = isSameDay(day, selectedDate);
-            const isTodayDate = isToday(day);
+          {/* Days */}
+          <div className="flex-1 grid grid-cols-7 gap-1">
+            {weekDays.map((day, i) => {
+              const isSelected = isSameDay(day, selectedDate);
+              const isToday = isSameDay(day, today);
 
-            return (
-              <div key={index} className="flex flex-col items-center">
-                <span className="text-sm font-medium text-gray-500 mb-2">
-                  {daysOfWeek[day.getDay()]}
-                </span>
-                <button
-                  onClick={() => setSelectedDate(day)}
-                  className={`w-8 md:w-12 h-8 md:h-12 rounded-full flex items-center justify-center text-lg font-semibold transition-all ${
-                    isSelected
-                      ? "bg-purple-500 text-white shadow-lg scale-110"
-                      : isTodayDate
-                      ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  {day.getDate().toString().padStart(2, "0")}
-                </button>
-              </div>
-            );
-          })}
-        </div>
+              return (
+                <div key={i} className="flex flex-col items-center gap-1.5">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {DAY_LABELS[day.getDay()]}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDate(day)}
+                    className={`size-9 rounded-full text-sm font-medium transition-colors ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : isToday
+                          ? "bg-primary/10 text-primary"
+                          : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {day.getDate()}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
 
-        <div className="md:p-2 hover:bg-gray-100 rounded-full transition-colors hover:cursor-pointer">
-          <ChevronRight
+          {/* Next */}
+          <button
+            type="button"
             onClick={goToNextWeek}
-            className="w-6 h-6 text-gray-600"
-          />
+            className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+            aria-label="Semana siguiente"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        </div>
+
+        {/* Selected date pill */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Seleccionado:</span>
+          <span className="text-xs font-medium bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+            {selectedDate.getDate()} de {MONTH_NAMES[selectedDate.getMonth()]} de {selectedDate.getFullYear()}
+          </span>
         </div>
       </div>
-
-      <div className="text-center">
-        <Text
-          text={`${
-            monthNames[weekDays[3].getMonth()]
-          } ${weekDays[3].getFullYear()}`}
-        />
-      </div>
-
-      {selectedDate && (
-        <div className=" p-4 bg-purple-50 rounded-lg">
-          <Text text="Fecha seleccionada" />
-          <Title
-            text={`${selectedDate.getDate()} de ${
-              monthNames[selectedDate.getMonth()]
-            } de ${selectedDate.getFullYear()}`}
-          />
-        </div>
-      )}
     </div>
   );
 }
