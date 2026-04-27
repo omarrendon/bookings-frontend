@@ -45,10 +45,11 @@ export function useUpdateBusiness(id: string) {
   return useMutation({
     mutationFn: (data: UpdateBusinessRequest) => businessApi.update(id, data),
     onSuccess: response => {
+      const updated = response.data.updatedBusiness;
       // Actualiza el store de Zustand
-      updateBusiness(response.data);
-      // Actualiza también la caché de React Query sin hacer un refetch
-      queryClient.setQueryData(businessKeys.detail(id), response);
+      updateBusiness(updated);
+      // Actualiza también la caché de React Query con la shape de BusinessResponse
+      queryClient.setQueryData(businessKeys.detail(id), { ...response, data: updated });
       toast.success("Negocio actualizado correctamente.");
     },
     onError: () => {

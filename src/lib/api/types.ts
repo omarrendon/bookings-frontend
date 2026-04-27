@@ -81,6 +81,13 @@ export interface BusinessResponse {
   success: boolean;
 }
 
+export interface UpdateBusinessResponse {
+  success: boolean;
+  data: {
+    updatedBusiness: Business;
+  };
+}
+
 export interface CreateBusinessRequest {
   name: string;
   description?: string;
