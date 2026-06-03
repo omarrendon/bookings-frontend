@@ -1,7 +1,7 @@
 import { apiClient } from "./client";
 import type {
-  Business,
   BusinessResponse,
+  UpdateBusinessResponse,
   CreateBusinessRequest,
   UpdateBusinessRequest,
   UploadResponse,
@@ -14,7 +14,7 @@ export const businessApi = {
   getById: (id: string) => apiClient.get<BusinessResponse>(`/businesses/${id}`),
 
   update: (id: string, data: UpdateBusinessRequest) =>
-    apiClient.put<BusinessResponse>(`/businesses/${id}`, data),
+    apiClient.put<UpdateBusinessResponse>(`/businesses/${id}`, data),
 
   uploadImage: (file: File) => {
     const formData = new FormData();

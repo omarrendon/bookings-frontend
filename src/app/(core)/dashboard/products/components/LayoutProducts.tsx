@@ -10,13 +10,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import NoFoundProducts from "./NoFoundProducts";
 import ServiceCard from "@/components/ui/ServiceCard";
 import AddProductModal from "./AddProductModal";
+import DeleteProductModal from "./DeleteProductModal";
 // Types
 import type { Product } from "@/lib/api/types";
 // Utils
 import { formatDuration } from "@/utils/utils";
 // Icons
 import { Plus } from "lucide-react";
-import { toast } from "sonner";
 
 export default function LayoutProducts() {
   const business = useBusinessStore(state => state.business);
@@ -27,6 +27,7 @@ export default function LayoutProducts() {
 
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
   const handleAdd = () => {
     setEditingProduct(null);
@@ -98,7 +99,7 @@ export default function LayoutProducts() {
               images={product.images}
               isEditable
               onEdit={() => handleEdit(product)}
-              onDelete={() => toast.info("Próximamente: eliminar servicio")}
+              onDelete={() => setDeletingProduct(product)}
             />
           ))}
         </div>
@@ -110,6 +111,12 @@ export default function LayoutProducts() {
         isOpen={isOpenModal}
         onClose={handleClose}
         product={editingProduct}
+      />
+
+      <DeleteProductModal
+        isOpen={!!deletingProduct}
+        product={deletingProduct}
+        onClose={() => setDeletingProduct(null)}
       />
     </div>
   );

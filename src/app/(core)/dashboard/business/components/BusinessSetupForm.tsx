@@ -46,11 +46,16 @@ import {
 } from "@/lib/schemas/businessSetupSchema";
 // Utils
 import { SOCIAL_PLATFORMS, MEXICAN_STATES } from "@/utils/utils";
-// Hooks
-import { useCreateBusiness } from "@/hooks/useBusiness";
+// Hooks & store
+import { useCreateBusiness, useUpdateBusiness } from "@/hooks/useBusiness";
+import { useBusinessStore } from "@/store/business.store";
 
 export default function BusinessSetupForm() {
+  const business = useBusinessStore(state => state.business);
+  const isEditing = !!business;
+
   const createBusiness = useCreateBusiness();
+  const updateBusiness = useUpdateBusiness(business?.id ?? "");
 
   const form = useForm<BusinessSetupValues>({
     resolver: zodResolver(businessSetupSchema),
@@ -73,13 +78,46 @@ export default function BusinessSetupForm() {
     },
   });
 
+  const { reset } = form;
   const { isSubmitting } = form.formState;
+
+  // Pre-poblar el formulario cuando existe un negocio
+  useEffect(() => {
+    if (!business) return;
+
+    reset({
+      name: business.name,
+      description: business.description ?? "",
+      phone_number: business.phone_number ?? "",
+      website: business.website ?? "",
+      street: business.street,
+      external_number: business.external_number,
+      internal_number: business.internal_number ?? "",
+      neighborhood: business.neighborhood ?? "",
+      city: business.city,
+      state: business.state,
+      zip_code: business.zip_code,
+      country: business.country,
+      social_links: business.social_links ?? [],
+      main_image_url: business.main_image_url ?? "",
+      gallery_images: business.gallery_images ?? [],
+    });
+
+    if (business.main_image_url) {
+      setImagePreview(business.main_image_url);
+    }
+
+    if (business.gallery_images && business.gallery_images.length > 0) {
+      setGalleryPreviews(business.gallery_images);
+    }
+  }, [business, reset]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "social_links",
   });
 
+  // ── Imagen principal ──────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -98,9 +136,11 @@ export default function BusinessSetupForm() {
 
   const handleRemoveImage = () => {
     setImagePreview(null);
+    form.setValue("main_image_url", "");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // ── Galería ───────────────────────────────────────────────────────────────
   const MAX_GALLERY = 5;
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
@@ -125,8 +165,11 @@ export default function BusinessSetupForm() {
 
   const handleRemoveGalleryImage = (index: number) => {
     setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+    const current = form.getValues("gallery_images") ?? [];
+    form.setValue("gallery_images", current.filter((_, i) => i !== index));
   };
 
+  // ── Dropdown de estado ────────────────────────────────────────────────────
   const [stateOpen, setStateOpen] = useState(false);
   const [stateQuery, setStateQuery] = useState("");
   const stateDropdownRef = useRef<HTMLDivElement>(null);
@@ -146,13 +189,17 @@ export default function BusinessSetupForm() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [stateOpen]);
 
+  // ── Submit ────────────────────────────────────────────────────────────────
   const onSubmit = async (values: BusinessSetupValues) => {
-    // Elimina strings vacíos para no enviar campos opcionales vacíos al backend
     const payload = Object.fromEntries(
       Object.entries(values).filter(([, v]) => v !== "" && v !== undefined),
     ) as BusinessSetupValues;
 
-    await createBusiness.mutateAsync(payload);
+    if (isEditing) {
+      await updateBusiness.mutateAsync(payload);
+    } else {
+      await createBusiness.mutateAsync(payload);
+    }
   };
 
   return (
@@ -614,8 +661,12 @@ export default function BusinessSetupForm() {
           disabled={isSubmitting}
           className="w-full rounded-full gap-2"
         >
-          {isSubmitting ? "Guardando..." : "Guardar y continuar"}
-          {!isSubmitting && <ArrowRight className="size-4" />}
+          {isSubmitting
+            ? "Guardando..."
+            : isEditing
+              ? "Guardar cambios"
+              : "Guardar y continuar"}
+          {!isSubmitting && !isEditing && <ArrowRight className="size-4" />}
         </Button>
 
       </form>

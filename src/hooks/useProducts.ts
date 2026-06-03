@@ -68,7 +68,7 @@ export function useDeleteProduct(businessId: string) {
 
   return useMutation({
     mutationFn: (productId: string) =>
-      productsApi.delete(businessId, productId),
+      productsApi.delete(productId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: productKeys.byBusiness(businessId),

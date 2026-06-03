@@ -1,141 +1,182 @@
 "use client";
 // Dependencies
 import { useState } from "react";
-// Components
-import Text from "./Text";
-import Title from "./Title";
-import SubTitle from "./SubTitle";
-// Utils
-import { getFormattedLocalDate } from "@/utils/dates/utils";
+// Types
+import type { DaySlots } from "@/lib/api/types";
 // Icons
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function CalendarRow() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
+const DAY_LABELS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const MONTH_NAMES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
 
-  const daysOfWeek = ["D", "L", "M", "M", "J", "V", "S"];
-  const monthNames = [
-    "enero",
-    "febrero",
-    "marzo",
-    "abril",
-    "mayo",
-    "junio",
-    "julio",
-    "agosto",
-    "septiembre",
-    "octubre",
-    "noviembre",
-    "diciembre",
-  ];
+interface CalendarRowProps {
+  slotsData: DaySlots[];
+  isLoading: boolean;
+  selectedDate: Date;
+  currentMonth: Date;
+  onDateSelect: (date: Date) => void;
+  onMonthChange: (date: Date) => void;
+}
 
-  const currentDayInfo = getFormattedLocalDate(new Date().toISOString());
+const getWeekDays = (date: Date): Date[] => {
+  const base = new Date(date);
+  const first = base.getDate() - base.getDay();
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(base);
+    d.setDate(first + i);
+    return d;
+  });
+};
 
-  const getWeekDays = (date: Date) => {
-    const currentDate = new Date(date);
-    const first = currentDate.getDate() - currentDate.getDay();
+const isSameDay = (a: Date, b: Date) =>
+  a.getDate() === b.getDate() &&
+  a.getMonth() === b.getMonth() &&
+  a.getFullYear() === b.getFullYear();
 
-    const week = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(currentDate);
-      day.setDate(first + i);
-      week.push(day);
-    }
-    return week;
-  };
+const toLocalDateString = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+export default function CalendarRow({
+  slotsData,
+  isLoading,
+  selectedDate,
+  onDateSelect,
+  onMonthChange,
+}: CalendarRowProps) {
+  const today = new Date();
+  const [currentDate, setCurrentDate] = useState(selectedDate);
 
   const weekDays = getWeekDays(currentDate);
+  const midWeek = weekDays[3];
 
-  const goToPreviousWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() - 7);
-    setCurrentDate(newDate);
+  const navigate = (delta: number) => {
+    const d = new Date(currentDate);
+    d.setDate(d.getDate() + delta);
+    setCurrentDate(d);
+    // If the week crosses into another month, notify parent
+    const newWeek = getWeekDays(d);
+    const newMid = newWeek[3];
+    if (
+      newMid.getMonth() !== midWeek.getMonth() ||
+      newMid.getFullYear() !== midWeek.getFullYear()
+    ) {
+      onMonthChange(new Date(newMid.getFullYear(), newMid.getMonth(), 1));
+    }
   };
 
-  const goToNextWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + 7);
-    setCurrentDate(newDate);
+  const getDayStatus = (date: Date) => {
+    const key = toLocalDateString(date);
+    const day = slotsData.find(d => d.date === key);
+    if (!day || day.slots.length === 0) return "closed";
+    const allBooked = day.slots.every(s => s.isBooked);
+    if (allBooked) return "full";
+    return "available";
   };
-
-  const isSameDay = (firstDate: Date, secondDate: Date) => {
-    return (
-      firstDate.getDate() === secondDate.getDate() &&
-      firstDate.getMonth() === secondDate.getMonth() &&
-      firstDate.getFullYear() === secondDate.getFullYear()
-    );
-  };
-
-  const isToday = (date: Date) => isSameDay(date, new Date());
 
   return (
-    <div className="flex flex-col bg-white rounded-2xl shadow-xl p-4 md:p-6 w-full gap-3 md:gap-6">
-      <div className=" flex flex-col items-start gap-1">
-        <Title text="Hoy" className="!text-2xl !font-bold" />
-        <SubTitle text={currentDayInfo} />
-      </div>
-      <div className="flex items-center justify-between md:gap-2">
-        <div className="md:p-2 hover:bg-gray-100 rounded-full transition-colors hover:cursor-pointer">
-          <ChevronLeft
-            onClick={goToPreviousWeek}
-            className="w-6 h-6 text-gray-600"
-          />
+    <div className="bg-card rounded-2xl border overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-5 border-b flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="size-4 text-primary" />
+          <h3 className="font-semibold tracking-tight">Semana actual</h3>
         </div>
-
-        <div className="flex-1 grid grid-cols-7 gap-2">
-          {weekDays.map((day, index) => {
-            const isSelected = isSameDay(day, selectedDate);
-            const isTodayDate = isToday(day);
-
-            return (
-              <div key={index} className="flex flex-col items-center">
-                <span className="text-sm font-medium text-gray-500 mb-2">
-                  {daysOfWeek[day.getDay()]}
-                </span>
-                <button
-                  onClick={() => setSelectedDate(day)}
-                  className={`w-8 md:w-12 h-8 md:h-12 rounded-full flex items-center justify-center text-lg font-semibold transition-all ${
-                    isSelected
-                      ? "bg-purple-500 text-white shadow-lg scale-110"
-                      : isTodayDate
-                      ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  {day.getDate().toString().padStart(2, "0")}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="md:p-2 hover:bg-gray-100 rounded-full transition-colors hover:cursor-pointer">
-          <ChevronRight
-            onClick={goToNextWeek}
-            className="w-6 h-6 text-gray-600"
-          />
-        </div>
+        <span className="text-sm text-muted-foreground capitalize">
+          {MONTH_NAMES[midWeek.getMonth()]} {midWeek.getFullYear()}
+        </span>
       </div>
 
-      <div className="text-center">
-        <Text
-          text={`${
-            monthNames[weekDays[3].getMonth()]
-          } ${weekDays[3].getFullYear()}`}
-        />
-      </div>
+      {/* Week grid */}
+      <div className="px-6 py-5 flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          {/* Prev */}
+          <button
+            type="button"
+            onClick={() => navigate(-7)}
+            className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+            aria-label="Semana anterior"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
 
-      {selectedDate && (
-        <div className=" p-4 bg-purple-50 rounded-lg">
-          <Text text="Fecha seleccionada" />
-          <Title
-            text={`${selectedDate.getDate()} de ${
-              monthNames[selectedDate.getMonth()]
-            } de ${selectedDate.getFullYear()}`}
-          />
+          {/* Days */}
+          <div className="flex-1 grid grid-cols-7 gap-1">
+            {weekDays.map((day, i) => {
+              const isSelected = isSameDay(day, selectedDate);
+              const isToday = isSameDay(day, today);
+              const status = !isLoading ? getDayStatus(day) : null;
+
+              return (
+                <div key={i} className="flex flex-col items-center gap-1.5">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {DAY_LABELS[day.getDay()]}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onDateSelect(day)}
+                    className={`size-9 rounded-full text-sm font-medium transition-colors ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : isToday
+                          ? "bg-primary/10 text-primary"
+                          : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {day.getDate()}
+                  </button>
+                  {/* Availability dot */}
+                  <span className={`size-1.5 rounded-full ${
+                    status === "available"
+                      ? "bg-green-500"
+                      : status === "full"
+                        ? "bg-amber-400"
+                        : "bg-transparent"
+                  }`} />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Next */}
+          <button
+            type="button"
+            onClick={() => navigate(7)}
+            className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+            aria-label="Semana siguiente"
+          >
+            <ChevronRight className="size-4" />
+          </button>
         </div>
-      )}
+
+        {/* Selected date pill */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Seleccionado:</span>
+          <span className="text-xs font-medium bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+            {selectedDate.getDate()} de {MONTH_NAMES[selectedDate.getMonth()]} de {selectedDate.getFullYear()}
+          </span>
+        </div>
+
+        {/* Legend */}
+        {!isLoading && slotsData.length > 0 && (
+          <div className="flex items-center gap-4 pt-1">
+            <div className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-green-500" />
+              <span className="text-xs text-muted-foreground">Disponible</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-amber-400" />
+              <span className="text-xs text-muted-foreground">Sin disponibilidad</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

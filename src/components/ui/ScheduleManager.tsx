@@ -1,251 +1,322 @@
 "use client";
 // Dependencies
 import { useState } from "react";
-// Utils
-import { DAYS, generateTimeSlots, timeToMinutes } from "@/utils/dates/utils";
+// Types
+import type { DaySlots } from "@/lib/api/types";
 // Components
-import Text from "./Text";
-import SubTitle from "./SubTitle";
-import { Switch } from "./switch";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
+// Utils
+import { generateTimeSlots, timeToMinutes } from "@/utils/dates/utils";
 // Icons
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { Clock, ChevronDown, ChevronUp, Plus, Trash2, CheckCircle2, XCircle } from "lucide-react";
 
 const TIME_SLOTS = generateTimeSlots();
 
-export default function ScheduleManager() {
-  const [schedule, setSchedule] = useState({
-    monday: {
-      enabled: true,
-      expanded: true,
-      slots: [{ id: 1, start: "9:00", end: "13:30" }],
-    },
-    tuesday: {
-      enabled: true,
-      expanded: false,
-      slots: [{ id: 1, start: "9:30", end: "11:00" }],
-    },
-    wednesday: {
-      enabled: true,
-      expanded: false,
-      slots: [{ id: 1, start: "9:00", end: "17:00" }],
-    },
-    thursday: {
-      enabled: true,
-      expanded: false,
-      slots: [{ id: 1, start: "9:00", end: "17:00" }],
-    },
-    friday: {
-      enabled: true,
-      expanded: false,
-      slots: [{ id: 1, start: "9:00", end: "17:00" }],
-    },
-    saturday: { enabled: false, expanded: false, slots: [] },
-    sunday: { enabled: false, expanded: false, slots: [] },
-  });
+type DayId = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 
-  const toggleDay = (dayId: keyof typeof schedule) => {
+interface TimeSlot {
+  id: number;
+  start: string;
+  end: string;
+}
+
+interface DaySchedule {
+  enabled: boolean;
+  expanded: boolean;
+  slots: TimeSlot[];
+}
+
+type ScheduleState = Record<DayId, DaySchedule>;
+
+const DAYS: { id: DayId; label: string }[] = [
+  { id: "monday",    label: "Lunes" },
+  { id: "tuesday",   label: "Martes" },
+  { id: "wednesday", label: "Miércoles" },
+  { id: "thursday",  label: "Jueves" },
+  { id: "friday",    label: "Viernes" },
+  { id: "saturday",  label: "Sábado" },
+  { id: "sunday",    label: "Domingo" },
+];
+
+const DEFAULT_SCHEDULE: ScheduleState = {
+  monday:    { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
+  tuesday:   { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
+  wednesday: { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
+  thursday:  { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
+  friday:    { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
+  saturday:  { enabled: false, expanded: false, slots: [] },
+  sunday:    { enabled: false, expanded: false, slots: [] },
+};
+
+const formatTimeRange = (slots: TimeSlot[]) =>
+  slots.map(s => `${s.start} – ${s.end}`).join(" · ");
+
+const toLocalDateString = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const MONTH_NAMES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+interface ScheduleManagerProps {
+  selectedDate: Date;
+  slotsData: DaySlots[];
+  isLoading: boolean;
+}
+
+export default function ScheduleManager({ selectedDate, slotsData, isLoading }: ScheduleManagerProps) {
+  const [schedule, setSchedule] = useState<ScheduleState>(DEFAULT_SCHEDULE);
+
+  // Find the selected day's slots from API data
+  const selectedKey = toLocalDateString(selectedDate);
+  const selectedDayData = slotsData.find(d => d.date === selectedKey);
+  const apiSlots = selectedDayData?.slots ?? [];
+
+  const toggleDay = (id: DayId) => {
     setSchedule(prev => ({
       ...prev,
-      [dayId]: {
-        ...prev[dayId],
-        enabled: !prev[dayId].enabled,
+      [id]: {
+        ...prev[id],
+        enabled: !prev[id].enabled,
+        expanded: !prev[id].enabled ? true : prev[id].expanded,
         slots:
-          !prev[dayId].enabled && prev[dayId].slots.length === 0
-            ? [{ id: Date.now(), start: "9:00", end: "17:00" }]
-            : prev[dayId].slots,
+          !prev[id].enabled && prev[id].slots.length === 0
+            ? [{ id: Date.now(), start: "09:00", end: "17:00" }]
+            : prev[id].slots,
       },
     }));
   };
 
-  const toggleExpanded = (dayId: keyof typeof schedule) => {
+  const toggleExpanded = (id: DayId) => {
     setSchedule(prev => ({
       ...prev,
-      [dayId]: {
-        ...prev[dayId],
-        expanded: !prev[dayId].expanded,
-      },
+      [id]: { ...prev[id], expanded: !prev[id].expanded },
     }));
   };
 
-  const updateSlot = (
-    dayId: keyof typeof schedule,
-    slotId: number,
-    field: string,
-    value: string
-  ) => {
+  const updateSlot = (id: DayId, slotId: number, field: "start" | "end", value: string) => {
     setSchedule(prev => ({
       ...prev,
-      [dayId]: {
-        ...prev[dayId],
-        slots: prev[dayId].slots.map(slot =>
-          slot.id === slotId ? { ...slot, [field]: value } : slot
-        ),
+      [id]: {
+        ...prev[id],
+        slots: prev[id].slots.map(s => s.id === slotId ? { ...s, [field]: value } : s),
       },
     }));
   };
 
-  const addSlot = (dayId: keyof typeof schedule) => {
-    const currentSlots = schedule[dayId].slots;
-    const lastSlot = currentSlots[currentSlots.length - 1];
+  const addSlot = (id: DayId) => {
+    const slots = schedule[id].slots;
+    const last = slots[slots.length - 1];
+    let start = "09:00";
+    let end = "17:00";
 
-    let newStart = "9:00";
-    let newEnd = "17:00";
-
-    if (lastSlot) {
-      const endMinutes = timeToMinutes(lastSlot.end);
-      const nextStartMinutes = endMinutes + 30;
-      const nextEndMinutes = nextStartMinutes + 60;
-
-      if (nextStartMinutes < 24 * 60) {
-        const startHours = Math.floor(nextStartMinutes / 60);
-        const startMins = nextStartMinutes % 60;
-        newStart = `${startHours.toString().padStart(2, "0")}:${startMins
-          .toString()
-          .padStart(2, "0")}`;
+    if (last) {
+      const startMins = timeToMinutes(last.end) + 30;
+      const endMins = startMins + 60;
+      if (startMins < 24 * 60) {
+        start = `${String(Math.floor(startMins / 60)).padStart(2, "0")}:${String(startMins % 60).padStart(2, "0")}`;
       }
-
-      if (nextEndMinutes < 24 * 60) {
-        const endHours = Math.floor(nextEndMinutes / 60);
-        const endMins = nextEndMinutes % 60;
-        newEnd = `${endHours.toString().padStart(2, "0")}:${endMins
-          .toString()
-          .padStart(2, "0")}`;
+      if (endMins < 24 * 60) {
+        end = `${String(Math.floor(endMins / 60)).padStart(2, "0")}:${String(endMins % 60).padStart(2, "0")}`;
       }
     }
 
     setSchedule(prev => ({
       ...prev,
-      [dayId]: {
-        ...prev[dayId],
-        slots: [
-          ...prev[dayId].slots,
-          { id: Date.now(), start: newStart, end: newEnd },
-        ],
+      [id]: {
+        ...prev[id],
+        slots: [...prev[id].slots, { id: Date.now(), start, end }],
       },
     }));
   };
 
-  const deleteSlot = (dayId: keyof typeof schedule, slotId: number) => {
+  const deleteSlot = (id: DayId, slotId: number) => {
     setSchedule(prev => ({
       ...prev,
-      [dayId]: {
-        ...prev[dayId],
-        slots: prev[dayId].slots.filter(slot => slot.id !== slotId),
+      [id]: {
+        ...prev[id],
+        slots: prev[id].slots.filter(s => s.id !== slotId),
       },
     }));
   };
 
-  const getAvailableEndTimes = (startTime: string) => {
-    const startMinutes = timeToMinutes(startTime);
-    return TIME_SLOTS.filter(time => timeToMinutes(time) > startMinutes);
-  };
-
-  const formatTimeRange = (slots: { start: string; end: string }[]) => {
-    return slots.map(slot => `${slot.start} - ${slot.end}`).join(" · ");
-  };
+  const getEndOptions = (start: string) =>
+    TIME_SLOTS.filter(t => timeToMinutes(t) > timeToMinutes(start));
 
   return (
-    <div className="w-full my-6">
-      <div className="flex flex-col gap-6 p-2 md:p-6 rounded-2xl shadow-xl ">
-        {DAYS.map(day => {
-          const daySchedule = schedule[day.id];
-          const isEnabled = daySchedule.enabled;
-          const isExpanded = daySchedule.expanded;
-          console.log({ daySchedule });
-          return (
-            <div
-              key={day.id}
-              className="border-2 border-gray-200 rounded-xl overflow-hidden transition-all"
-            >
-              <div className="flex items-center p-4 bg-gray-50">
-                <Switch
-                  checked={isEnabled}
-                  onClick={() => toggleDay(day.id)}
-                  className="relative inline-flex h-7 w-10 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                  style={{
-                    backgroundColor: isEnabled ? "primary" : "gray-300",
-                  }}
-                />
-                <SubTitle
-                  text={day.spanish}
-                  className="ml-3 font-semibold text-gray-800 flex-1"
-                />
+    <div className="flex flex-col gap-5">
+      {/* ── Day slots panel (from API) ── */}
+      <div className="bg-card rounded-2xl border overflow-hidden">
+        <div className="px-6 py-5 border-b flex items-center gap-2">
+          <Clock className="size-4 text-primary" />
+          <h3 className="font-semibold tracking-tight">
+            Franjas del día
+          </h3>
+          <span className="ml-auto text-xs text-muted-foreground">
+            {selectedDate.getDate()} de {MONTH_NAMES[selectedDate.getMonth()]}
+          </span>
+        </div>
 
-                {isEnabled && !isExpanded && (
-                  <Text
-                    text={formatTimeRange(daySchedule.slots)}
-                    className="mr-1"
+        <div className="px-6 py-5">
+          {isLoading ? (
+            <div className="flex flex-col gap-2">
+              {[1, 2, 3].map(i => (
+                <Skeleton key={i} className="h-10 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : apiSlots.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No hay franjas horarias para este día.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {apiSlots.map((slot, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between px-4 py-2.5 rounded-xl border bg-muted/30"
+                >
+                  <span className="text-sm font-medium">
+                    {slot.start} – {slot.end}
+                  </span>
+                  {slot.isBooked ? (
+                    <span className="flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                      <XCircle className="size-3.5" />
+                      Reservado
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 text-xs text-green-600 font-medium">
+                      <CheckCircle2 className="size-3.5" />
+                      Disponible
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Weekly schedule editor ── */}
+      <div className="bg-card rounded-2xl border overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-5 border-b flex items-center gap-2">
+          <Clock className="size-4 text-primary" />
+          <h3 className="font-semibold tracking-tight">Horario de atención</h3>
+        </div>
+
+        {/* Days */}
+        <div className="divide-y divide-border">
+          {DAYS.map(({ id, label }) => {
+            const day = schedule[id];
+            return (
+              <div key={id}>
+                {/* Day row */}
+                <div className="flex items-center gap-3 px-6 py-4">
+                  <Switch
+                    checked={day.enabled}
+                    onCheckedChange={() => toggleDay(id)}
                   />
-                )}
+                  <span className={`text-sm font-medium flex-1 ${day.enabled ? "text-foreground" : "text-muted-foreground"}`}>
+                    {label}
+                  </span>
 
-                {isEnabled && (
-                  <button
-                    onClick={() => toggleExpanded(day.id)}
-                    className="p-1 hover:bg-gray-200 rounded transition-colors"
-                  >
-                    {isExpanded ? (
-                      <ChevronUp className="w-5 h-5 text-gray-600" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-600" />
-                    )}
-                  </button>
+                  {day.enabled && !day.expanded && day.slots.length > 0 && (
+                    <span className="text-xs text-muted-foreground hidden sm:block">
+                      {formatTimeRange(day.slots)}
+                    </span>
+                  )}
+
+                  {!day.enabled && (
+                    <span className="text-xs text-muted-foreground">Cerrado</span>
+                  )}
+
+                  {day.enabled && (
+                    <button
+                      type="button"
+                      onClick={() => toggleExpanded(id)}
+                      className="size-7 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      aria-label={day.expanded ? "Colapsar" : "Expandir"}
+                    >
+                      {day.expanded
+                        ? <ChevronUp className="size-4" />
+                        : <ChevronDown className="size-4" />
+                      }
+                    </button>
+                  )}
+                </div>
+
+                {/* Expanded slots */}
+                {day.enabled && day.expanded && (
+                  <div className="px-6 pb-4 flex flex-col gap-3 bg-muted/20">
+                    {day.slots.map((slot) => (
+                      <div key={slot.id} className="flex items-center gap-2">
+                        {/* Start time */}
+                        <select
+                          value={slot.start}
+                          onChange={e => updateSlot(id, slot.id, "start", e.target.value)}
+                          className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        >
+                          {TIME_SLOTS.map(t => (
+                            <option key={t} value={t}>{t}</option>
+                          ))}
+                        </select>
+
+                        <span className="text-xs text-muted-foreground shrink-0">a</span>
+
+                        {/* End time */}
+                        <select
+                          value={slot.end}
+                          onChange={e => updateSlot(id, slot.id, "end", e.target.value)}
+                          className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        >
+                          {getEndOptions(slot.start).map(t => (
+                            <option key={t} value={t}>{t}</option>
+                          ))}
+                        </select>
+
+                        {/* Add slot */}
+                        <button
+                          type="button"
+                          onClick={() => addSlot(id)}
+                          className="size-9 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors shrink-0"
+                          aria-label="Agregar franja"
+                        >
+                          <Plus className="size-4" />
+                        </button>
+
+                        {/* Delete slot */}
+                        {day.slots.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => deleteSlot(id, slot.id)}
+                            className="size-9 rounded-full flex items-center justify-center text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+                            aria-label="Eliminar franja"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
+            );
+          })}
+        </div>
 
-              {isEnabled && isExpanded && (
-                <div className="p-4 space-y-3 bg-white">
-                  {daySchedule.slots.map((slot, index) => (
-                    <div key={slot.id} className="flex items-center gap-3">
-                      <select
-                        value={slot.start}
-                        onChange={e =>
-                          updateSlot(day.id, slot.id, "start", e.target.value)
-                        }
-                        className="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      >
-                        {TIME_SLOTS.map(time => (
-                          <option key={time} value={time}>
-                            {time}
-                          </option>
-                        ))}
-                      </select>
-
-                      <span className="text-gray-500 font-medium">a</span>
-
-                      <select
-                        value={slot.end}
-                        onChange={e =>
-                          updateSlot(day.id, slot.id, "end", e.target.value)
-                        }
-                        className="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      >
-                        {getAvailableEndTimes(slot.start).map(time => (
-                          <option key={time} value={time}>
-                            {time}
-                          </option>
-                        ))}
-                      </select>
-
-                      <Plus
-                        className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors "
-                        onClick={() => addSlot(day.id)}
-                        size={38}
-                      />
-
-                      {daySchedule.slots.length > 1 && (
-                        <Trash2
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          size={38}
-                          onClick={() => deleteSlot(day.id, slot.id)}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {/* Footer */}
+        <div className="px-6 py-4 border-t">
+          <Button type="button" className="w-full rounded-full">
+            Guardar horario
+          </Button>
+        </div>
       </div>
     </div>
   );

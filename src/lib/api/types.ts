@@ -81,6 +81,13 @@ export interface BusinessResponse {
   success: boolean;
 }
 
+export interface UpdateBusinessResponse {
+  success: boolean;
+  data: {
+    updatedBusiness: Business;
+  };
+}
+
 export interface CreateBusinessRequest {
   name: string;
   description?: string;
@@ -218,11 +225,12 @@ export interface DaySlots {
 }
 
 export interface MonthSlotsResponse {
-  data: {
-    slots: DaySlots[];
-  };
   message: string;
   success: boolean;
+  data: {
+    month: string; // ISO — "2026-04-01T00:00:00.000Z"
+    slots: DaySlots[];
+  };
 }
 
 // ── File Upload ───────────────────────────────────────────────────────────────
@@ -239,6 +247,11 @@ export interface UploadGalleryResponse {
 }
 
 export interface DeleteImageResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface DeleteProductResponse {
   success: boolean;
   message: string;
 }
