@@ -1,6 +1,8 @@
 "use client";
 // Dependencies
 import { useState } from "react";
+// Types
+import type { DaySlots } from "@/lib/api/types";
 // Icons
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -9,6 +11,15 @@ const MONTH_NAMES = [
   "enero", "febrero", "marzo", "abril", "mayo", "junio",
   "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
 ];
+
+interface CalendarRowProps {
+  slotsData: DaySlots[];
+  isLoading: boolean;
+  selectedDate: Date;
+  currentMonth: Date;
+  onDateSelect: (date: Date) => void;
+  onMonthChange: (date: Date) => void;
+}
 
 const getWeekDays = (date: Date): Date[] => {
   const base = new Date(date);
@@ -25,24 +36,48 @@ const isSameDay = (a: Date, b: Date) =>
   a.getMonth() === b.getMonth() &&
   a.getFullYear() === b.getFullYear();
 
-export default function CalendarRow() {
+const toLocalDateString = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+export default function CalendarRow({
+  slotsData,
+  isLoading,
+  selectedDate,
+  onDateSelect,
+  onMonthChange,
+}: CalendarRowProps) {
   const today = new Date();
-  const [currentDate, setCurrentDate] = useState(today);
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [currentDate, setCurrentDate] = useState(selectedDate);
 
   const weekDays = getWeekDays(currentDate);
   const midWeek = weekDays[3];
 
-  const goToPreviousWeek = () => {
+  const navigate = (delta: number) => {
     const d = new Date(currentDate);
-    d.setDate(d.getDate() - 7);
+    d.setDate(d.getDate() + delta);
     setCurrentDate(d);
+    // If the week crosses into another month, notify parent
+    const newWeek = getWeekDays(d);
+    const newMid = newWeek[3];
+    if (
+      newMid.getMonth() !== midWeek.getMonth() ||
+      newMid.getFullYear() !== midWeek.getFullYear()
+    ) {
+      onMonthChange(new Date(newMid.getFullYear(), newMid.getMonth(), 1));
+    }
   };
 
-  const goToNextWeek = () => {
-    const d = new Date(currentDate);
-    d.setDate(d.getDate() + 7);
-    setCurrentDate(d);
+  const getDayStatus = (date: Date) => {
+    const key = toLocalDateString(date);
+    const day = slotsData.find(d => d.date === key);
+    if (!day || day.slots.length === 0) return "closed";
+    const allBooked = day.slots.every(s => s.isBooked);
+    if (allBooked) return "full";
+    return "available";
   };
 
   return (
@@ -64,7 +99,7 @@ export default function CalendarRow() {
           {/* Prev */}
           <button
             type="button"
-            onClick={goToPreviousWeek}
+            onClick={() => navigate(-7)}
             className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
             aria-label="Semana anterior"
           >
@@ -76,6 +111,7 @@ export default function CalendarRow() {
             {weekDays.map((day, i) => {
               const isSelected = isSameDay(day, selectedDate);
               const isToday = isSameDay(day, today);
+              const status = !isLoading ? getDayStatus(day) : null;
 
               return (
                 <div key={i} className="flex flex-col items-center gap-1.5">
@@ -84,7 +120,7 @@ export default function CalendarRow() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => setSelectedDate(day)}
+                    onClick={() => onDateSelect(day)}
                     className={`size-9 rounded-full text-sm font-medium transition-colors ${
                       isSelected
                         ? "bg-primary text-primary-foreground shadow-sm"
@@ -95,6 +131,14 @@ export default function CalendarRow() {
                   >
                     {day.getDate()}
                   </button>
+                  {/* Availability dot */}
+                  <span className={`size-1.5 rounded-full ${
+                    status === "available"
+                      ? "bg-green-500"
+                      : status === "full"
+                        ? "bg-amber-400"
+                        : "bg-transparent"
+                  }`} />
                 </div>
               );
             })}
@@ -103,7 +147,7 @@ export default function CalendarRow() {
           {/* Next */}
           <button
             type="button"
-            onClick={goToNextWeek}
+            onClick={() => navigate(7)}
             className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
             aria-label="Semana siguiente"
           >
@@ -118,6 +162,20 @@ export default function CalendarRow() {
             {selectedDate.getDate()} de {MONTH_NAMES[selectedDate.getMonth()]} de {selectedDate.getFullYear()}
           </span>
         </div>
+
+        {/* Legend */}
+        {!isLoading && slotsData.length > 0 && (
+          <div className="flex items-center gap-4 pt-1">
+            <div className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-green-500" />
+              <span className="text-xs text-muted-foreground">Disponible</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-amber-400" />
+              <span className="text-xs text-muted-foreground">Sin disponibilidad</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -225,11 +225,12 @@ export interface DaySlots {
 }
 
 export interface MonthSlotsResponse {
-  data: {
-    slots: DaySlots[];
-  };
   message: string;
   success: boolean;
+  data: {
+    month: string; // ISO — "2026-04-01T00:00:00.000Z"
+    slots: DaySlots[];
+  };
 }
 
 // ── File Upload ───────────────────────────────────────────────────────────────
