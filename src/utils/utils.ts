@@ -17,11 +17,11 @@ export const getPasswordStrength = (password: string): number => {
 };
 
 export const SOCIAL_PLATFORMS = [
-  { name: "Instagram",   baseUrl: "https://instagram.com/",       placeholder: "tunegocio" },
-  { name: "Facebook",    baseUrl: "https://facebook.com/",         placeholder: "tunegocio" },
-  { name: "TikTok",      baseUrl: "https://tiktok.com/@",          placeholder: "tunegocio" },
-  { name: "WhatsApp",    baseUrl: "https://wa.me/+52",             placeholder: "5512345678" },
-  { name: "Otro",        baseUrl: "",                               placeholder: "https://ejemplo.com/tunegocio" },
+  { name: "Instagram", baseUrl: "https://instagram.com/",  placeholder: "tunegocio" },
+  { name: "Facebook",  baseUrl: "https://facebook.com/",   placeholder: "tunegocio" },
+  { name: "TikTok",    baseUrl: "https://tiktok.com/@",    placeholder: "tunegocio" },
+  { name: "WhatsApp",  baseUrl: "https://wa.me/+52",       placeholder: "5512345678" },
+  { name: "Otro",      baseUrl: "",                         placeholder: "https://ejemplo.com/tunegocio" },
 ];
 
 export const MEXICAN_STATES = [

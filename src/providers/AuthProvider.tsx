@@ -37,7 +37,7 @@ export default function AuthProvider({
     };
 
     initAuth();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <>{children}</>;

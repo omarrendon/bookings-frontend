@@ -11,8 +11,7 @@ export const businessApi = {
   create: (data: CreateBusinessRequest) =>
     apiClient.post<BusinessResponse>("/businesses", data),
 
-  getMy: () =>
-    apiClient.get<BusinessResponse>("/businesses/my"),
+  getMy: () => apiClient.get<BusinessResponse>(`/businesses/my`),
 
   getById: (id: string) => apiClient.get<BusinessResponse>(`/businesses/${id}`),
 

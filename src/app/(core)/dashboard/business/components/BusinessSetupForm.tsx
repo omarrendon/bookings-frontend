@@ -50,27 +50,22 @@ import { SOCIAL_PLATFORMS, MEXICAN_STATES } from "@/utils/utils";
 import { useCreateBusiness, useUpdateBusiness } from "@/hooks/useBusiness";
 import { useBusinessStore } from "@/store/business.store";
 
+const buildSocialLinks = (links: { platform: string; url: string }[] | null | undefined) =>
+  (links ?? []).map(link => {
+    const platformInfo = SOCIAL_PLATFORMS.find(p => p.name === link.platform);
+    const baseUrl = platformInfo?.baseUrl ?? "";
+    return {
+      platform: link.platform,
+      url: baseUrl && link.url.startsWith(baseUrl) ? link.url.slice(baseUrl.length) : link.url,
+    };
+  });
+
 export default function BusinessSetupForm() {
   const business = useBusinessStore(state => state.business);
   const isEditing = !!business;
 
   const createBusiness = useCreateBusiness();
   const updateBusiness = useUpdateBusiness(business?.id ?? "");
-
-  const buildSocialLinks = (links: typeof business.social_links) =>
-    (links ?? []).map(link => {
-      const platformInfo = SOCIAL_PLATFORMS.find(p => p.name === link.platform);
-      const baseUrl = platformInfo?.baseUrl ?? "";
-      return {
-        platform: link.platform,
-        url:
-          baseUrl && link.url.startsWith(baseUrl)
-            ? link.url.slice(baseUrl.length)
-            : link.url,
-      };
-    });
-
-  console.log("Business data from store:", business);
 
   const form = useForm<BusinessSetupValues>({
     resolver: zodResolver(businessSetupSchema),
@@ -111,13 +106,15 @@ export default function BusinessSetupForm() {
         },
   });
 
+  const { reset } = form;
   const { isSubmitting } = form.formState;
+  const watchedLinks = form.watch("social_links") ?? [];
 
-  // Fallback: si el store carga de forma asíncrona después del mount
+  // Pre-poblar el formulario cuando existe un negocio
   useEffect(() => {
     if (!business) return;
 
-    form.reset({
+    reset({
       name: business.name,
       description: business.description ?? "",
       phone_number: business.phone_number ?? "",
@@ -130,7 +127,19 @@ export default function BusinessSetupForm() {
       state: business.state,
       zip_code: business.zip_code,
       country: business.country,
-      social_links: buildSocialLinks(business.social_links),
+      social_links: (business.social_links ?? []).map(link => {
+        const platformInfo = SOCIAL_PLATFORMS.find(
+          p => p.name === link.platform,
+        );
+        const baseUrl = platformInfo?.baseUrl ?? "";
+        return {
+          platform: link.platform,
+          url:
+            baseUrl && link.url.startsWith(baseUrl)
+              ? link.url.slice(baseUrl.length)
+              : link.url,
+        };
+      }),
       main_image_url: business.main_image_url ?? "",
       gallery_images: business.gallery_images ?? [],
     });
@@ -142,15 +151,12 @@ export default function BusinessSetupForm() {
     if (business.gallery_images && business.gallery_images.length > 0) {
       setGalleryPreviews(business.gallery_images);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [business]);
+  }, [business, reset]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "social_links",
   });
-
-  const socialLinksWatch = form.watch("social_links") ?? [];
 
   // ── Imagen principal ──────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -239,18 +245,15 @@ export default function BusinessSetupForm() {
   // ── Submit ────────────────────────────────────────────────────────────────
   const onSubmit = async (values: BusinessSetupValues) => {
     const payload = Object.fromEntries(
-      Object.entries(values).filter(([, v]) => v !== "" && v !== undefined),
+      Object.entries({
+        ...values,
+        social_links: values.social_links?.map(link => {
+          const platformInfo = SOCIAL_PLATFORMS.find(p => p.name === link.platform);
+          const baseUrl = platformInfo?.baseUrl ?? "";
+          return { ...link, url: baseUrl ? baseUrl + link.url : link.url };
+        }),
+      }).filter(([, v]) => v !== "" && v !== undefined),
     ) as BusinessSetupValues;
-
-    if (payload.social_links) {
-      payload.social_links = payload.social_links.map(link => {
-        const platformInfo = SOCIAL_PLATFORMS.find(
-          p => p.name === link.platform,
-        );
-        const baseUrl = platformInfo?.baseUrl ?? "";
-        return { platform: link.platform, url: baseUrl + link.url };
-      });
-    }
 
     if (isEditing) {
       await updateBusiness.mutateAsync(payload);
@@ -553,77 +556,74 @@ export default function BusinessSetupForm() {
             ) : (
               <div className="flex flex-col gap-3">
                 {fields.map((field, index) => {
-                  const platformName = socialLinksWatch[index]?.platform ?? "";
-                  const platformInfo = SOCIAL_PLATFORMS.find(
-                    p => p.name === platformName,
-                  );
-                  const prefix = platformInfo?.baseUrl
-                    ? platformInfo.baseUrl.replace("https://", "")
-                    : "";
+                  const currentPlatform = watchedLinks[index]?.platform;
+                  const platformInfo = SOCIAL_PLATFORMS.find(p => p.name === currentPlatform);
+                  const prefix = platformInfo?.baseUrl ?? "";
+                  const inputPlaceholder = platformInfo?.placeholder ?? "usuario";
 
                   return (
-                    <div key={field.id} className="flex gap-2 items-start">
-                      <FormField
-                        control={form.control}
-                        name={`social_links.${index}.platform`}
-                        render={({ field }) => (
-                          <FormItem className="w-40 shrink-0">
-                            <FormControl>
-                              <Select
-                                onValueChange={field.onChange}
-                                value={field.value}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Plataforma" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {SOCIAL_PLATFORMS.map(p => (
-                                    <SelectItem key={p.name} value={p.name}>
-                                      {p.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`social_links.${index}.url`}
-                        render={({ field }) => (
-                          <FormItem className="flex-1">
-                            <FormControl>
-                              <div className="flex">
-                                {prefix && (
-                                  <span className="inline-flex items-center h-9 px-2.5 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-xs whitespace-nowrap select-none">
-                                    {prefix}
-                                  </span>
-                                )}
+                  <div key={field.id} className="flex gap-2 items-start">
+                    <FormField
+                      control={form.control}
+                      name={`social_links.${index}.platform`}
+                      render={({ field }) => (
+                        <FormItem className="w-40 shrink-0">
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Plataforma" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {SOCIAL_PLATFORMS.map(p => (
+                                  <SelectItem key={p.name} value={p.name}>
+                                    {p.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`social_links.${index}.url`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            {prefix ? (
+                              <div className="flex items-center rounded-md border border-input bg-background focus-within:ring-1 focus-within:ring-ring overflow-hidden">
+                                <span className="px-2.5 py-2 text-xs text-muted-foreground bg-muted border-r border-input whitespace-nowrap shrink-0 select-none">
+                                  {prefix}
+                                </span>
                                 <Input
-                                  placeholder={
-                                    platformInfo?.placeholder ?? "usuario"
-                                  }
-                                  className={prefix ? "rounded-l-none" : ""}
+                                  placeholder={inputPlaceholder}
+                                  className="border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
                                   {...field}
                                 />
                               </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                            ) : (
+                              <Input placeholder={inputPlaceholder} {...field} />
+                            )}
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                      onClick={() => remove(index)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
                   );
                 })}
               </div>

@@ -27,8 +27,6 @@ export const useAuthStore = create<AuthState>()(
       setSession: (user, token) =>
         set({ user, token, isAuthenticated: true }),
 
-      updateUser: (user) => set({ user }),
-
       clearSession: () =>
         set({ user: null, token: null, isAuthenticated: false }),
 

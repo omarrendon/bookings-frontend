@@ -1,7 +1,6 @@
 "use client";
 // Dependencies
 import z from "zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 // Components
@@ -24,14 +23,12 @@ import { getPasswordStrength, strengthColors, strengthLabels } from "@/utils/uti
 // Hooks
 import { useSignUp } from "@/hooks/useAuth";
 // Icons
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 type FormValues = z.infer<typeof signUpFormSchema>;
 
 export default function SignUpForm() {
   const signUp = useSignUp();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const form = useForm<FormValues>({
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
@@ -129,23 +126,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        className="pr-10"
-                        {...field}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(prev => !prev)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        tabIndex={-1}
-                        aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                      >
-                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      </button>
-                    </div>
+                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   {passwordValue && (
                     <div className="flex flex-col gap-1 mt-1">
@@ -177,23 +158,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Confirmar contraseña</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <Input
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        className="pr-10"
-                        {...field}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(prev => !prev)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        tabIndex={-1}
-                        aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                      >
-                        {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      </button>
-                    </div>
+                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -216,11 +181,11 @@ export default function SignUpForm() {
                     </FormControl>
                     <FormLabel className="text-sm text-muted-foreground font-normal leading-snug cursor-pointer">
                       Acepto los{" "}
-                      <Link href="/terminos" className="text-primary underline-offset-4 hover:underline">
+                      <Link href="#" className="text-primary underline-offset-4 hover:underline">
                         términos y condiciones
                       </Link>{" "}
                       y la{" "}
-                      <Link href="/privacidad" className="text-primary underline-offset-4 hover:underline">
+                      <Link href="#" className="text-primary underline-offset-4 hover:underline">
                         política de privacidad
                       </Link>
                     </FormLabel>
