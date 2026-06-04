@@ -23,7 +23,7 @@ export const authApi = {
     apiClient.post<void>("/auth/password-update", data),
 
   updateProfile: (data: UpdateProfileRequest) =>
-    apiClient.patch<UpdateProfileResponse>("/auth/profile", data),
+    apiClient.put<UpdateProfileResponse>("/users/me", data),
 
   // Usa la cookie httpOnly del refreshToken para obtener un nuevo access token
   refresh: () =>

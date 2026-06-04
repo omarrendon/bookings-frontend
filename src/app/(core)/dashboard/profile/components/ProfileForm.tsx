@@ -18,36 +18,34 @@ import {
   profileFormSchema,
   type ProfileFormValues,
 } from "@/lib/schemas/profileFormSchema";
-// import { useUpdateProfile } from "@/hooks/useAuth";
+import { useUpdateProfile } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
 
 export default function ProfileForm() {
   const user = useAuthStore(state => state.user);
-  // const updateProfile = useUpdateProfile();
+  const updateProfile = useUpdateProfile();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: { name: "", last_name: "", email: "" },
+    defaultValues: user
+      ? { name: user.name, last_name: user.last_name, email: user.email }
+      : { name: "", last_name: "", email: "" },
   });
 
   const { isSubmitting } = form.formState;
-  // const isPending = isSubmitting || updateProfile.isPending;
+  const isPending = isSubmitting || updateProfile.isPending;
 
+  // Async fallback: si el store se hidrata después del montaje
   useEffect(() => {
     if (!user) return;
-    form.reset({
-      name: user.name,
-      last_name: user.last_name,
-      email: user.email,
-    });
-  }, [user, form]);
-
-  console.log("Renderizando ProfileForm, user:", user);
+    form.reset({ name: user.name, last_name: user.last_name, email: user.email });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const onSubmit = async (values: ProfileFormValues) => {
-    // await updateProfile.mutateAsync(values);
+    await updateProfile.mutateAsync(values);
   };
-  console.log("USER EN PROFILE FORM:", user);
+
   const initials = user
     ? `${user.name[0]}${user.last_name[0]}`.toUpperCase()
     : "??";
@@ -148,11 +146,10 @@ export default function ProfileForm() {
           <Button
             type="submit"
             size="lg"
-            // disabled={isPending}
+            disabled={isPending}
             className="w-full rounded-full"
           >
-            {/* {isPending ? "Guardando..." : "Guardar cambios"} */}
-            Guardar cambios
+            {isPending ? "Guardando..." : "Guardar cambios"}
           </Button>
         </form>
       </Form>

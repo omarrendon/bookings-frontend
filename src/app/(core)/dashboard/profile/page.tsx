@@ -1,3 +1,4 @@
+// Components
 import Title from "@/components/ui/Title";
 import ProfileForm from "./components/ProfileForm";
 
@@ -8,7 +9,8 @@ export default function ProfilePage() {
         <Title text="Mi Perfil" />
         <p className="text-sm text-muted-foreground mt-1">
           Actualiza tu información personal. Los campos marcados con{" "}
-          <span className="text-destructive font-medium">*</span> son obligatorios.
+          <span className="text-destructive font-medium">*</span> son
+          obligatorios.
         </p>
       </div>
       <div className="max-w-2xl w-full">

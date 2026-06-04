@@ -15,6 +15,25 @@ import type {
   UpdateProfileRequest,
 } from "@/lib/api/types";
 
+export function useUpdateProfile() {
+  const updateUser = useAuthStore(state => state.updateUser);
+
+  return useMutation({
+    mutationFn: (data: UpdateProfileRequest) => authApi.updateProfile(data),
+    onSuccess: response => {
+      updateUser(response.data);
+      toast.success("Perfil actualizado correctamente.");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof ApiError && error.status === 409) {
+        toast.error("Ese correo electrónico ya está en uso.");
+      } else {
+        toast.error("No se pudo actualizar el perfil. Inténtalo de nuevo.");
+      }
+    },
+  });
+}
+
 export function useLogin() {
   const router = useRouter();
   const setSession = useAuthStore(state => state.setSession);
@@ -112,7 +131,6 @@ export function useLogout() {
     try {
       await authApi.logout();
     } finally {
-      // Limpiamos el estado local independientemente de si el API responde
       clearSession();
       clearBusiness();
       router.push("/login");
