@@ -17,7 +17,7 @@ import { productsApi } from "@/lib/api/products.api";
 // Types
 import type { Product } from "@/lib/api/types";
 // Icons
-import { Trash2 } from "lucide-react";
+import { AlertTriangle, ImageOff, Loader2, Trash2 } from "lucide-react";
 
 interface DeleteProductModalProps {
   isOpen: boolean;
@@ -39,15 +39,14 @@ export default function DeleteProductModal({
     if (!product) return;
 
     try {
-      // 1. Eliminar todas las imágenes del producto en paralelo
       if (product.images.length > 0) {
-        await Promise.all(product.images.map(img => productsApi.deleteImage(img.id)));
+        await Promise.all(
+          product.images.map(img => productsApi.deleteImage(img.id)),
+        );
       }
 
-      // 2. Eliminar el producto
       await deleteProduct.mutateAsync(product.id.toString());
 
-      // 3. Refetch de la lista actualizada
       await queryClient.invalidateQueries({
         queryKey: productKeys.byBusiness(businessId),
       });
@@ -58,42 +57,102 @@ export default function DeleteProductModal({
     }
   };
 
+  const isPending = deleteProduct.isPending;
+  const firstImage = product?.images?.sort((a, b) => a.order - b.order)[0];
+  const imageCount = product?.images?.length ?? 0;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-sm flex flex-col gap-0 p-0 overflow-hidden">
-        <DialogHeader className="px-6 py-5 border-b">
-          <div className="flex flex-col items-center gap-3">
-            <div className="size-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+        {/* Header */}
+        <DialogHeader className="px-6 pt-6 pb-5 border-b">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10 ring-4 ring-destructive/5">
               <Trash2 className="size-5 text-destructive" />
             </div>
-            <DialogTitle className="text-base font-semibold">
-              Eliminar servicio
-            </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground text-center">
-              ¿Estás seguro de que deseas eliminar este producto?
-            </DialogDescription>
+            <div className="space-y-1">
+              <DialogTitle className="text-lg font-semibold">
+                Eliminar servicio
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                Esta acción es permanente y no se puede deshacer.
+              </DialogDescription>
+            </div>
           </div>
         </DialogHeader>
 
-        <div className="flex gap-3 px-6 py-4 border-t">
+        {/* Cuerpo */}
+        <div className="flex flex-col gap-4 px-6 py-5">
+          {/* Preview del producto que se va a eliminar */}
+          {product && (
+            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/40 p-3">
+              {firstImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={firstImage.url}
+                  alt={product.name}
+                  className="size-12 rounded-lg object-cover shrink-0 border border-border/40"
+                />
+              ) : (
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted border border-border/40">
+                  <ImageOff className="size-5 text-muted-foreground" />
+                </div>
+              )}
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-sm font-medium leading-tight truncate">
+                  {product.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {imageCount > 0
+                    ? `${imageCount} ${imageCount === 1 ? "imagen" : "imágenes"} asociada${imageCount === 1 ? "" : "s"}`
+                    : "Sin imágenes"}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Advertencia de consecuencias */}
+          {imageCount > 0 && (
+            <div
+              role="alert"
+              className="flex items-start gap-2.5 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2.5"
+            >
+              <AlertTriangle className="size-4 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive/80 leading-snug">
+                Se eliminarán también las{" "}
+                <span className="font-medium">
+                  {imageCount} {imageCount === 1 ? "imagen" : "imágenes"}
+                </span>{" "}
+                asociadas a este servicio.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex gap-3 px-6 py-4 border-t bg-muted/30">
           <Button
             type="button"
             variant="outline"
-            className="flex-1 rounded-full"
+            className="flex-1"
             onClick={onClose}
-            disabled={deleteProduct.isPending}
+            disabled={isPending}
           >
             Cancelar
           </Button>
           <Button
             type="button"
             variant="destructive"
-            className="flex-1 rounded-full gap-1.5"
+            className="flex-1 gap-2"
             onClick={handleDelete}
-            disabled={deleteProduct.isPending}
+            disabled={isPending}
           >
-            <Trash2 className="size-3.5" />
-            {deleteProduct.isPending ? "Eliminando..." : "Eliminar servicio"}
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Trash2 className="size-4" />
+            )}
+            {isPending ? "Eliminando..." : "Eliminar"}
           </Button>
         </div>
       </DialogContent>
