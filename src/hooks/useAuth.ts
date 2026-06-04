@@ -12,7 +12,27 @@ import type {
   SignUpRequest,
   RequestPasswordResetRequest,
   ResetPasswordRequest,
+  UpdateProfileRequest,
 } from "@/lib/api/types";
+
+export function useUpdateProfile() {
+  const updateUser = useAuthStore(state => state.updateUser);
+
+  return useMutation({
+    mutationFn: (data: UpdateProfileRequest) => authApi.updateProfile(data),
+    onSuccess: response => {
+      updateUser(response.data);
+      toast.success("Perfil actualizado correctamente.");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof ApiError && error.status === 409) {
+        toast.error("Ese correo electrónico ya está en uso.");
+      } else {
+        toast.error("No se pudo actualizar el perfil. Inténtalo de nuevo.");
+      }
+    },
+  });
+}
 
 export function useLogin() {
   const router = useRouter();
@@ -20,7 +40,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
-    onSuccess: (response) => {
+    onSuccess: response => {
       setSession(response.data.user, response.data.token);
       toast.success("Sesión iniciada correctamente");
       router.push("/dashboard");
@@ -32,7 +52,9 @@ export function useLogin() {
             toast.error("Correo o contraseña incorrectos.");
             break;
           case 429:
-            toast.error("Demasiados intentos. Espera unos minutos e intenta de nuevo.");
+            toast.error(
+              "Demasiados intentos. Espera unos minutos e intenta de nuevo.",
+            );
             break;
           default:
             toast.error("No se pudo iniciar sesión. Inténtalo de nuevo.");
@@ -50,7 +72,7 @@ export function useSignUp() {
 
   return useMutation({
     mutationFn: (data: SignUpRequest) => authApi.signUp(data),
-    onSuccess: (response) => {
+    onSuccess: response => {
       setPostAuthRedirect("/dashboard/business");
       setSession(response.data.user, response.data.token);
       toast.success("Cuenta creada correctamente. ¡Bienvenido!");
@@ -92,7 +114,9 @@ export function useResetPassword() {
         toast.error("El enlace expiró o ya fue utilizado. Solicita uno nuevo.");
         router.push("/login/reset-password");
       } else {
-        toast.error("No se pudo restablecer la contraseña. Inténtalo de nuevo.");
+        toast.error(
+          "No se pudo restablecer la contraseña. Inténtalo de nuevo.",
+        );
       }
     },
   });
@@ -107,7 +131,6 @@ export function useLogout() {
     try {
       await authApi.logout();
     } finally {
-      // Limpiamos el estado local independientemente de si el API responde
       clearSession();
       clearBusiness();
       router.push("/login");

@@ -49,6 +49,18 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
+export interface UpdateProfileRequest {
+  name: string;
+  last_name: string;
+  email: string;
+}
+
+export interface UpdateProfileResponse {
+  success: boolean;
+  message: string;
+  data: LoginUser;
+}
+
 // ── Business ──────────────────────────────────────────────────────────────────
 
 export interface SocialLink {
@@ -126,7 +138,7 @@ export interface Product {
   category_id: number | null;
   name: string;
   description?: string;
-  price: string;            // el backend lo devuelve como "150.00"
+  price: string; // el backend lo devuelve como "150.00"
   stock: number;
   estimated_delivery_time: string; // minutos en decimal: "30.00"
   gallery_images: string[] | null;
@@ -196,7 +208,7 @@ export interface CreateBookingRequest {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
-  start_time: string;        // ISO 8601 — "2026-04-15T10:00:00.000Z"
+  start_time: string; // ISO 8601 — "2026-04-15T10:00:00.000Z"
   products: BookingProductItem[];
   user_id?: string;
   proof_of_payment?: string; // URL del comprobante

@@ -50,6 +50,16 @@ import { SOCIAL_PLATFORMS, MEXICAN_STATES } from "@/utils/utils";
 import { useCreateBusiness, useUpdateBusiness } from "@/hooks/useBusiness";
 import { useBusinessStore } from "@/store/business.store";
 
+const buildSocialLinks = (links: { platform: string; url: string }[] | null | undefined) =>
+  (links ?? []).map(link => {
+    const platformInfo = SOCIAL_PLATFORMS.find(p => p.name === link.platform);
+    const baseUrl = platformInfo?.baseUrl ?? "";
+    return {
+      platform: link.platform,
+      url: baseUrl && link.url.startsWith(baseUrl) ? link.url.slice(baseUrl.length) : link.url,
+    };
+  });
+
 export default function BusinessSetupForm() {
   const business = useBusinessStore(state => state.business);
   const isEditing = !!business;
@@ -59,27 +69,46 @@ export default function BusinessSetupForm() {
 
   const form = useForm<BusinessSetupValues>({
     resolver: zodResolver(businessSetupSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      phone_number: "",
-      website: "",
-      street: "",
-      external_number: "",
-      internal_number: "",
-      neighborhood: "",
-      city: "",
-      state: "",
-      zip_code: "",
-      country: "México",
-      social_links: [],
-      main_image_url: "",
-      gallery_images: [],
-    },
+    defaultValues: business
+      ? {
+          name: business.name,
+          description: business.description ?? "",
+          phone_number: business.phone_number ?? "",
+          website: business.website ?? "",
+          street: business.street,
+          external_number: business.external_number,
+          internal_number: business.internal_number ?? "",
+          neighborhood: business.neighborhood ?? "",
+          city: business.city,
+          state: business.state,
+          zip_code: business.zip_code,
+          country: business.country,
+          social_links: buildSocialLinks(business.social_links),
+          main_image_url: business.main_image_url ?? "",
+          gallery_images: business.gallery_images ?? [],
+        }
+      : {
+          name: "",
+          description: "",
+          phone_number: "",
+          website: "",
+          street: "",
+          external_number: "",
+          internal_number: "",
+          neighborhood: "",
+          city: "",
+          state: "",
+          zip_code: "",
+          country: "México",
+          social_links: [],
+          main_image_url: "",
+          gallery_images: [],
+        },
   });
 
   const { reset } = form;
   const { isSubmitting } = form.formState;
+  const watchedLinks = form.watch("social_links") ?? [];
 
   // Pre-poblar el formulario cuando existe un negocio
   useEffect(() => {
@@ -98,7 +127,19 @@ export default function BusinessSetupForm() {
       state: business.state,
       zip_code: business.zip_code,
       country: business.country,
-      social_links: business.social_links ?? [],
+      social_links: (business.social_links ?? []).map(link => {
+        const platformInfo = SOCIAL_PLATFORMS.find(
+          p => p.name === link.platform,
+        );
+        const baseUrl = platformInfo?.baseUrl ?? "";
+        return {
+          platform: link.platform,
+          url:
+            baseUrl && link.url.startsWith(baseUrl)
+              ? link.url.slice(baseUrl.length)
+              : link.url,
+        };
+      }),
       main_image_url: business.main_image_url ?? "",
       gallery_images: business.gallery_images ?? [],
     });
@@ -145,7 +186,9 @@ export default function BusinessSetupForm() {
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
-  const handleGalleryChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = Array.from(e.target.files ?? []);
     const remaining = MAX_GALLERY - galleryPreviews.length;
     const selected = files.slice(0, remaining);
@@ -159,14 +202,19 @@ export default function BusinessSetupForm() {
       form.setValue("gallery_images", [...current, ...newUrls]);
     } catch {
       toast.error("No se pudieron subir las imágenes. Inténtalo de nuevo.");
-      setGalleryPreviews(prev => prev.slice(0, prev.length - newPreviews.length));
+      setGalleryPreviews(prev =>
+        prev.slice(0, prev.length - newPreviews.length),
+      );
     }
   };
 
   const handleRemoveGalleryImage = (index: number) => {
     setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
     const current = form.getValues("gallery_images") ?? [];
-    form.setValue("gallery_images", current.filter((_, i) => i !== index));
+    form.setValue(
+      "gallery_images",
+      current.filter((_, i) => i !== index),
+    );
   };
 
   // ── Dropdown de estado ────────────────────────────────────────────────────
@@ -175,13 +223,18 @@ export default function BusinessSetupForm() {
   const stateDropdownRef = useRef<HTMLDivElement>(null);
 
   const filteredStates = stateQuery.trim()
-    ? MEXICAN_STATES.filter(s => s.toLowerCase().includes(stateQuery.toLowerCase()))
+    ? MEXICAN_STATES.filter(s =>
+        s.toLowerCase().includes(stateQuery.toLowerCase()),
+      )
     : MEXICAN_STATES;
 
   useEffect(() => {
     if (!stateOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (stateDropdownRef.current && !stateDropdownRef.current.contains(e.target as Node)) {
+      if (
+        stateDropdownRef.current &&
+        !stateDropdownRef.current.contains(e.target as Node)
+      ) {
         setStateOpen(false);
       }
     };
@@ -192,7 +245,14 @@ export default function BusinessSetupForm() {
   // ── Submit ────────────────────────────────────────────────────────────────
   const onSubmit = async (values: BusinessSetupValues) => {
     const payload = Object.fromEntries(
-      Object.entries(values).filter(([, v]) => v !== "" && v !== undefined),
+      Object.entries({
+        ...values,
+        social_links: values.social_links?.map(link => {
+          const platformInfo = SOCIAL_PLATFORMS.find(p => p.name === link.platform);
+          const baseUrl = platformInfo?.baseUrl ?? "";
+          return { ...link, url: baseUrl ? baseUrl + link.url : link.url };
+        }),
+      }).filter(([, v]) => v !== "" && v !== undefined),
     ) as BusinessSetupValues;
 
     if (isEditing) {
@@ -204,13 +264,17 @@ export default function BusinessSetupForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
-
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-5"
+      >
         {/* ── Sección 1: Información del negocio ── */}
         <div className="bg-card rounded-2xl border overflow-hidden">
           <div className="px-6 py-5 border-b flex items-center gap-2">
             <Globe className="size-4 text-primary" />
-            <h3 className="font-semibold tracking-tight">Información del negocio</h3>
+            <h3 className="font-semibold tracking-tight">
+              Información del negocio
+            </h3>
           </div>
           <div className="p-6 flex flex-col gap-5">
             <FormField
@@ -219,7 +283,8 @@ export default function BusinessSetupForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Nombre del negocio <span className="text-destructive">*</span>
+                    Nombre del negocio{" "}
+                    <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="Mi negocio" {...field} />
@@ -267,7 +332,11 @@ export default function BusinessSetupForm() {
                   <FormItem>
                     <FormLabel>Sitio web</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://tunegocio.com" type="url" {...field} />
+                      <Input
+                        placeholder="https://tunegocio.com"
+                        type="url"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -486,7 +555,13 @@ export default function BusinessSetupForm() {
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                {fields.map((field, index) => (
+                {fields.map((field, index) => {
+                  const currentPlatform = watchedLinks[index]?.platform;
+                  const platformInfo = SOCIAL_PLATFORMS.find(p => p.name === currentPlatform);
+                  const prefix = platformInfo?.baseUrl ?? "";
+                  const inputPlaceholder = platformInfo?.placeholder ?? "usuario";
+
+                  return (
                   <div key={field.id} className="flex gap-2 items-start">
                     <FormField
                       control={form.control}
@@ -494,14 +569,17 @@ export default function BusinessSetupForm() {
                       render={({ field }) => (
                         <FormItem className="w-40 shrink-0">
                           <FormControl>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                            >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Plataforma" />
                               </SelectTrigger>
                               <SelectContent>
                                 {SOCIAL_PLATFORMS.map(p => (
-                                  <SelectItem key={p} value={p}>
-                                    {p}
+                                  <SelectItem key={p.name} value={p.name}>
+                                    {p.name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -517,7 +595,20 @@ export default function BusinessSetupForm() {
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <Input placeholder="https://instagram.com/tunegocio" {...field} />
+                            {prefix ? (
+                              <div className="flex items-center rounded-md border border-input bg-background focus-within:ring-1 focus-within:ring-ring overflow-hidden">
+                                <span className="px-2.5 py-2 text-xs text-muted-foreground bg-muted border-r border-input whitespace-nowrap shrink-0 select-none">
+                                  {prefix}
+                                </span>
+                                <Input
+                                  placeholder={inputPlaceholder}
+                                  className="border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
+                                  {...field}
+                                />
+                              </div>
+                            ) : (
+                              <Input placeholder={inputPlaceholder} {...field} />
+                            )}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -533,7 +624,8 @@ export default function BusinessSetupForm() {
                       <Trash2 className="size-4" />
                     </Button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -556,7 +648,11 @@ export default function BusinessSetupForm() {
             {imagePreview ? (
               <div className="relative w-full rounded-xl overflow-hidden border aspect-video">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imagePreview} alt="Vista previa" className="w-full h-full object-cover" />
+                <img
+                  src={imagePreview}
+                  alt="Vista previa"
+                  className="w-full h-full object-cover"
+                />
                 <button
                   type="button"
                   onClick={handleRemoveImage}
@@ -588,7 +684,9 @@ export default function BusinessSetupForm() {
           <div className="px-6 py-5 border-b flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Images className="size-4 text-primary" />
-              <h3 className="font-semibold tracking-tight">Galería de imágenes</h3>
+              <h3 className="font-semibold tracking-tight">
+                Galería de imágenes
+              </h3>
             </div>
             <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
               {galleryPreviews.length} / {MAX_GALLERY}
@@ -668,7 +766,6 @@ export default function BusinessSetupForm() {
               : "Guardar y continuar"}
           {!isSubmitting && !isEditing && <ArrowRight className="size-4" />}
         </Button>
-
       </form>
     </Form>
   );
