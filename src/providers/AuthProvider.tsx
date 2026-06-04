@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 import { authApi } from "@/lib/api/auth.api";
+import { businessApi } from "@/lib/api/business.api";
 import { useAuthStore } from "@/store/auth.store";
+import { useBusinessStore } from "@/store/business.store";
 
 export default function AuthProvider({
   children,
@@ -10,17 +12,24 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const { setSession, clearSession, setAuthLoading } = useAuthStore();
+  const { setBusiness, business } = useBusinessStore();
 
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Intenta renovar la sesión usando la cookie httpOnly del refreshToken.
-        // Si el usuario ya había iniciado sesión antes, esto restaura el access token
-        // en memoria sin pedirle que vuelva a ingresar sus credenciales.
         const response = await authApi.refresh();
         setSession(response.data.user, response.data.token);
+
+        // Si el negocio no está en el store (ej: después de logout), lo cargamos desde la API
+        if (!business) {
+          try {
+            const businessResponse = await businessApi.getMy();
+            setBusiness(businessResponse.data);
+          } catch {
+            // El usuario aún no tiene negocio registrado — flujo normal para cuentas nuevas
+          }
+        }
       } catch {
-        // No hay cookie válida o expiró → sesión limpia, el usuario debe hacer login.
         clearSession();
       } finally {
         setAuthLoading(false);
@@ -28,7 +37,8 @@ export default function AuthProvider({
     };
 
     initAuth();
-  }, [setSession, clearSession, setAuthLoading]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <>{children}</>;
 }

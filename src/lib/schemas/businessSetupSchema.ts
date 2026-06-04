@@ -57,8 +57,11 @@ export const businessSetupSchema = z.object({
     .array(
       z.object({
         platform: z.string().min(1, { message: "Selecciona una plataforma" }),
-        url: z.string().refine(isValidUrl, { message: "Ingresa una URL válida" }),
-      })
+        url: z.string().min(1, { message: "Ingresa el usuario o número" }),
+      }).refine(
+        data => data.platform !== "Otro" || isValidUrl(data.url),
+        { message: "Ingresa una URL válida (ej: https://...)", path: ["url"] }
+      )
     )
     .optional(),
 

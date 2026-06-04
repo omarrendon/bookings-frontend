@@ -5,6 +5,8 @@ import type {
   SignUpRequest,
   RequestPasswordResetRequest,
   ResetPasswordRequest,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
 } from "./types";
 
 export const authApi = {
@@ -19,6 +21,9 @@ export const authApi = {
 
   resetPassword: (data: ResetPasswordRequest) =>
     apiClient.post<void>("/auth/password-update", data),
+
+  updateProfile: (data: UpdateProfileRequest) =>
+    apiClient.patch<UpdateProfileResponse>("/auth/profile", data),
 
   // Usa la cookie httpOnly del refreshToken para obtener un nuevo access token
   refresh: () =>

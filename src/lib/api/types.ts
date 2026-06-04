@@ -49,6 +49,18 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
+export interface UpdateProfileRequest {
+  name: string;
+  last_name: string;
+  email: string;
+}
+
+export interface UpdateProfileResponse {
+  success: boolean;
+  message: string;
+  data: LoginUser;
+}
+
 // ── Business ──────────────────────────────────────────────────────────────────
 
 export interface SocialLink {

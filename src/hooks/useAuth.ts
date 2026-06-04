@@ -12,6 +12,7 @@ import type {
   SignUpRequest,
   RequestPasswordResetRequest,
   ResetPasswordRequest,
+  UpdateProfileRequest,
 } from "@/lib/api/types";
 
 export function useLogin() {
@@ -93,6 +94,25 @@ export function useResetPassword() {
         router.push("/login/reset-password");
       } else {
         toast.error("No se pudo restablecer la contraseña. Inténtalo de nuevo.");
+      }
+    },
+  });
+}
+
+export function useUpdateProfile() {
+  const updateUser = useAuthStore(state => state.updateUser);
+
+  return useMutation({
+    mutationFn: (data: UpdateProfileRequest) => authApi.updateProfile(data),
+    onSuccess: (response) => {
+      updateUser(response.data);
+      toast.success("Perfil actualizado correctamente.");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof ApiError && error.status === 409) {
+        toast.error("Ese correo electrónico ya está en uso.");
+      } else {
+        toast.error("No se pudo actualizar el perfil. Inténtalo de nuevo.");
       }
     },
   });

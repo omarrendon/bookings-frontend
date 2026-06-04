@@ -9,6 +9,7 @@ interface AuthState {
   isAuthLoading: boolean;      // true mientras se ejecuta el silent refresh inicial
   postAuthRedirect: string | null; // destino de redirección tras autenticación
   setSession: (user: LoginUser, token: string) => void;
+  updateUser: (user: LoginUser) => void;
   clearSession: () => void;
   setAuthLoading: (loading: boolean) => void;
   setPostAuthRedirect: (path: string | null) => void;
@@ -25,6 +26,8 @@ export const useAuthStore = create<AuthState>()(
 
       setSession: (user, token) =>
         set({ user, token, isAuthenticated: true }),
+
+      updateUser: (user) => set({ user }),
 
       clearSession: () =>
         set({ user: null, token: null, isAuthenticated: false }),
