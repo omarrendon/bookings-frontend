@@ -1,11 +1,10 @@
 "use client";
-// Dependencies
 import { useState } from "react";
-// Components
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// Types
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import type { ProductImage } from "@/lib/api/types";
-// Icons
 import { ChevronLeft, ChevronRight, Clock, Pencil, Trash2 } from "lucide-react";
 
 const DEFAULT_IMAGE =
@@ -36,9 +35,7 @@ export default function ServiceCard({
 }: ServiceCardProps) {
   const sorted = [...(images ?? [])].sort((a, b) => a.order - b.order);
   const hasMultiple = sorted.length > 1;
-
   const [currentIndex, setCurrentIndex] = useState(0);
-
   const currentUrl = sorted[currentIndex]?.url ?? DEFAULT_IMAGE;
 
   const prev = (e: React.MouseEvent) => {
@@ -52,8 +49,7 @@ export default function ServiceCard({
   };
 
   return (
-    <div className="bg-card rounded-2xl border overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
-
+    <Card className="border-border/60 bg-card shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col">
       {/* Imagen / galería */}
       <div className="relative w-full aspect-video bg-muted overflow-hidden group">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -63,7 +59,6 @@ export default function ServiceCard({
           className="w-full h-full object-cover transition-opacity duration-200"
         />
 
-        {/* Flechas de navegación — sólo si hay más de una imagen */}
         {hasMultiple && (
           <>
             <button
@@ -82,8 +77,6 @@ export default function ServiceCard({
             >
               <ChevronRight className="size-4" />
             </button>
-
-            {/* Dots indicadores */}
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
               {sorted.map((_, i) => (
                 <button
@@ -100,7 +93,6 @@ export default function ServiceCard({
           </>
         )}
 
-        {/* Botón eliminar */}
         {isEditable && (
           <button
             type="button"
@@ -114,40 +106,46 @@ export default function ServiceCard({
       </div>
 
       {/* Contenido */}
-      <div className="flex flex-col flex-1 p-4 gap-3">
-        <div className="flex flex-col gap-1">
-          <h3 className="font-semibold text-sm leading-tight">{title}</h3>
-          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{description}</p>
+      <CardContent className="flex flex-col flex-1 p-5 gap-3">
+        <div className="space-y-1">
+          <h3 className="text-base font-semibold leading-tight">{title}</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+            {description}
+          </p>
         </div>
 
-        <div className="flex items-center justify-between mt-auto">
-          <span className="text-primary font-bold text-sm">{price}</span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="size-3" />
-            {time}
-          </span>
+        <Separator />
+
+        <div className="flex items-center justify-between">
+          <Badge
+            variant="secondary"
+            className="bg-primary/10 text-primary border-0 font-semibold px-2.5"
+          >
+            {price}
+          </Badge>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock className="size-3.5" />
+            <span>{time}</span>
+          </div>
         </div>
 
         {isEditable ? (
           <Button
             size="sm"
             variant="outline"
-            className="w-full rounded-full gap-1.5"
+            className="w-full gap-2 mt-auto"
             onClick={onEdit}
+            aria-label={`Editar ${title}`}
           >
             <Pencil className="size-3.5" />
             Editar
           </Button>
         ) : (
-          <Button
-            size="sm"
-            className="w-full rounded-full"
-            onClick={onReserve}
-          >
+          <Button size="sm" className="w-full mt-auto" onClick={onReserve}>
             Reservar
           </Button>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

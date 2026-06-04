@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -34,7 +35,15 @@ import { productsApi } from "@/lib/api/products.api";
 // Types
 import type { Product, ProductImage } from "@/lib/api/types";
 // Icons
-import { ImagePlus, Upload, X } from "lucide-react";
+import {
+  Clock,
+  ImagePlus,
+  Loader2,
+  Package,
+  Tag,
+  Upload,
+  X,
+} from "lucide-react";
 
 type FormValues = z.infer<typeof productFormSchema>;
 
@@ -81,7 +90,6 @@ export default function AddProductModal({
 
   const { reset } = form;
 
-  // Poblar el form al abrir en modo edición
   useEffect(() => {
     if (!isOpen) return;
 
@@ -153,7 +161,6 @@ export default function AddProductModal({
         (parseInt(values.estimated_delivery_minutes ?? "0") || 0);
 
       if (isEditing) {
-        // Actualizar datos del producto
         await updateProduct.mutateAsync({
           productId: product.id.toString(),
           data: {
@@ -164,22 +171,18 @@ export default function AddProductModal({
           },
         });
 
-        // Eliminar imágenes marcadas para borrar
         if (removedImageIds.length > 0) {
           await Promise.all(removedImageIds.map(id => productsApi.deleteImage(id)));
         }
 
-        // Subir imágenes nuevas si las hay
         if (selectedFiles.length > 0) {
           await productsApi.uploadGallery(product.id.toString(), selectedFiles);
         }
 
-        // Refetch con la info más reciente una vez completadas todas las operaciones
         await queryClient.invalidateQueries({
           queryKey: productKeys.byBusiness(businessId),
         });
       } else {
-        // Crear el producto
         const response = await createProduct.mutateAsync({
           name: values.name,
           description: values.description,
@@ -188,12 +191,10 @@ export default function AddProductModal({
           business_id: businessId,
         });
 
-        // Subir imágenes al producto recién creado
         if (selectedFiles.length > 0) {
           await productsApi.uploadGallery(response.data.id.toString(), selectedFiles);
         }
 
-        // Refetch con las imágenes ya subidas
         await queryClient.invalidateQueries({
           queryKey: productKeys.byBusiness(businessId),
         });
@@ -213,16 +214,24 @@ export default function AddProductModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden">
-        <DialogHeader className="px-6 py-5 border-b flex-shrink-0">
-          <DialogTitle className="text-base font-semibold">
-            {isEditing ? "Editar servicio" : "Agregar servicio"}
-          </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            {isEditing
-              ? "Modifica la información del servicio."
-              : "Completa la información para agregar un nuevo servicio."}
-          </DialogDescription>
+      <DialogContent className="max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden sm:max-w-lg">
+        {/* Header */}
+        <DialogHeader className="px-6 pt-6 pb-5 border-b flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+              <Package className="size-5 text-primary" />
+            </div>
+            <div>
+              <DialogTitle className="text-lg font-semibold leading-tight">
+                {isEditing ? "Editar servicio" : "Nuevo servicio"}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground mt-0.5">
+                {isEditing
+                  ? "Modifica la información del servicio."
+                  : "Completa los datos para agregar un nuevo servicio."}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <Form {...form}>
@@ -230,83 +239,29 @@ export default function AddProductModal({
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col flex-1 overflow-hidden"
           >
-            <div className="flex flex-col gap-5 overflow-y-auto px-6 py-5">
-              {/* Nombre */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Nombre del servicio{" "}
-                      <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ej. Corte de cabello" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="flex flex-col gap-6 overflow-y-auto px-6 py-5">
 
-              {/* Descripción */}
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe brevemente el servicio..."
-                        className="resize-none"
-                        rows={3}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Sección: Información básica */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Tag className="size-3.5 text-primary" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Información básica
+                  </span>
+                </div>
 
-              {/* Precio */}
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Precio (MXN) <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="0.00"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Duración estimada */}
-              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="estimated_delivery_hours"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        Horas <span className="text-destructive">*</span>
+                      <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Nombre <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="0"
-                          type="number"
-                          min="0"
+                          placeholder="Ej. Corte de cabello"
+                          className="bg-background border-border/80 focus-visible:ring-ring"
                           {...field}
                         />
                       </FormControl>
@@ -314,18 +269,20 @@ export default function AddProductModal({
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
-                  name="estimated_delivery_minutes"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Minutos</FormLabel>
+                      <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Descripción
+                      </FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="0"
-                          type="number"
-                          min="0"
-                          max="59"
+                        <Textarea
+                          placeholder="Describe brevemente el servicio..."
+                          className="resize-none bg-background border-border/80 focus-visible:ring-ring"
+                          rows={3}
                           {...field}
                         />
                       </FormControl>
@@ -335,14 +292,108 @@ export default function AddProductModal({
                 />
               </div>
 
-              {/* Imágenes */}
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium leading-none">
-                  Imágenes del servicio{" "}
-                  <span className="text-muted-foreground font-normal">
-                    (máx. {MAX_IMAGES})
+              <Separator />
+
+              {/* Sección: Precio y duración */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Clock className="size-3.5 text-primary" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Precio y duración
                   </span>
-                </span>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Precio (MXN) <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground select-none">
+                            $
+                          </span>
+                          <Input
+                            placeholder="0.00"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            className="pl-7 bg-background border-border/80 focus-visible:ring-ring"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="estimated_delivery_hours"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Horas <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="0"
+                            type="number"
+                            min="0"
+                            className="bg-background border-border/80 focus-visible:ring-ring"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="estimated_delivery_minutes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Minutos
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="0"
+                            type="number"
+                            min="0"
+                            max="59"
+                            className="bg-background border-border/80 focus-visible:ring-ring"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Sección: Imágenes */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ImagePlus className="size-3.5 text-primary" />
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Imágenes del servicio
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {totalImages}/{MAX_IMAGES}
+                  </span>
+                </div>
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -356,100 +407,102 @@ export default function AddProductModal({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/40 transition-colors py-8 cursor-pointer"
+                    className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-colors py-8 cursor-pointer group"
+                    aria-label="Seleccionar imágenes"
                   >
-                    <Upload className="size-6 text-muted-foreground" />
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Haz clic para seleccionar imágenes
-                    </span>
-                    <span className="text-xs text-muted-foreground/70">
-                      PNG, JPG, WEBP — máx. recomendado 2 MB c/u
-                    </span>
+                    <div className="flex size-10 items-center justify-center rounded-full bg-muted group-hover:bg-primary/10 transition-colors">
+                      <Upload className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <div className="space-y-0.5 text-center">
+                      <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                        Haz clic para seleccionar imágenes
+                      </p>
+                      <p className="text-xs text-muted-foreground/70">
+                        PNG, JPG, WEBP — máx. recomendado 2 MB c/u
+                      </p>
+                    </div>
                   </button>
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    <div className="grid grid-cols-3 gap-2">
-                      {/* Imágenes existentes (modo edición) */}
-                      {existingImages.map(img => (
-                        <div
-                          key={img.id}
-                          className="relative aspect-square rounded-xl overflow-hidden border"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={img.url}
-                            alt={`Imagen ${img.order + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveExistingImage(img.id)}
-                            className="absolute top-1.5 right-1.5 size-6 rounded-full bg-background/80 hover:bg-background flex items-center justify-center transition-colors shadow-sm"
-                          >
-                            <X className="size-3" />
-                          </button>
-                        </div>
-                      ))}
-
-                      {/* Nuevas imágenes seleccionadas */}
-                      {previews.map((src, i) => (
-                        <div
-                          key={`new-${i}`}
-                          className="relative aspect-square rounded-xl overflow-hidden border ring-1 ring-primary/40"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={src}
-                            alt={`Nueva imagen ${i + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveNewImage(i)}
-                            className="absolute top-1.5 right-1.5 size-6 rounded-full bg-background/80 hover:bg-background flex items-center justify-center transition-colors shadow-sm"
-                          >
-                            <X className="size-3" />
-                          </button>
-                        </div>
-                      ))}
-
-                      {/* Botón agregar más */}
-                      {totalImages < MAX_IMAGES && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {existingImages.map(img => (
+                      <div
+                        key={img.id}
+                        className="relative aspect-square rounded-xl overflow-hidden border border-border/60"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={img.url}
+                          alt={`Imagen ${img.order + 1}`}
+                          className="w-full h-full object-cover"
+                        />
                         <button
                           type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/40 transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer"
+                          onClick={() => handleRemoveExistingImage(img.id)}
+                          className="absolute top-1.5 right-1.5 size-6 rounded-full bg-background/80 hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-colors shadow-sm"
+                          aria-label="Eliminar imagen"
                         >
-                          <ImagePlus className="size-5 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            Agregar
-                          </span>
+                          <X className="size-3" />
                         </button>
-                      )}
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {totalImages}/{MAX_IMAGES} imágenes
-                    </span>
+                      </div>
+                    ))}
+
+                    {previews.map((src, i) => (
+                      <div
+                        key={`new-${i}`}
+                        className="relative aspect-square rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={src}
+                          alt={`Nueva imagen ${i + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveNewImage(i)}
+                          className="absolute top-1.5 right-1.5 size-6 rounded-full bg-background/80 hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-colors shadow-sm"
+                          aria-label="Eliminar imagen nueva"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </div>
+                    ))}
+
+                    {totalImages < MAX_IMAGES && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer group"
+                        aria-label="Agregar más imágenes"
+                      >
+                        <ImagePlus className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <span className="text-xs text-muted-foreground group-hover:text-primary transition-colors">
+                          Agregar
+                        </span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex gap-3 px-6 py-4 border-t flex-shrink-0">
+            <div className="flex gap-3 px-6 py-4 border-t bg-muted/30 flex-shrink-0">
               <Button
                 type="button"
                 variant="outline"
-                className="flex-1 rounded-full"
+                className="flex-1"
                 onClick={handleClose}
+                disabled={isPending}
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                className="flex-1 rounded-full"
+                className="flex-1 gap-2"
                 disabled={isPending}
               >
+                {isPending && <Loader2 className="size-4 animate-spin" />}
                 {isPending
                   ? "Guardando..."
                   : isEditing
