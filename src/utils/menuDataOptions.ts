@@ -48,10 +48,10 @@ export const menuDataOptions = {
       url: "/dashboard/profile",
       icon: Users,
     },
-    {
-      title: "Ajustes",
-      url: "/dashboard/settings",
-      icon: Settings,
-    },
+    // {
+    //   title: "Ajustes",
+    //   url: "/dashboard/settings",
+    //   icon: Settings,
+    // },
   ],
 };
