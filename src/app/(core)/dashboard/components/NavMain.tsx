@@ -11,6 +11,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+// Hooks
+import { usePathname } from "next/navigation";
 
 export function NavMain({
   items,
@@ -21,22 +23,42 @@ export function NavMain({
     icon?: React.ElementType;
   }[];
 }) {
+  const pathname = usePathname();
+
+  const isActive = (url: string) =>
+    url === "/dashboard" ? pathname === url : pathname.startsWith(url);
+
   return (
     <SidebarGroup>
-      <SidebarGroupContent className="flex flex-col gap-2">
-        <SidebarGroupLabel>Menú</SidebarGroupLabel>
-        <SidebarMenu>
+      <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/70 uppercase tracking-widest px-2 mb-1">
+        Principal
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu className="gap-0.5">
           {items.map(item => {
             const Icon = item.icon;
+            const active = isActive(item.url);
+
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   tooltip={item.title}
-                  className="hover:bg-primary/10"
+                  isActive={active}
                   asChild
+                  className={
+                    active
+                      ? "bg-primary/10 text-primary font-medium hover:bg-primary/15 hover:text-primary"
+                      : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  }
                 >
-                  <Link href={item.url} className="flex items-center gap-2">
-                    {Icon && <Icon className="size-4" />}
+                  <Link href={item.url} className="flex items-center gap-3">
+                    {Icon && (
+                      <div className={`flex size-6 shrink-0 items-center justify-center rounded-md transition-colors ${
+                        active ? "bg-primary/15" : "bg-transparent"
+                      }`}>
+                        <Icon className={`size-4 ${active ? "text-primary" : ""}`} />
+                      </div>
+                    )}
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
