@@ -1,9 +1,7 @@
 import { apiClient } from "./client";
-import type { MonthSlotsResponse } from "./types";
+import type { SchedulesListResponse } from "./types";
 
 export const schedulesApi = {
-  getMonthSlots: (businessId: string, date: string) =>
-    apiClient.get<MonthSlotsResponse>(
-      `/schedules/${businessId}`,
-    ),
+  getByBusiness: (businessId: string) =>
+    apiClient.get<SchedulesListResponse>(`/schedules/${businessId}`),
 };

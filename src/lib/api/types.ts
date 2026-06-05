@@ -225,24 +225,33 @@ export interface BookingResponse {
 
 // ── Schedules ─────────────────────────────────────────────────────────────────
 
+// Shape returned by GET /schedules/:businessId
+export interface Schedule {
+  id: number;
+  date: string;                  // "YYYY-MM-DD"
+  open_time: string;             // "HH:MM:SS"
+  close_time: string;            // "HH:MM:SS"
+  slot_duration_minutes: number;
+  business_id: number;
+}
+
+export interface SchedulesListResponse {
+  success: boolean;
+  message: string;
+  data: Schedule[];
+}
+
+// ── Derived types (used by calendar/picker components) ────────────────────────
+
 export interface TimeSlot {
-  start: string; // "09:00"
-  end: string; // "10:00"
+  start: string; // "HH:MM"
+  end: string;   // "HH:MM"
   isBooked: boolean;
 }
 
 export interface DaySlots {
   date: string; // "YYYY-MM-DD"
   slots: TimeSlot[];
-}
-
-export interface MonthSlotsResponse {
-  message: string;
-  success: boolean;
-  data: {
-    month: string; // ISO — "2026-04-01T00:00:00.000Z"
-    slots: DaySlots[];
-  };
 }
 
 // ── File Upload ───────────────────────────────────────────────────────────────
