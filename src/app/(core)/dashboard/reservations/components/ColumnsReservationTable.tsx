@@ -1,7 +1,8 @@
 "use client";
-// Dependencies
 import { ColumnDef } from "@tanstack/react-table";
-// Components
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,11 +11,60 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-// Types
 import { Reservation } from "@/types/Reservation";
-import { Checkbox } from "@/components/ui/checkbox";
-import { BadgeCheck, BadgeX } from "lucide-react";
+import {
+  CalendarCheck,
+  CalendarClock,
+  Check,
+  ChevronDown,
+  Clock,
+  Copy,
+  MoreHorizontal,
+  XCircle,
+} from "lucide-react";
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map(n => n[0])
+    .join("")
+    .toUpperCase();
+}
+
+const STATUS_CONFIG: Record<
+  Reservation["status"],
+  { label: string; className: string }
+> = {
+  pending: {
+    label: "Pendiente",
+    className:
+      "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/50",
+  },
+  confirmed: {
+    label: "Confirmada",
+    className: "bg-primary/10 text-primary border-primary/20",
+  },
+  canceled: {
+    label: "Cancelada",
+    className: "bg-destructive/10 text-destructive border-destructive/20",
+  },
+  completed: {
+    label: "Completada",
+    className:
+      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/50",
+  },
+  rescheduled: {
+    label: "Reprogramada",
+    className:
+      "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-200/50",
+  },
+};
+
+const STATUS_ACTIONS = (["confirmed", "canceled", "rescheduled"] as const).reduce(
+  (acc, s) => ({ ...acc, [s]: STATUS_CONFIG[s].label }),
+  {} as Record<string, string>
+);
 
 export const ColumnsReservationTable: ColumnDef<Reservation>[] = [
   {
@@ -23,228 +73,208 @@ export const ColumnsReservationTable: ColumnDef<Reservation>[] = [
       <Checkbox
         checked={table.getIsAllPageRowsSelected()}
         onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label="Seleccionar todo"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={value => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label="Seleccionar fila"
       />
     ),
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: "id",
-    header: ({ column }) => {
-      return (
-        <div className="flex justify-between py-2 text-left">
-          <span className="font-bold">ID</span>
-          {/* <ArrowUpDown
-            className="w-4 h-4 ml-2 cursor-pointer"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          /> */}
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const { id } = row.original;
-      return <div className="font-medium text-left">{id}</div>;
-    },
-  },
-  {
     accessorKey: "customerName",
-    header: ({ column }) => {
+    header: () => (
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        Cliente
+      </span>
+    ),
+    cell: ({ row }) => {
+      const { customerName, customerEmail } = row.original;
       return (
-        <div className="flex justify-between py-2 text-left">
-          <span className="font-bold">Cliente</span>
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
+            {getInitials(customerName)}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium leading-tight truncate max-w-[120px] md:max-w-[160px]">
+              {customerName}
+            </p>
+            <p className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-[160px]">
+              {customerEmail}
+            </p>
+          </div>
         </div>
       );
-    },
-    cell: ({ row }) => {
-      const { customerName } = row.original;
-      return <div className="font-medium text-left">{customerName}</div>;
     },
   },
   {
     accessorKey: "reservationDate",
-    header: ({ column }) => {
-      return (
-        <div className="flex justify-between py-2 text-left">
-          <span className="font-bold">Fecha</span>
-        </div>
-      );
-    },
+    header: () => (
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        Fecha / Hora
+      </span>
+    ),
     cell: ({ row }) => {
-      const { reservationDate } = row.original;
-      return <div className="font-medium text-left">{reservationDate}</div>;
-    },
-  },
-  {
-    accessorKey: "startTime",
-    header: ({ column }) => {
+      const { reservationDate, startTime, endTime } = row.original;
       return (
-        <div className="flex justify-between py-2 text-left">
-          <span className="font-bold">Hora</span>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const { startTime, endTime } = row.original;
-      return (
-        <div className="font-medium text-left">
-          {startTime} - {endTime}
+        <div className="space-y-0.5">
+          <p className="text-sm font-medium">{reservationDate}</p>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Clock className="size-3 shrink-0" />
+            {startTime} – {endTime}
+          </p>
         </div>
       );
     },
   },
   {
     accessorKey: "customerPhone",
-    header: ({ column }) => {
-      return (
-        <div className="flex justify-between py-2 text-left">
-          <span className="font-bold">Teléfono</span>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const { customerPhone } = row.original;
-      return <div className="font-medium text-left">{customerPhone}</div>;
-    },
-  },
-  {
-    accessorKey: "customerEmail",
-    header: ({ column }) => {
-      return (
-        <div className="flex justify-between py-2 text-left">
-          <span className="font-bold">Email</span>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const { customerEmail } = row.original;
-      return <div className="font-medium text-left">{customerEmail}</div>;
-    },
+    meta: { className: "hidden lg:table-cell" },
+    header: () => (
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide hidden lg:inline">
+        Teléfono
+      </span>
+    ),
+    cell: ({ row }) => (
+      <p className="text-sm text-muted-foreground hidden lg:block">
+        {row.original.customerPhone}
+      </p>
+    ),
   },
   {
     accessorKey: "proofOfPayment",
-    header: ({ column }) => {
-      return (
-        <div className="flex justify-between py-2 text-left">
-          <span className="font-bold ">Pago</span>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const { proofOfPayment } = row.original;
-      return (
-        <div className="flex justify-start items-center gap-2">
-          {proofOfPayment ? (
-            <BadgeCheck className="text-primary" />
-          ) : (
-            <BadgeX className="text-canceled" />
-          )}
-        </div>
-      );
-    },
+    header: () => (
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        Pago
+      </span>
+    ),
+    cell: ({ row }) =>
+      row.original.proofOfPayment ? (
+        <Badge
+          variant="secondary"
+          className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 gap-1 text-xs whitespace-nowrap"
+        >
+          <Check className="size-3" />
+          <span className="hidden sm:inline">Pagado</span>
+        </Badge>
+      ) : (
+        <Badge
+          variant="secondary"
+          className="bg-muted text-muted-foreground border-0 gap-1 text-xs whitespace-nowrap"
+        >
+          <XCircle className="size-3" />
+          <span className="hidden sm:inline">Pendiente</span>
+        </Badge>
+      ),
   },
   {
     accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <div className="flex justify-between  text-center">
-          <span className="font-bold">Status</span>
-        </div>
-      );
-    },
+    header: () => (
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        Estado
+      </span>
+    ),
     cell: ({ row }) => {
       const { status } = row.original;
-      const colors = {
-        pending: "bg-pending",
-        confirmed: "bg-primary",
-        canceled: "bg-canceled",
-        completed: "bg-completed",
-        rescheduled: "bg-rescheduled",
-      };
-
-      const labels = {
-        pending: "Pendiente",
-        confirmed: "Confirmada",
-        canceled: "Cancelada",
-        completed: "Completada",
-        rescheduled: "Reprogramada",
-      };
-
-      const labelsOptions = {
-        confirmed: "Confirmada",
-        canceled: "Cancelada",
-        rescheduled: "Reprogramar",
-      };
+      const config = STATUS_CONFIG[status];
+      const changeOptions = (
+        Object.keys(STATUS_ACTIONS) as Reservation["status"][]
+      ).filter(s => s !== status);
 
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Badge
-              variant="outline"
-              className={`${colors[status]} text-white justify-center w-[100px] p-1`}
+            <button
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+              aria-label={`Estado: ${config.label}. Cambiar estado`}
             >
-              <span className="font-bold text-md">{labels[status]}</span>
-            </Badge>
+              <Badge
+                variant="outline"
+                className={`${config.className} gap-1 font-medium text-xs cursor-pointer hover:opacity-80 transition-opacity pr-1.5 whitespace-nowrap`}
+              >
+                {config.label}
+                <ChevronDown className="size-3 opacity-60" />
+              </Badge>
+            </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>
-              <span className="font-medium text-sm">Cambiar status</span>
+          <DropdownMenuContent align="end" className="min-w-44">
+            <DropdownMenuLabel className="text-xs text-muted-foreground">
+              Cambiar estado
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {Object.keys(labelsOptions).map(key => (
-              <DropdownMenuItem key={key}>
-                <Badge
-                  variant="outline"
-                  className={`${
-                    colors[key as keyof typeof colors]
-                  } text-white justify-center p-1 w-full text-center`}
-                  onClick={() => console.log(key)}
+            {changeOptions.map(key => {
+              const opt = STATUS_CONFIG[key];
+              return (
+                <DropdownMenuItem
+                  key={key}
+                  className="gap-2 cursor-pointer"
+                  onClick={() => console.log("change status to", key)}
                 >
-                  <span className="font-bold text-md">
-                    {labelsOptions[key as keyof typeof labelsOptions]}
-                  </span>
-                </Badge>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
+                  <Badge
+                    variant="outline"
+                    className={`${opt.className} text-xs font-medium w-full justify-center`}
+                  >
+                    {opt.label}
+                  </Badge>
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       );
     },
   },
-  // {
-  //   id: "actions",
-  //   header: "Acciones",
-  //   cell: ({ row }) => {
-  //     const reservation = row.original;
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button variant="ghost" className="w-8 h-8 p-0">
-  //             <MoreHorizontal />
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align="end">
-  //           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-  //           <DropdownMenuItem
-  //             onClick={() => navigator.clipboard.writeText(reservation.id)}
-  //           >
-  //             Copiar ID de reservación
-  //           </DropdownMenuItem>
-  //           <DropdownMenuSeparator />
-  //           <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-  //           <DropdownMenuItem>Editar</DropdownMenuItem>
-  //           <DropdownMenuItem>Cancelar reservación</DropdownMenuItem>
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     );
-  //   },
-  // },
+  {
+    id: "actions",
+    header: () => <span className="sr-only">Acciones</span>,
+    cell: ({ row }) => {
+      const reservation = row.original;
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground hover:text-foreground"
+              aria-label="Más acciones"
+            >
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-48">
+            <DropdownMenuLabel className="text-xs text-muted-foreground">
+              Acciones
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="gap-2 cursor-pointer"
+              onClick={() => navigator.clipboard.writeText(reservation.id)}
+            >
+              <Copy className="size-4 text-muted-foreground" />
+              Copiar ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="gap-2 cursor-pointer">
+              <CalendarCheck className="size-4 text-muted-foreground" />
+              Ver detalles
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 cursor-pointer">
+              <CalendarClock className="size-4 text-muted-foreground" />
+              Reprogramar
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
+              <XCircle className="size-4" />
+              Cancelar reserva
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
 ];

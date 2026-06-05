@@ -1,20 +1,14 @@
 // Icons
 import {
-  AlignVerticalDistributeCenter,
   BookCheck,
   CalendarCheck,
   LayoutDashboard,
   Building2,
-  Settings,
+  Package,
   Users,
 } from "lucide-react";
 
 export const menuDataOptions = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -27,14 +21,14 @@ export const menuDataOptions = {
       icon: CalendarCheck,
     },
     {
-      title: "Mis Horarios",
+      title: "Horarios",
       url: "/dashboard/schedules",
       icon: BookCheck,
     },
     {
-      title: "Mis Productos",
+      title: "Servicios",
       url: "/dashboard/products",
-      icon: AlignVerticalDistributeCenter,
+      icon: Package,
     },
   ],
   navSecondary: [
@@ -48,10 +42,5 @@ export const menuDataOptions = {
       url: "/dashboard/profile",
       icon: Users,
     },
-    // {
-    //   title: "Ajustes",
-    //   url: "/dashboard/settings",
-    //   icon: Settings,
-    // },
   ],
 };

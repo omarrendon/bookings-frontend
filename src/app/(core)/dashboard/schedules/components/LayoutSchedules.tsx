@@ -7,13 +7,13 @@ import { useBusinessStore } from "@/store/business.store";
 // Components
 import CalendarRow from "@/components/ui/CalendarRow";
 import ScheduleManager from "@/components/ui/ScheduleManager";
+// Icons
+import { CalendarClock } from "lucide-react";
 
 export default function LayoutSchedules() {
   const businessId = useBusinessStore(state => state.business?.id?.toString() ?? "");
 
-  // Mes activo — controla qué mes se consulta a la API
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
-  // Día seleccionado — compartido entre CalendarRow y ScheduleManager
   const [selectedDate, setSelectedDate] = useState(() => new Date());
 
   const { data, isLoading } = useMonthSlots(businessId, currentMonth);
@@ -21,7 +21,6 @@ export default function LayoutSchedules() {
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    // Si el día seleccionado cae en otro mes, actualiza el fetch
     if (
       date.getMonth() !== currentMonth.getMonth() ||
       date.getFullYear() !== currentMonth.getFullYear()
@@ -31,16 +30,21 @@ export default function LayoutSchedules() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      {/* ── Header ── */}
-      <div>
-        <h2 className="text-xl font-semibold text-primary">Mis Horarios</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Consulta los días y franjas horarias disponibles de tu negocio.
-        </p>
+    <div className="flex w-full flex-col gap-8">
+      {/* Page header */}
+      <div className="flex items-center gap-4">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+          <CalendarClock className="size-6 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Horarios</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Consulta y configura los días y franjas horarias de tu negocio.
+          </p>
+        </div>
       </div>
 
-      {/* ── Content ── */}
+      {/* Content */}
       <div className="flex flex-col gap-5 max-w-3xl w-full">
         <CalendarRow
           slotsData={slotsData}

@@ -5,16 +5,33 @@ import { useState } from "react";
 import type { DaySlots } from "@/lib/api/types";
 // Components
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 // Utils
 import { generateTimeSlots, timeToMinutes } from "@/utils/dates/utils";
 // Icons
-import { Clock, ChevronDown, ChevronUp, Plus, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import {
+  CalendarCheck2,
+  CheckCircle2,
+  Clock,
+  Loader2,
+  Plus,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 
 const TIME_SLOTS = generateTimeSlots();
 
-type DayId = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+type DayId =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
 
 interface TimeSlot {
   id: number;
@@ -30,28 +47,60 @@ interface DaySchedule {
 
 type ScheduleState = Record<DayId, DaySchedule>;
 
-const DAYS: { id: DayId; label: string }[] = [
-  { id: "monday",    label: "Lunes" },
-  { id: "tuesday",   label: "Martes" },
-  { id: "wednesday", label: "Miércoles" },
-  { id: "thursday",  label: "Jueves" },
-  { id: "friday",    label: "Viernes" },
-  { id: "saturday",  label: "Sábado" },
-  { id: "sunday",    label: "Domingo" },
+const DAYS: { id: DayId; label: string; short: string }[] = [
+  { id: "monday", label: "Lunes", short: "L" },
+  { id: "tuesday", label: "Martes", short: "M" },
+  { id: "wednesday", label: "Miércoles", short: "X" },
+  { id: "thursday", label: "Jueves", short: "J" },
+  { id: "friday", label: "Viernes", short: "V" },
+  { id: "saturday", label: "Sábado", short: "S" },
+  { id: "sunday", label: "Domingo", short: "D" },
+];
+
+const MONTH_NAMES = [
+  "enero",
+  "febrero",
+  "marzo",
+  "abril",
+  "mayo",
+  "junio",
+  "julio",
+  "agosto",
+  "septiembre",
+  "octubre",
+  "noviembre",
+  "diciembre",
 ];
 
 const DEFAULT_SCHEDULE: ScheduleState = {
-  monday:    { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
-  tuesday:   { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
-  wednesday: { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
-  thursday:  { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
-  friday:    { enabled: true,  expanded: false, slots: [{ id: 1, start: "09:00", end: "17:00" }] },
-  saturday:  { enabled: false, expanded: false, slots: [] },
-  sunday:    { enabled: false, expanded: false, slots: [] },
+  monday: {
+    enabled: true,
+    expanded: false,
+    slots: [{ id: 1, start: "09:00", end: "17:00" }],
+  },
+  tuesday: {
+    enabled: true,
+    expanded: false,
+    slots: [{ id: 1, start: "09:00", end: "17:00" }],
+  },
+  wednesday: {
+    enabled: true,
+    expanded: false,
+    slots: [{ id: 1, start: "09:00", end: "17:00" }],
+  },
+  thursday: {
+    enabled: true,
+    expanded: false,
+    slots: [{ id: 1, start: "09:00", end: "17:00" }],
+  },
+  friday: {
+    enabled: true,
+    expanded: false,
+    slots: [{ id: 1, start: "09:00", end: "17:00" }],
+  },
+  saturday: { enabled: false, expanded: false, slots: [] },
+  sunday: { enabled: false, expanded: false, slots: [] },
 };
-
-const formatTimeRange = (slots: TimeSlot[]) =>
-  slots.map(s => `${s.start} – ${s.end}`).join(" · ");
 
 const toLocalDateString = (date: Date) => {
   const y = date.getFullYear();
@@ -60,10 +109,8 @@ const toLocalDateString = (date: Date) => {
   return `${y}-${m}-${d}`;
 };
 
-const MONTH_NAMES = [
-  "enero", "febrero", "marzo", "abril", "mayo", "junio",
-  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
-];
+const selectClass =
+  "flex-1 h-9 rounded-md border border-border/80 bg-background px-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors";
 
 interface ScheduleManagerProps {
   selectedDate: Date;
@@ -71,10 +118,14 @@ interface ScheduleManagerProps {
   isLoading: boolean;
 }
 
-export default function ScheduleManager({ selectedDate, slotsData, isLoading }: ScheduleManagerProps) {
+export default function ScheduleManager({
+  selectedDate,
+  slotsData,
+  isLoading,
+}: ScheduleManagerProps) {
   const [schedule, setSchedule] = useState<ScheduleState>(DEFAULT_SCHEDULE);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Find the selected day's slots from API data
   const selectedKey = toLocalDateString(selectedDate);
   const selectedDayData = slotsData.find(d => d.date === selectedKey);
   const apiSlots = selectedDayData?.slots ?? [];
@@ -101,12 +152,19 @@ export default function ScheduleManager({ selectedDate, slotsData, isLoading }: 
     }));
   };
 
-  const updateSlot = (id: DayId, slotId: number, field: "start" | "end", value: string) => {
+  const updateSlot = (
+    id: DayId,
+    slotId: number,
+    field: "start" | "end",
+    value: string,
+  ) => {
     setSchedule(prev => ({
       ...prev,
       [id]: {
         ...prev[id],
-        slots: prev[id].slots.map(s => s.id === slotId ? { ...s, [field]: value } : s),
+        slots: prev[id].slots.map(s =>
+          s.id === slotId ? { ...s, [field]: value } : s,
+        ),
       },
     }));
   };
@@ -116,7 +174,6 @@ export default function ScheduleManager({ selectedDate, slotsData, isLoading }: 
     const last = slots[slots.length - 1];
     let start = "09:00";
     let end = "17:00";
-
     if (last) {
       const startMins = timeToMinutes(last.end) + 30;
       const endMins = startMins + 60;
@@ -127,7 +184,6 @@ export default function ScheduleManager({ selectedDate, slotsData, isLoading }: 
         end = `${String(Math.floor(endMins / 60)).padStart(2, "0")}:${String(endMins % 60).padStart(2, "0")}`;
       }
     }
-
     setSchedule(prev => ({
       ...prev,
       [id]: {
@@ -150,16 +206,29 @@ export default function ScheduleManager({ selectedDate, slotsData, isLoading }: 
   const getEndOptions = (start: string) =>
     TIME_SLOTS.filter(t => timeToMinutes(t) > timeToMinutes(start));
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    // Placeholder: integrar con API cuando esté disponible
+    await new Promise(r => setTimeout(r, 800));
+    setIsSaving(false);
+  };
+
+  const enabledCount = DAYS.filter(d => schedule[d.id].enabled).length;
+
   return (
     <div className="flex flex-col gap-5">
-      {/* ── Day slots panel (from API) ── */}
-      <div className="bg-card rounded-2xl border overflow-hidden">
-        <div className="px-6 py-5 border-b flex items-center gap-2">
-          <Clock className="size-4 text-primary" />
-          <h3 className="font-semibold tracking-tight">
-            Franjas del día
-          </h3>
-          <span className="ml-auto text-xs text-muted-foreground">
+      {/* ── Franjas del día seleccionado ── */}
+      <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10">
+              <Clock className="size-3.5 text-primary" />
+            </div>
+            <h3 className="text-base font-semibold tracking-tight">
+              Franjas del día
+            </h3>
+          </div>
+          <span className="text-sm font-medium text-muted-foreground capitalize">
             {selectedDate.getDate()} de {MONTH_NAMES[selectedDate.getMonth()]}
           </span>
         </div>
@@ -168,34 +237,52 @@ export default function ScheduleManager({ selectedDate, slotsData, isLoading }: 
           {isLoading ? (
             <div className="flex flex-col gap-2">
               {[1, 2, 3].map(i => (
-                <Skeleton key={i} className="h-10 w-full rounded-lg" />
+                <Skeleton key={i} className="h-11 w-full rounded-xl" />
               ))}
             </div>
           ) : apiSlots.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No hay franjas horarias para este día.
-            </p>
+            <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+              <div className="rounded-full bg-muted p-4">
+                <Clock className="size-6 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Sin franjas horarias</p>
+                <p className="text-sm text-muted-foreground max-w-xs">
+                  No hay horarios configurados para este día.
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="flex flex-col gap-2">
               {apiSlots.map((slot, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between px-4 py-2.5 rounded-xl border bg-muted/30"
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-colors ${
+                    slot.isBooked
+                      ? "bg-amber-500/5 border-amber-500/20"
+                      : "bg-emerald-500/5 border-emerald-500/20"
+                  }`}
                 >
-                  <span className="text-sm font-medium">
-                    {slot.start} – {slot.end}
-                  </span>
-                  {slot.isBooked ? (
-                    <span className="flex items-center gap-1.5 text-xs text-amber-600 font-medium">
-                      <XCircle className="size-3.5" />
-                      Reservado
+                  <div className="flex items-center gap-2.5">
+                    {slot.isBooked ? (
+                      <XCircle className="size-4 text-amber-500 shrink-0" />
+                    ) : (
+                      <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
+                    )}
+                    <span className="text-sm font-medium tabular-nums">
+                      {slot.start} – {slot.end}
                     </span>
-                  ) : (
-                    <span className="flex items-center gap-1.5 text-xs text-green-600 font-medium">
-                      <CheckCircle2 className="size-3.5" />
-                      Disponible
-                    </span>
-                  )}
+                  </div>
+                  <Badge
+                    variant="secondary"
+                    className={`border-0 text-xs ${
+                      slot.isBooked
+                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    }`}
+                  >
+                    {slot.isBooked ? "Reservado" : "Disponible"}
+                  </Badge>
                 </div>
               ))}
             </div>
@@ -203,107 +290,146 @@ export default function ScheduleManager({ selectedDate, slotsData, isLoading }: 
         </div>
       </div>
 
-      {/* ── Weekly schedule editor ── */}
-      <div className="bg-card rounded-2xl border overflow-hidden">
+      {/* ── Editor de horario semanal ── */}
+      <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b flex items-center gap-2">
-          <Clock className="size-4 text-primary" />
-          <h3 className="font-semibold tracking-tight">Horario de atención</h3>
+        <div className="px-6 py-4 border-b flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10">
+              <CalendarCheck2 className="size-3.5 text-primary" />
+            </div>
+            <h3 className="text-base font-semibold tracking-tight">
+              Horario de atención
+            </h3>
+          </div>
+          <Badge
+            variant="secondary"
+            className="bg-primary/10 text-primary border-0 tabular-nums"
+          >
+            {enabledCount} / {DAYS.length} días
+          </Badge>
         </div>
 
-        {/* Days */}
-        <div className="divide-y divide-border">
+        {/* Day rows */}
+        <div className="divide-y divide-border/60">
           {DAYS.map(({ id, label }) => {
             const day = schedule[id];
+
             return (
-              <div key={id}>
-                {/* Day row */}
+              <div key={id} className={day.enabled ? "" : "opacity-60"}>
+                {/* Collapsed row */}
                 <div className="flex items-center gap-3 px-6 py-4">
                   <Switch
                     checked={day.enabled}
                     onCheckedChange={() => toggleDay(id)}
+                    aria-label={`${day.enabled ? "Desactivar" : "Activar"} ${label}`}
                   />
-                  <span className={`text-sm font-medium flex-1 ${day.enabled ? "text-foreground" : "text-muted-foreground"}`}>
-                    {label}
-                  </span>
 
-                  {day.enabled && !day.expanded && day.slots.length > 0 && (
-                    <span className="text-xs text-muted-foreground hidden sm:block">
-                      {formatTimeRange(day.slots)}
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span
+                      className={`text-sm font-medium ${day.enabled ? "text-foreground" : "text-muted-foreground"}`}
+                    >
+                      {label}
                     </span>
-                  )}
-
-                  {!day.enabled && (
-                    <span className="text-xs text-muted-foreground">Cerrado</span>
-                  )}
+                    {/* Time summary — visible on all screen sizes */}
+                    {day.enabled && !day.expanded && day.slots.length > 0 && (
+                      <span className="text-xs text-muted-foreground mt-0.5 tabular-nums">
+                        {day.slots
+                          .map(s => `${s.start} – ${s.end}`)
+                          .join(" · ")}
+                      </span>
+                    )}
+                    {!day.enabled && (
+                      <span className="text-xs text-muted-foreground mt-0.5">
+                        Cerrado
+                      </span>
+                    )}
+                  </div>
 
                   {day.enabled && (
                     <button
                       type="button"
                       onClick={() => toggleExpanded(id)}
-                      className="size-7 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                      aria-label={day.expanded ? "Colapsar" : "Expandir"}
-                    >
-                      {day.expanded
-                        ? <ChevronUp className="size-4" />
-                        : <ChevronDown className="size-4" />
+                      className="size-7 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+                      aria-label={
+                        day.expanded ? `Colapsar ${label}` : `Editar ${label}`
                       }
+                    >
+                      <Clock
+                        className={`size-3.5 transition-transform ${day.expanded ? "text-primary" : ""}`}
+                      />
                     </button>
                   )}
                 </div>
 
-                {/* Expanded slots */}
+                {/* Expanded slot editor */}
                 {day.enabled && day.expanded && (
-                  <div className="px-6 pb-4 flex flex-col gap-3 bg-muted/20">
-                    {day.slots.map((slot) => (
+                  <div className="px-6 pb-5 pt-1 flex flex-col gap-3 bg-muted/20 border-t border-border/40">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-2">
+                      Franjas horarias
+                    </span>
+
+                    {day.slots.map((slot, idx) => (
                       <div key={slot.id} className="flex items-center gap-2">
-                        {/* Start time */}
                         <select
                           value={slot.start}
-                          onChange={e => updateSlot(id, slot.id, "start", e.target.value)}
-                          className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                          onChange={e =>
+                            updateSlot(id, slot.id, "start", e.target.value)
+                          }
+                          className={selectClass}
+                          aria-label={`Hora de inicio franja ${idx + 1} de ${label}`}
                         >
                           {TIME_SLOTS.map(t => (
-                            <option key={t} value={t}>{t}</option>
+                            <option key={t} value={t}>
+                              {t}
+                            </option>
                           ))}
                         </select>
 
-                        <span className="text-xs text-muted-foreground shrink-0">a</span>
+                        <span className="text-xs text-muted-foreground shrink-0 select-none">
+                          a
+                        </span>
 
-                        {/* End time */}
                         <select
                           value={slot.end}
-                          onChange={e => updateSlot(id, slot.id, "end", e.target.value)}
-                          className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                          onChange={e =>
+                            updateSlot(id, slot.id, "end", e.target.value)
+                          }
+                          className={selectClass}
+                          aria-label={`Hora de fin franja ${idx + 1} de ${label}`}
                         >
                           {getEndOptions(slot.start).map(t => (
-                            <option key={t} value={t}>{t}</option>
+                            <option key={t} value={t}>
+                              {t}
+                            </option>
                           ))}
                         </select>
 
-                        {/* Add slot */}
-                        <button
-                          type="button"
-                          onClick={() => addSlot(id)}
-                          className="size-9 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors shrink-0"
-                          aria-label="Agregar franja"
-                        >
-                          <Plus className="size-4" />
-                        </button>
-
-                        {/* Delete slot */}
                         {day.slots.length > 1 && (
                           <button
                             type="button"
                             onClick={() => deleteSlot(id, slot.id)}
-                            className="size-9 rounded-full flex items-center justify-center text-destructive hover:bg-destructive/10 transition-colors shrink-0"
-                            aria-label="Eliminar franja"
+                            className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+                            aria-label={`Eliminar franja ${idx + 1} de ${label}`}
                           >
-                            <Trash2 className="size-4" />
+                            <Trash2 className="size-3.5" />
                           </button>
                         )}
                       </div>
                     ))}
+
+                    <Separator className="my-1" />
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-2 text-muted-foreground hover:text-foreground border-dashed"
+                      onClick={() => addSlot(id)}
+                    >
+                      <Plus className="size-3.5" />
+                      Agregar franja horaria
+                    </Button>
                   </div>
                 )}
               </div>
@@ -312,9 +438,15 @@ export default function ScheduleManager({ selectedDate, slotsData, isLoading }: 
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t">
-          <Button type="button" className="w-full rounded-full">
-            Guardar horario
+        <div className="px-6 py-4 border-t bg-muted/30">
+          <Button
+            type="button"
+            className="w-full gap-2 font-medium"
+            disabled={isSaving}
+            onClick={handleSave}
+          >
+            {isSaving && <Loader2 className="size-4 animate-spin" />}
+            {isSaving ? "Guardando..." : "Guardar horario"}
           </Button>
         </div>
       </div>
