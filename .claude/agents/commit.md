@@ -37,5 +37,6 @@ Cuando hagas un commit sigue estas reglas:
    - Archivos .env o .env.local
    - node_modules
    - Archivos de build (.next/, dist/, out/)
+   - No incluyes en el mensaje de commit la referencia de que es commit fue generado por un agente, modelo, ni el nombre del agente.
 
 6. Después del commit, confirma el hash y el mensaje al usuario.
