@@ -1,11 +1,10 @@
-// Icons
 import {
   BookCheck,
+  Building2,
   CalendarCheck,
   LayoutDashboard,
-  Building2,
   Package,
-  Users,
+  UserCircle,
 } from "lucide-react";
 
 export const menuDataOptions = {
@@ -40,7 +39,7 @@ export const menuDataOptions = {
     {
       title: "Mi Perfil",
       url: "/dashboard/profile",
-      icon: Users,
+      icon: UserCircle,
     },
   ],
 };

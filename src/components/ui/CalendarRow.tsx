@@ -1,39 +1,25 @@
 "use client";
-// Dependencies
-import { useState } from "react";
-// Types
+import { useMemo, useState } from "react";
 import type { DaySlots } from "@/lib/api/types";
-// Icons
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "@/app/(core)/dashboard/schedules/components/LayoutSchedules";
 
-const DAY_LABELS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 const MONTH_NAMES = [
-  "enero", "febrero", "marzo", "abril", "mayo", "junio",
-  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
 ];
-const MONTH_NAMES_SHORT = [
-  "ene", "feb", "mar", "abr", "may", "jun",
-  "jul", "ago", "sep", "oct", "nov", "dic",
-];
-
-interface CalendarRowProps {
-  slotsData: DaySlots[];
-  isLoading: boolean;
-  selectedDate: Date;
-  currentMonth: Date;
-  onDateSelect: (date: Date) => void;
-  onMonthChange: (date: Date) => void;
-}
-
-const getWeekDays = (date: Date): Date[] => {
-  const base = new Date(date);
-  const first = base.getDate() - base.getDay();
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(base);
-    d.setDate(first + i);
-    return d;
-  });
-};
+const WEEK_DAYS = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"];
 
 const isSameDay = (a: Date, b: Date) =>
   a.getDate() === b.getDate() &&
@@ -47,162 +33,290 @@ const toLocalDateString = (date: Date) => {
   return `${y}-${m}-${d}`;
 };
 
+interface CalendarRowProps {
+  slotsData: DaySlots[];
+  isLoading: boolean;
+  dateRange: DateRange;
+  currentMonth: Date;
+  onDateSelect: (date: Date) => void;
+  onMonthChange: (date: Date) => void;
+}
+
 export default function CalendarRow({
   slotsData,
   isLoading,
-  selectedDate,
+  dateRange,
+  currentMonth,
   onDateSelect,
   onMonthChange,
 }: CalendarRowProps) {
+  const [hoverDate, setHoverDate] = useState<Date | null>(null);
+
   const today = new Date();
-  const [currentDate, setCurrentDate] = useState(selectedDate);
+  today.setHours(0, 0, 0, 0);
 
-  const weekDays = getWeekDays(currentDate);
-  const midWeek = weekDays[3];
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // Monday-first offset: Sun=0 → 6, Mon=1 → 0
+  const firstOffset = (new Date(year, month, 1).getDay() + 6) % 7;
 
-  const navigate = (delta: number) => {
-    const d = new Date(currentDate);
-    d.setDate(d.getDate() + delta);
-    setCurrentDate(d);
-    const newWeek = getWeekDays(d);
-    const newMid = newWeek[3];
-    if (
-      newMid.getMonth() !== midWeek.getMonth() ||
-      newMid.getFullYear() !== midWeek.getFullYear()
-    ) {
-      onMonthChange(new Date(newMid.getFullYear(), newMid.getMonth(), 1));
+  // Block prev-month navigation when already at or before the current month
+  const isPrevMonthDisabled =
+    year < today.getFullYear() ||
+    (year === today.getFullYear() && month <= today.getMonth());
+
+  // ── Visual range (confirmed OR hover preview) ──────────────────────────────
+
+  const visualStart = useMemo(() => {
+    if (dateRange.end) return dateRange.start;
+    if (hoverDate && hoverDate < dateRange.start) return hoverDate;
+    return dateRange.start;
+  }, [dateRange, hoverDate]);
+
+  const visualEnd = useMemo(() => {
+    if (dateRange.end) return dateRange.end;
+    if (hoverDate && !isSameDay(hoverDate, dateRange.start)) {
+      return hoverDate > dateRange.start ? hoverDate : dateRange.start;
     }
-  };
+    return null;
+  }, [dateRange, hoverDate]);
 
-  const getDayStatus = (date: Date) => {
-    const key = toLocalDateString(date);
-    const day = slotsData.find(d => d.date === key);
-    if (!day || day.slots.length === 0) return "closed";
-    const allBooked = day.slots.every(s => s.isBooked);
-    if (allBooked) return "full";
-    return "available";
-  };
+  // True when start ≠ end (span of 2+ days)
+  const isVisualRange =
+    visualEnd !== null && !isSameDay(visualStart, visualEnd);
+  // Preview = user hovering, no confirmed end yet
+  const isPreview = !dateRange.end && isVisualRange;
 
-  // Format selected date for display
-  const selectedDayName = DAY_LABELS[selectedDate.getDay()];
-  const selectedMonthName = MONTH_NAMES[selectedDate.getMonth()];
+  // ── Slots map ──────────────────────────────────────────────────────────────
+
+  const slotsMap = useMemo(() => {
+    const map: Record<string, "configured" | "full"> = {};
+    slotsData.forEach(d => {
+      if (d.slots.length === 0) return;
+      map[d.date] = d.slots.every(s => s.isBooked) ? "full" : "configured";
+    });
+    return map;
+  }, [slotsData]);
+
+  // ── Legend chip label ──────────────────────────────────────────────────────
+
+  const legendText = useMemo(() => {
+    const { start, end } = dateRange;
+    if (!end) {
+      return `${start.getDate()} de ${MONTH_NAMES[start.getMonth()].toLowerCase()}`;
+    }
+    const sameMonth =
+      start.getMonth() === end.getMonth() &&
+      start.getFullYear() === end.getFullYear();
+    if (sameMonth) {
+      return `${start.getDate()} – ${end.getDate()} de ${MONTH_NAMES[start.getMonth()].toLowerCase()}`;
+    }
+    return `${start.getDate()} ${MONTH_NAMES[start.getMonth()].slice(0, 3).toLowerCase()} – ${end.getDate()} ${MONTH_NAMES[end.getMonth()].slice(0, 3).toLowerCase()}`;
+  }, [dateRange]);
 
   return (
     <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-border/60 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10">
             <CalendarDays className="size-3.5 text-primary" />
           </div>
-          <h3 className="text-base font-semibold tracking-tight">
-            Semana actual
+          <h3 className="text-base font-semibold tracking-tight capitalize">
+            {MONTH_NAMES[month]} {year}
           </h3>
         </div>
-        <span className="text-sm font-medium text-muted-foreground capitalize">
-          {MONTH_NAMES[midWeek.getMonth()]} {midWeek.getFullYear()}
-        </span>
-      </div>
-
-      {/* Week grid */}
-      <div className="px-4 sm:px-6 py-5 flex flex-col gap-4">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Prev week */}
+        <div className="flex items-center gap-0.5">
           <button
             type="button"
-            onClick={() => navigate(-7)}
-            className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
-            aria-label="Semana anterior"
+            onClick={() => onMonthChange(new Date(year, month - 1, 1))}
+            disabled={isPrevMonthDisabled}
+            className={cn(
+              "size-8 rounded-full flex items-center justify-center transition-colors",
+              isPrevMonthDisabled
+                ? "text-muted-foreground/30 cursor-not-allowed"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+            aria-label="Mes anterior"
           >
             <ChevronLeft className="size-4" />
           </button>
-
-          {/* Day cells */}
-          <div className="flex-1 grid grid-cols-7 gap-1">
-            {weekDays.map((day, i) => {
-              const isSelected = isSameDay(day, selectedDate);
-              const isToday = isSameDay(day, today);
-              const status = !isLoading ? getDayStatus(day) : null;
-              const isOtherMonth = day.getMonth() !== midWeek.getMonth();
-
-              return (
-                <div key={i} className="flex flex-col items-center gap-1.5">
-                  {/* Day label */}
-                  <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wide ${
-                    isOtherMonth ? "text-muted-foreground/40" : "text-muted-foreground"
-                  }`}>
-                    {DAY_LABELS[day.getDay()]}
-                  </span>
-
-                  {/* Day button */}
-                  <button
-                    type="button"
-                    onClick={() => onDateSelect(day)}
-                    aria-label={`Seleccionar ${day.getDate()} de ${MONTH_NAMES_SHORT[day.getMonth()]}`}
-                    aria-pressed={isSelected}
-                    className={`size-8 sm:size-9 rounded-full text-sm font-medium transition-all duration-150 ${
-                      isSelected
-                        ? "bg-primary text-primary-foreground shadow-md scale-105"
-                        : isToday
-                          ? "bg-primary/10 text-primary ring-1 ring-primary/30"
-                          : isOtherMonth
-                            ? "text-muted-foreground/40 hover:bg-muted"
-                            : "text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    {day.getDate()}
-                  </button>
-
-                  {/* Availability dot */}
-                  {isLoading ? (
-                    <span className="size-1.5 rounded-full bg-muted animate-pulse" />
-                  ) : (
-                    <span className={`size-1.5 rounded-full transition-colors ${
-                      status === "available"
-                        ? "bg-emerald-500"
-                        : status === "full"
-                          ? "bg-amber-400"
-                          : "bg-transparent"
-                    }`} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Next week */}
           <button
             type="button"
-            onClick={() => navigate(7)}
-            className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
-            aria-label="Semana siguiente"
+            onClick={() => onMonthChange(new Date(year, month + 1, 1))}
+            className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Mes siguiente"
           >
             <ChevronRight className="size-4" />
           </button>
         </div>
+      </div>
 
-        {/* Selected date + legend row */}
-        <div className="flex items-center justify-between gap-3 pt-1 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Viendo:</span>
-            <span className="text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full capitalize">
-              {selectedDayName} {selectedDate.getDate()} de {selectedMonthName}
-            </span>
-          </div>
-
-          {!isLoading && slotsData.length > 0 && (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-emerald-500" />
-                <span className="text-xs text-muted-foreground">Disponible</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-amber-400" />
-                <span className="text-xs text-muted-foreground">Lleno</span>
-              </div>
+      <div className="px-4 pt-2 pb-4">
+        {/* Weekday headers */}
+        <div className="grid grid-cols-7 mb-1">
+          {WEEK_DAYS.map(d => (
+            <div
+              key={d}
+              className="text-center text-xs font-medium text-muted-foreground/70 py-2 uppercase tracking-wide"
+            >
+              {d}
             </div>
-          )}
+          ))}
         </div>
+
+        {/* Day grid */}
+        <div
+          className="grid grid-cols-7"
+          onMouseLeave={() => setHoverDate(null)}
+        >
+          {/* Offset empty cells */}
+          {Array.from({ length: firstOffset }).map((_, i) => (
+            <div key={`e${i}`} className="h-11" />
+          ))}
+
+          {Array.from({ length: daysInMonth }, (_, i) => {
+            const day = i + 1;
+            const date = new Date(year, month, day);
+            const isPast = date < today;
+            const isToday = isSameDay(date, today);
+            const dateKey = toLocalDateString(date);
+            const status =
+              isLoading || isPast ? null : (slotsMap[dateKey] ?? null);
+
+            // Visual range flags
+            const isVStart = isSameDay(date, visualStart);
+            const isVEnd = !!visualEnd && isSameDay(date, visualEnd);
+            const isVMiddle =
+              !!visualEnd && date > visualStart && date < visualEnd;
+
+            // Confirmed range flags
+            const isConfStart =
+              !!dateRange.end && isSameDay(date, dateRange.start);
+            const isConfEnd = !!dateRange.end && isSameDay(date, dateRange.end);
+            const isConfMiddle =
+              !!dateRange.end && date > dateRange.start && date < dateRange.end;
+
+            // Single selected day (no range end)
+            const isSingle = !dateRange.end && isSameDay(date, dateRange.start);
+
+            // Stripe rendering helpers
+            const showLeftStripe = isVisualRange && (isVMiddle || isVEnd);
+            const showRightStripe = isVisualRange && (isVMiddle || isVStart);
+            const stripeClass = isPreview ? "bg-primary/5" : "bg-primary/10";
+
+            return (
+              <div
+                key={day}
+                className="relative flex flex-col items-center gap-0.5 py-0.5"
+              >
+                {/* Left-half stripe (fills left side of cell for range middle & end) */}
+                {showLeftStripe && (
+                  <div
+                    className={cn(
+                      "absolute top-0.5 h-9 left-0 right-1/2 pointer-events-none",
+                      stripeClass,
+                    )}
+                  />
+                )}
+                {/* Right-half stripe (fills right side for range middle & start) */}
+                {showRightStripe && (
+                  <div
+                    className={cn(
+                      "absolute top-0.5 h-9 left-1/2 right-0 pointer-events-none",
+                      stripeClass,
+                    )}
+                  />
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => !isPast && onDateSelect(date)}
+                  disabled={isPast}
+                  onMouseEnter={() => {
+                    if (!isPast && !dateRange.end) setHoverDate(date);
+                  }}
+                  aria-label={`Seleccionar ${day} de ${MONTH_NAMES[month]}`}
+                  aria-pressed={
+                    isSingle || isConfStart || isConfEnd || isConfMiddle
+                  }
+                  className={cn(
+                    "size-9 rounded-full text-sm font-medium transition-all duration-150 flex items-center justify-center relative z-10",
+                    // Past days — disabled appearance
+                    isPast && "text-muted-foreground/30 cursor-not-allowed",
+                    // Confirmed: solid circle on start / end
+                    !isPast &&
+                      (isSingle || isConfStart || isConfEnd) &&
+                      "bg-primary text-primary-foreground shadow-md scale-105",
+                    // Confirmed: in-range days
+                    !isPast &&
+                      isConfMiddle &&
+                      "text-primary font-semibold hover:bg-primary/20",
+                    // Hover preview: semi-transparent endpoints
+                    !isPast &&
+                      isPreview &&
+                      (isVStart || isVEnd) &&
+                      "bg-primary/60 text-primary-foreground shadow-sm",
+                    // Hover preview: in-range days
+                    !isPast && isPreview && isVMiddle && "text-primary/80",
+                    // Today ring (only when not part of any range/selection)
+                    !isPast &&
+                      !isSingle &&
+                      !isConfStart &&
+                      !isConfEnd &&
+                      !isConfMiddle &&
+                      !(isPreview && (isVStart || isVEnd || isVMiddle)) &&
+                      isToday &&
+                      "bg-primary/10 text-primary ring-1 ring-primary/30 font-semibold",
+                    // Default
+                    !isPast &&
+                      !isSingle &&
+                      !isConfStart &&
+                      !isConfEnd &&
+                      !isConfMiddle &&
+                      !(isPreview && (isVStart || isVEnd || isVMiddle)) &&
+                      !isToday &&
+                      "text-foreground hover:bg-muted",
+                  )}
+                >
+                  {day}
+                </button>
+
+                {/* Status dot — hidden for past days */}
+                {!isPast && isLoading ? (
+                  <span className="size-1 rounded-full bg-muted/40 animate-pulse" />
+                ) : (
+                  <span
+                    className={cn(
+                      "size-1 rounded-full transition-colors",
+                      !isPast && status === "configured" && "bg-emerald-500",
+                      !isPast && status === "full" && "bg-amber-400",
+                      (isPast || !status) && "invisible",
+                    )}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="px-5 py-3 border-t border-border/60 bg-muted/20 flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-emerald-500" />
+            <span className="text-xs text-muted-foreground">Con horario</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-amber-400" />
+            <span className="text-xs text-muted-foreground">Sin horario</span>
+          </div>
+        </div>
+        <span className="text-xs font-medium bg-primary/10 text-primary px-2.5 py-1 rounded-full shrink-0">
+          {legendText}
+        </span>
       </div>
     </div>
   );

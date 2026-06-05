@@ -1,7 +1,5 @@
 "use client";
-// Dependencies
 import * as React from "react";
-// Components
 import Link from "next/link";
 import { NavSecondary } from "./NavSecondary";
 import { NavMain } from "./NavMain";
@@ -16,11 +14,8 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-// Icons
 import { BookMarked } from "lucide-react";
-// Data
 import { menuDataOptions } from "@/utils/menuDataOptions";
-// Store
 import { useBusinessStore } from "@/store/business.store";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -42,13 +37,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <BookMarked className="size-4" />
                 </div>
                 <div className="flex flex-col leading-tight min-w-0">
-                  <span className="font-semibold text-sm truncate">Bookea.me</span>
+                  <span className="font-semibold text-sm truncate">
+                    Bookea.me
+                  </span>
                   {businessName ? (
                     <span className="text-xs text-muted-foreground truncate">
                       {businessName}
                     </span>
                   ) : (
-                    <span className="text-xs text-muted-foreground/60 truncate">
+                    <span className="text-xs text-muted-foreground/50 truncate">
                       Sin negocio configurado
                     </span>
                   )}

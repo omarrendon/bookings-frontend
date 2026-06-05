@@ -1,5 +1,4 @@
 "use client";
-// Components
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,12 +15,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-// Icons
 import { Building2, EllipsisVertical, LogOut, UserCircle } from "lucide-react";
-// Hooks & store
 import { useLogout } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
-// Navigation
 import Link from "next/link";
 
 function getInitials(name?: string | null, lastName?: string | null): string {
@@ -35,10 +31,12 @@ export function NavUser() {
   const { logout } = useLogout();
   const user = useAuthStore(state => state.user);
 
-  const fullName = [user?.name, user?.last_name].filter(Boolean).join(" ") || "-";
+  const fullName =
+    [user?.name, user?.last_name].filter(Boolean).join(" ") || "-";
   const email = user?.email ?? "-";
   const initials = getInitials(user?.name, user?.last_name);
-  const roleLabel = user?.role === "owner" ? "Propietario" : (user?.role ?? "");
+  const roleLabel =
+    user?.role === "owner" ? "Propietario" : (user?.role ?? "");
 
   return (
     <SidebarMenu>
@@ -56,7 +54,9 @@ export function NavUser() {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight min-w-0">
                 <span className="truncate font-medium">{fullName}</span>
-                <span className="text-muted-foreground truncate text-xs">{email}</span>
+                <span className="text-muted-foreground truncate text-xs">
+                  {email}
+                </span>
               </div>
               <EllipsisVertical className="size-4 shrink-0 text-muted-foreground" />
             </SidebarMenuButton>
@@ -77,8 +77,12 @@ export function NavUser() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left leading-tight min-w-0">
-                  <span className="truncate font-medium text-sm">{fullName}</span>
-                  <span className="text-muted-foreground truncate text-xs">{email}</span>
+                  <span className="truncate font-medium text-sm">
+                    {fullName}
+                  </span>
+                  <span className="text-muted-foreground truncate text-xs">
+                    {email}
+                  </span>
                 </div>
                 {roleLabel && (
                   <Badge
@@ -93,14 +97,20 @@ export function NavUser() {
 
             <DropdownMenuSeparator className="my-1" />
 
-            {/* Navigation items */}
-            <DropdownMenuItem asChild className="gap-2.5 cursor-pointer rounded-lg">
+            {/* Navigation links */}
+            <DropdownMenuItem
+              asChild
+              className="gap-2.5 cursor-pointer rounded-lg"
+            >
               <Link href="/dashboard/profile">
                 <UserCircle className="size-4 text-muted-foreground" />
                 <span>Mi Perfil</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="gap-2.5 cursor-pointer rounded-lg">
+            <DropdownMenuItem
+              asChild
+              className="gap-2.5 cursor-pointer rounded-lg"
+            >
               <Link href="/dashboard/business">
                 <Building2 className="size-4 text-muted-foreground" />
                 <span>Mi Negocio</span>
