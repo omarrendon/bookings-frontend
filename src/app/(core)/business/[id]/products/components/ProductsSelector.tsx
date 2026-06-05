@@ -1,15 +1,11 @@
 "use client";
-// Dependencies
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-// Store
 import { useCartStore } from "@/store/cart.store";
-// Components
 import ProductCard from "@/app/(core)/business/[id]/components/ProductCard";
 import SummarySidebar from "../../components/SummarySidebar";
-// Types
 import type { Product } from "@/lib/api/types";
-// Icons
 import { ShoppingBag } from "lucide-react";
 
 interface ProductsSelectorProps {
@@ -23,10 +19,14 @@ export default function ProductsSelector({
 }: ProductsSelectorProps) {
   const router = useRouter();
 
-  const { businessId: storedBusinessId, selectedProducts, setBusinessId, toggleProduct, clearCart } =
-    useCartStore();
+  const {
+    businessId: storedBusinessId,
+    selectedProducts,
+    setBusinessId,
+    toggleProduct,
+    clearCart,
+  } = useCartStore();
 
-  // Si el negocio cambió, limpiamos el carrito anterior
   useEffect(() => {
     if (storedBusinessId && storedBusinessId !== businessId) {
       clearCart();
@@ -42,15 +42,19 @@ export default function ProductsSelector({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      {/* ── Products grid ── */}
+      {/* Grilla de productos */}
       <div className="lg:col-span-2">
         {products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
-            <ShoppingBag className="size-10 mb-3 opacity-30" />
-            <p className="font-medium">Sin servicios disponibles</p>
-            <p className="text-sm mt-1">
-              Este negocio aún no ha publicado servicios.
-            </p>
+          <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
+            <div className="rounded-full bg-muted p-4">
+              <ShoppingBag className="size-8 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <p className="font-medium">Sin servicios disponibles</p>
+              <p className="text-sm text-muted-foreground max-w-xs">
+                Este negocio aún no ha publicado sus servicios. Vuelve pronto.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -71,7 +75,8 @@ export default function ProductsSelector({
           </div>
         )}
       </div>
-      {/* ── Summary sidebar ── */}
+
+      {/* Sidebar de resumen */}
       <SummarySidebar
         selectedProducts={selectedProducts}
         total={total}
