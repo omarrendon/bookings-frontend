@@ -2,22 +2,58 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { schedulesApi } from "@/lib/api/schedules.api";
+import type { DaySlots, Schedule } from "@/lib/api/types";
 
 export const scheduleKeys = {
-  monthSlots: (businessId: string, date: string) =>
-    ["schedules", businessId, "slots", date] as const,
+  byBusiness: (businessId: string) => ["schedules", businessId] as const,
 };
 
-export function useMonthSlots(businessId: string, date: Date) {
-  // Primer día del mes en formato YYYY-MM-DD usando partes locales para evitar offset UTC
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const dateParam = `${y}-${m}-01`;
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+}
 
+function toHHMM(totalMinutes: number): string {
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+function expandScheduleToSlots(s: Schedule) {
+  const open = timeToMinutes(s.open_time);
+  const close = timeToMinutes(s.close_time);
+  const dur = s.slot_duration_minutes;
+  const slots = [];
+  for (let t = open; t + dur <= close; t += dur) {
+    slots.push({ start: toHHMM(t), end: toHHMM(t + dur), isBooked: false });
+  }
+  return slots;
+}
+
+// Transforms Schedule[] (raw API) → DaySlots[] (used by calendar/picker components)
+function toDaySlots(schedules: Schedule[]): DaySlots[] {
+  const map: Record<string, DaySlots> = {};
+  for (const s of schedules) {
+    if (!map[s.date]) map[s.date] = { date: s.date, slots: [] };
+    map[s.date].slots.push(...expandScheduleToSlots(s));
+  }
+  for (const day of Object.values(map)) {
+    day.slots.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+  }
+  return Object.values(map);
+}
+
+// Keeps data?.data?.slots shape so LayoutSchedules and SchedulePicker need no changes
+export function useMonthSlots(businessId: string, _date?: Date) {
   return useQuery({
-    queryKey: scheduleKeys.monthSlots(businessId, dateParam),
-    queryFn: () => schedulesApi.getMonthSlots(businessId, dateParam),
+    queryKey: scheduleKeys.byBusiness(businessId),
+    queryFn: () => schedulesApi.getByBusiness(businessId),
     enabled: !!businessId,
-    staleTime: 1000 * 60 * 5, // 5 min — los slots de un mes no cambian frecuentemente
+    staleTime: 1000 * 60 * 5,
+    select: (res) => ({
+      success: res.success,
+      message: res.message,
+      data: { slots: toDaySlots(res.data ?? []) },
+    }),
   });
 }

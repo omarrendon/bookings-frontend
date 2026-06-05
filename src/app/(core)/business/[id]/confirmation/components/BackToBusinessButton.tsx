@@ -1,12 +1,10 @@
 "use client";
-// Dependencies
+
 import { useRouter } from "next/navigation";
-// Components
 import { Button } from "@/components/ui/button";
-// Store
 import { useCartStore } from "@/store/cart.store";
-// Icons
-import { Home } from "lucide-react";
+import { ArrowLeft, CalendarDays } from "lucide-react";
+import Link from "next/link";
 
 interface BackToBusinessButtonProps {
   businessId: string;
@@ -24,13 +22,24 @@ export default function BackToBusinessButton({
   };
 
   return (
-    <Button
-      variant="outline"
-      className="rounded-full gap-2"
-      onClick={handleClick}
-    >
-      <Home className="size-4" />
-      Volver al negocio
-    </Button>
+    <div className="flex flex-col sm:flex-row items-center gap-3">
+      <Button
+        variant="outline"
+        className="rounded-full gap-2 border-border/60"
+        onClick={handleClick}
+      >
+        <ArrowLeft className="size-4" />
+        Volver al negocio
+      </Button>
+      <Button
+        asChild
+        className="rounded-full gap-2 font-medium"
+      >
+        <Link href={`/business/${businessId}/products`} onClick={() => clearCart()}>
+          <CalendarDays className="size-4" />
+          Nueva reserva
+        </Link>
+      </Button>
+    </div>
   );
 }
