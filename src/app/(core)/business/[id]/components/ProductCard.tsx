@@ -1,11 +1,10 @@
 "use client";
-// Components
+
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-// Icons
+import { Badge } from "@/components/ui/badge";
 import { Check, ChevronRight, Clock, Minus, Plus } from "lucide-react";
-// Utils
 import { cn } from "@/lib/utils";
 import { formatPrice, formatDuration } from "@/utils/utils";
 
@@ -16,7 +15,6 @@ interface ProductCardProps {
   price: number;
   estimated_delivery_time: number;
   businessId: string;
-  // Selectable variant
   selectable?: boolean;
   selected?: boolean;
   onToggle?: () => void;
@@ -40,17 +38,15 @@ export default function ProductCard({
     <div
       onClick={selectable ? onToggle : undefined}
       className={cn(
-        "group bg-card rounded-2xl border overflow-hidden transition-all duration-200",
-        selectable ? "cursor-pointer" : "hover:shadow-md",
+        "group bg-card rounded-2xl border overflow-hidden transition-all duration-200 flex flex-col",
+        selectable ? "cursor-pointer" : "",
         selectable && selected
           ? "border-primary ring-2 ring-primary/20 shadow-md"
-          : selectable
-            ? "hover:shadow-md hover:border-muted-foreground/30"
-            : "",
+          : "border-border/60 hover:shadow-md hover:border-border",
       )}
     >
-      {/* Imagen */}
-      <div className="relative aspect-video overflow-hidden">
+      {/* Imagen con badges flotantes */}
+      <div className="relative aspect-video overflow-hidden shrink-0">
         <Image
           src={gallery_images?.[0] ?? FALLBACK_IMAGE}
           alt={name}
@@ -60,48 +56,69 @@ export default function ProductCard({
             selected ? "scale-105" : "group-hover:scale-105",
           )}
         />
+
+        {/* Gradiente inferior sobre la imagen */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+        {/* Precio flotante sobre la imagen */}
+        <div className="absolute bottom-3 left-3">
+          <span className="inline-flex items-center bg-white/95 backdrop-blur-sm text-foreground text-sm font-bold px-2.5 py-1 rounded-full shadow-sm">
+            {formatPrice(price)}
+          </span>
+        </div>
+
+        {/* Duración flotante */}
+        <div className="absolute bottom-3 right-3">
+          <span className="inline-flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
+            <Clock className="size-3" />
+            {formatDuration(estimated_delivery_time)}
+          </span>
+        </div>
+
+        {/* Check de selección */}
         {selectable && selected && (
           <div className="absolute top-3 right-3 size-7 rounded-full bg-primary flex items-center justify-center shadow-md">
             <Check className="size-4 text-primary-foreground" />
           </div>
         )}
+
+        {/* Badge "Nuevo" si no tiene imagen propia (indicativo visual) */}
+        {!gallery_images?.length && (
+          <Badge
+            variant="secondary"
+            className="absolute top-3 left-3 text-xs border-0 bg-muted/80 backdrop-blur-sm"
+          >
+            Sin imagen
+          </Badge>
+        )}
       </div>
 
       {/* Contenido */}
-      <div className="p-5">
-        <h3 className="font-semibold text-base mb-1 line-clamp-1">{name}</h3>
+      <div className="p-4 flex flex-col flex-1">
+        <h3 className="font-semibold text-base line-clamp-1 mb-1">{name}</h3>
         {description && (
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
             {description}
           </p>
         )}
-        <div className="flex items-center justify-between mt-auto pt-3 border-t">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-lg font-bold text-primary">
-              {formatPrice(price)}
-            </span>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="size-3" />
-              {formatDuration(estimated_delivery_time)}
-            </div>
-          </div>
 
+        <div className="mt-3 pt-3 border-t border-border/60">
           {selectable ? (
             <Button
               size="sm"
               variant={selected ? "default" : "outline"}
-              className="rounded-full text-xs gap-1 pointer-events-none"
+              className="w-full rounded-full text-xs gap-1.5 pointer-events-none"
               tabIndex={-1}
             >
               {selected ? (
                 <>
                   <Minus className="size-3" />
-                  Quitar
+                  Quitar del resumen
                 </>
               ) : (
                 <>
                   <Plus className="size-3" />
-                  Agregar
+                  Agregar a mi selección
                 </>
               )}
             </Button>
@@ -109,11 +126,11 @@ export default function ProductCard({
             <Button
               size="sm"
               variant="outline"
-              className="rounded-full text-xs gap-1"
+              className="w-full rounded-full text-xs gap-1.5 border-border/60 hover:border-primary/40"
               asChild
             >
               <Link href={`/business/${businessId}/products`}>
-                Reservar
+                Reservar este servicio
                 <ChevronRight className="size-3" />
               </Link>
             </Button>
