@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   CalendarCheck2,
   CalendarRange,
+  CheckCircle2,
   Clock,
   Loader2,
   Plus,
@@ -24,8 +25,15 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "@/app/(core)/dashboard/schedules/components/LayoutSchedules";
+import { useCreateSchedule } from "@/hooks/useSchedules";
 
 const TIME_SLOTS = generateTimeSlots();
+
+const DAY_OF_WEEK = [
+  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+];
+
+const getDayName = (date: Date) => DAY_OF_WEEK[date.getDay()];
 
 const MONTH_NAMES = [
   "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -93,6 +101,7 @@ interface LocalSlot {
 }
 
 interface ScheduleManagerProps {
+  businessId: string;
   dateRange: DateRange;
   slotsData: DaySlots[];
   isLoading: boolean;
@@ -101,18 +110,21 @@ interface ScheduleManagerProps {
 // ─── component ────────────────────────────────────────────────────────────────
 
 export default function ScheduleManager({
+  businessId,
   dateRange,
   slotsData,
   isLoading,
 }: ScheduleManagerProps) {
   const [localSlots, setLocalSlots] = useState<LocalSlot[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [savedOk, setSavedOk] = useState(false);
+
+  const { mutateAsync: createSchedule, isPending: isSaving } = useCreateSchedule(businessId);
 
   // Sync editor when date selection or API data changes
   useEffect(() => {
+    setSavedOk(false);
     if (!dateRange.end) {
-      // Single day — load existing slots
       const key = toLocalDateString(dateRange.start);
       const dayData = slotsData.find(d => d.date === key);
       if (dayData && dayData.slots.length > 0) {
@@ -122,7 +134,6 @@ export default function ScheduleManager({
         setLocalSlots([]);
       }
     } else {
-      // Range selected — start with a clean slate
       setLocalSlots([]);
     }
     setIsDirty(false);
@@ -174,12 +185,38 @@ export default function ScheduleManager({
   };
 
   const handleSave = async () => {
-    if (overlapping.size > 0) return;
-    setIsSaving(true);
-    // TODO: integrate with API when endpoint is available
-    await new Promise(r => setTimeout(r, 800));
-    setIsSaving(false);
+    if (overlapping.size > 0 || !businessId) return;
+
+    const dateFrom = toLocalDateString(dateRange.start);
+    const dateTo = dateRange.end ? toLocalDateString(dateRange.end) : dateFrom;
+
+    // Collect unique day names covered by the selected range
+    const uniqueDays: string[] = [];
+    const cursor = new Date(dateRange.start);
+    cursor.setHours(0, 0, 0, 0);
+    const end = dateRange.end ? new Date(dateRange.end) : new Date(dateRange.start);
+    end.setHours(0, 0, 0, 0);
+    while (cursor <= end) {
+      const name = getDayName(cursor);
+      if (!uniqueDays.includes(name)) uniqueDays.push(name);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    // One entry per (day × slot)
+    const hours = uniqueDays.flatMap(day =>
+      localSlots.map(s => ({ day, open_time: s.start, close_time: s.end }))
+    );
+
+    await createSchedule({
+      business_id: Number(businessId),
+      date_from: dateFrom,
+      date_to: dateTo,
+      slot_duration_minutes: 30,
+      hours,
+    });
+
     setIsDirty(false);
+    setSavedOk(true);
   };
 
   // ── derived display values ─────────────────────────────────────────────────
@@ -238,6 +275,15 @@ export default function ScheduleManager({
         </div>
 
         <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+          {savedOk && !isDirty && (
+            <Badge
+              variant="secondary"
+              className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 text-xs gap-1"
+            >
+              <CheckCircle2 className="size-3" />
+              Guardado
+            </Badge>
+          )}
           {isDirty && !isSaving && (
             <Badge
               variant="secondary"

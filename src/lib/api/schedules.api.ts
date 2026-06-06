@@ -1,7 +1,10 @@
 import { apiClient } from "./client";
-import type { SchedulesListResponse } from "./types";
+import type { CreateScheduleRequest, SchedulesListResponse } from "./types";
 
 export const schedulesApi = {
   getByBusiness: (businessId: string) =>
     apiClient.get<SchedulesListResponse>(`/schedules/${businessId}`),
+
+  create: (payload: CreateScheduleRequest) =>
+    apiClient.post<SchedulesListResponse>("/schedules", payload),
 };
