@@ -225,6 +225,20 @@ export interface BookingResponse {
 
 // ── Schedules ─────────────────────────────────────────────────────────────────
 
+export interface CreateScheduleHour {
+  day: string;
+  open_time: string | null;
+  close_time: string | null;
+}
+
+export interface CreateScheduleRequest {
+  business_id: number;
+  date_from: string;
+  date_to: string;
+  slot_duration_minutes: number;
+  hours: CreateScheduleHour[];
+}
+
 // Shape returned by GET /schedules/:businessId
 export interface Schedule {
   id: number;

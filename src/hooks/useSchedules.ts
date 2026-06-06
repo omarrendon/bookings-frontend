@@ -1,8 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { schedulesApi } from "@/lib/api/schedules.api";
-import type { DaySlots, Schedule } from "@/lib/api/types";
+import type { CreateScheduleRequest, DaySlots, Schedule } from "@/lib/api/types";
 
 export const scheduleKeys = {
   byBusiness: (businessId: string) => ["schedules", businessId] as const,
@@ -41,6 +41,18 @@ function toDaySlots(schedules: Schedule[]): DaySlots[] {
     day.slots.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
   }
   return Object.values(map);
+}
+
+export function useCreateSchedule(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateScheduleRequest) => schedulesApi.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: scheduleKeys.byBusiness(businessId),
+      });
+    },
+  });
 }
 
 // Keeps data?.data?.slots shape so LayoutSchedules and SchedulePicker need no changes

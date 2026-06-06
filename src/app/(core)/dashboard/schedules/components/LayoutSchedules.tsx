@@ -79,6 +79,7 @@ export default function LayoutSchedules() {
         />
 
         <ScheduleManager
+          businessId={businessId}
           dateRange={dateRange}
           slotsData={slotsData}
           isLoading={isLoading}
