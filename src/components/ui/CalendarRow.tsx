@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { DaySlots } from "@/lib/api/types";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,6 +37,7 @@ interface CalendarRowProps {
   slotsData: DaySlots[];
   isLoading: boolean;
   dateRange: DateRange;
+  isSelectingRange: boolean;
   currentMonth: Date;
   onDateSelect: (date: Date) => void;
   onMonthChange: (date: Date) => void;
@@ -46,11 +47,16 @@ export default function CalendarRow({
   slotsData,
   isLoading,
   dateRange,
+  isSelectingRange,
   currentMonth,
   onDateSelect,
   onMonthChange,
 }: CalendarRowProps) {
   const [hoverDate, setHoverDate] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (!isSelectingRange) setHoverDate(null);
+  }, [isSelectingRange]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -85,8 +91,8 @@ export default function CalendarRow({
   // True when start ≠ end (span of 2+ days)
   const isVisualRange =
     visualEnd !== null && !isSameDay(visualStart, visualEnd);
-  // Preview = user hovering, no confirmed end yet
-  const isPreview = !dateRange.end && isVisualRange;
+  // Preview = user hovering while in range selection mode
+  const isPreview = isSelectingRange && isVisualRange;
 
   // ── Slots map ──────────────────────────────────────────────────────────────
 
@@ -235,7 +241,7 @@ export default function CalendarRow({
                   onClick={() => !isPast && onDateSelect(date)}
                   disabled={isPast}
                   onMouseEnter={() => {
-                    if (!isPast && !dateRange.end) setHoverDate(date);
+                    if (!isPast && isSelectingRange) setHoverDate(date);
                   }}
                   aria-label={`Seleccionar ${day} de ${MONTH_NAMES[month]}`}
                   aria-pressed={
