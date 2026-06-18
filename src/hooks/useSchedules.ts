@@ -25,7 +25,7 @@ function expandScheduleToSlots(s: Schedule) {
   const dur = s.slot_duration_minutes;
   const slots = [];
   for (let t = open; t + dur <= close; t += dur) {
-    slots.push({ start: toHHMM(t), end: toHHMM(t + dur), isBooked: false });
+    slots.push({ start: toHHMM(t), end: toHHMM(t + dur), isBooked: false, scheduleId: s.id });
   }
   return slots;
 }
@@ -41,6 +41,18 @@ function toDaySlots(schedules: Schedule[]): DaySlots[] {
     day.slots.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
   }
   return Object.values(map);
+}
+
+export function useDeleteSchedule(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => schedulesApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: scheduleKeys.byBusiness(businessId),
+      });
+    },
+  });
 }
 
 export function useCreateSchedule(businessId: string) {

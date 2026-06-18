@@ -261,6 +261,7 @@ export interface TimeSlot {
   start: string; // "HH:MM"
   end: string;   // "HH:MM"
   isBooked: boolean;
+  scheduleId?: number; // ID of the parent Schedule record, used for deletion
 }
 
 export interface DaySlots {

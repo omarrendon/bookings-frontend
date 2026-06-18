@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "@/app/(core)/dashboard/schedules/components/LayoutSchedules";
-import { useCreateSchedule } from "@/hooks/useSchedules";
+import { useCreateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
 
 const TIME_SLOTS = generateTimeSlots();
 
@@ -52,20 +52,30 @@ const toLocalDateString = (date: Date) => {
   return `${y}-${m}-${d}`;
 };
 
-// Merge consecutive 30/60-min API slots into user-facing open/close ranges
-const mergeApiSlots = (slots: TimeSlot[]): { start: string; end: string }[] => {
+// Merge consecutive slots into user-facing ranges, preserving Schedule IDs for deletion
+const mergeApiSlots = (slots: TimeSlot[]): { start: string; end: string; scheduleIds: number[] }[] => {
   if (slots.length === 0) return [];
-  const sorted = [...slots].sort(
-    (a, b) => timeToMinutes(a.start) - timeToMinutes(b.start)
-  );
-  const ranges: { start: string; end: string }[] = [];
-  let range = { start: sorted[0].start, end: sorted[0].end };
+  const sorted = [...slots].sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+  const ranges: { start: string; end: string; scheduleIds: number[] }[] = [];
+  let range = {
+    start: sorted[0].start,
+    end: sorted[0].end,
+    scheduleIds: sorted[0].scheduleId != null ? [sorted[0].scheduleId] : [],
+  };
   for (let i = 1; i < sorted.length; i++) {
-    if (timeToMinutes(sorted[i].start) === timeToMinutes(range.end)) {
-      range.end = sorted[i].end;
+    const slot = sorted[i];
+    if (timeToMinutes(slot.start) === timeToMinutes(range.end)) {
+      range.end = slot.end;
+      if (slot.scheduleId != null && !range.scheduleIds.includes(slot.scheduleId)) {
+        range.scheduleIds.push(slot.scheduleId);
+      }
     } else {
       ranges.push(range);
-      range = { start: sorted[i].start, end: sorted[i].end };
+      range = {
+        start: slot.start,
+        end: slot.end,
+        scheduleIds: slot.scheduleId != null ? [slot.scheduleId] : [],
+      };
     }
   }
   ranges.push(range);
@@ -98,6 +108,7 @@ interface LocalSlot {
   id: string;
   start: string;
   end: string;
+  scheduleIds?: number[]; // present only for slots loaded from the API
 }
 
 interface ScheduleManagerProps {
@@ -118,8 +129,10 @@ export default function ScheduleManager({
   const [localSlots, setLocalSlots] = useState<LocalSlot[]>([]);
   const [isDirty, setIsDirty] = useState(false);
   const [savedOk, setSavedOk] = useState(false);
+  const [deletingSlotId, setDeletingSlotId] = useState<string | null>(null);
 
   const { mutateAsync: createSchedule, isPending: isSaving } = useCreateSchedule(businessId);
+  const { mutateAsync: deleteSchedule } = useDeleteSchedule(businessId);
 
   // Sync editor when date selection or API data changes
   useEffect(() => {
@@ -129,7 +142,7 @@ export default function ScheduleManager({
       const dayData = slotsData.find(d => d.date === key);
       if (dayData && dayData.slots.length > 0) {
         const ranges = mergeApiSlots(dayData.slots);
-        setLocalSlots(ranges.map((r, i) => ({ id: `api-${i}-${r.start}`, ...r })));
+        setLocalSlots(ranges.map((r, i) => ({ id: `api-${i}-${r.start}`, start: r.start, end: r.end, scheduleIds: r.scheduleIds })));
       } else {
         setLocalSlots([]);
       }
@@ -160,9 +173,22 @@ export default function ScheduleManager({
     setIsDirty(true);
   };
 
-  const deleteSlot = (id: string) => {
-    setLocalSlots(prev => prev.filter(s => s.id !== id));
-    setIsDirty(true);
+  const deleteSlot = async (id: string) => {
+    const slot = localSlots.find(s => s.id === id);
+    if (slot?.scheduleIds && slot.scheduleIds.length > 0) {
+      setDeletingSlotId(id);
+      try {
+        for (const scheduleId of slot.scheduleIds) {
+          await deleteSchedule(scheduleId);
+        }
+      } finally {
+        setDeletingSlotId(null);
+      }
+      // Query invalidation in the hook refreshes slotsData, useEffect re-syncs localSlots
+    } else {
+      setLocalSlots(prev => prev.filter(s => s.id !== id));
+      setIsDirty(true);
+    }
   };
 
   const updateSlot = (id: string, field: "start" | "end", value: string) => {
@@ -436,10 +462,14 @@ export default function ScheduleManager({
                     <button
                       type="button"
                       onClick={() => deleteSlot(slot.id)}
-                      className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+                      disabled={deletingSlotId === slot.id}
+                      className="size-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                       aria-label={`Eliminar franja ${idx + 1}`}
                     >
-                      <Trash2 className="size-3.5" />
+                      {deletingSlotId === slot.id
+                        ? <Loader2 className="size-3.5 animate-spin" />
+                        : <Trash2 className="size-3.5" />
+                      }
                     </button>
                   </div>
                 );
