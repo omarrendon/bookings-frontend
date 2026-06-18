@@ -7,4 +7,7 @@ export const schedulesApi = {
 
   create: (payload: CreateScheduleRequest) =>
     apiClient.post<SchedulesListResponse>("/schedules", payload),
+
+  delete: (id: number) =>
+    apiClient.delete<{ success: boolean; message: string }>(`/schedules/${id}`),
 };
