@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { schedulesApi } from "@/lib/api/schedules.api";
 import type { CreateScheduleRequest, DaySlots, Schedule } from "@/lib/api/types";
+import { toast } from "sonner";
 
 export const scheduleKeys = {
   byBusiness: (businessId: string) => ["schedules", businessId] as const,
@@ -51,6 +52,10 @@ export function useDeleteSchedule(businessId: string) {
       queryClient.invalidateQueries({
         queryKey: scheduleKeys.byBusiness(businessId),
       });
+      toast.success("Horario eliminado correctamente.");
+    },
+    onError: () => {
+      toast.error("No se pudo eliminar el horario. Inténtalo de nuevo.");
     },
   });
 }
@@ -63,6 +68,10 @@ export function useCreateSchedule(businessId: string) {
       queryClient.invalidateQueries({
         queryKey: scheduleKeys.byBusiness(businessId),
       });
+      toast.success("Horario guardado correctamente.");
+    },
+    onError: () => {
+      toast.error("No se pudo guardar el horario. Inténtalo de nuevo.");
     },
   });
 }
