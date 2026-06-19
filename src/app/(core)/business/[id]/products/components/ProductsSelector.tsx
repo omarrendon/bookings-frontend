@@ -34,7 +34,7 @@ export default function ProductsSelector({
     setBusinessId(businessId);
   }, [businessId, storedBusinessId, clearCart, setBusinessId]);
 
-  const total = selectedProducts.reduce((sum, p) => sum + p.price, 0);
+  const total = selectedProducts.reduce((sum, p) => sum + Number(p.price), 0);
 
   const handleContinue = () => {
     router.push(`/business/${businessId}/schedule`);
@@ -61,7 +61,7 @@ export default function ProductsSelector({
             {products.map(product => (
               <ProductCard
                 key={product.id}
-                gallery_images={product.gallery_images}
+                images={product.images}
                 name={product.name}
                 description={product.description}
                 price={product.price}

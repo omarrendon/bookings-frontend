@@ -1,30 +1,39 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, ChevronRight, Clock, Minus, Plus } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Minus,
+  Plus,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatPrice, formatDuration } from "@/utils/utils";
+import type { ProductImage } from "@/lib/api/types";
+
+const FALLBACK_IMAGE =
+  "https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg";
 
 interface ProductCardProps {
-  gallery_images?: string[];
+  images?: ProductImage[];
   name: string;
   description?: string;
-  price: number;
-  estimated_delivery_time: number;
+  price: string | number;
+  estimated_delivery_time: string | number;
   businessId: string;
   selectable?: boolean;
   selected?: boolean;
   onToggle?: () => void;
 }
 
-const FALLBACK_IMAGE =
-  "https://hips.hearstapps.com/hmg-prod/images/le-maise-9-1672919228.jpg";
-
 export default function ProductCard({
-  gallery_images,
+  images,
   name,
   description,
   price,
@@ -34,6 +43,21 @@ export default function ProductCard({
   selected = false,
   onToggle,
 }: ProductCardProps) {
+  const sorted = [...(images ?? [])].sort((a, b) => a.order - b.order);
+  const hasMultiple = sorted.length > 1;
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const currentUrl = sorted[currentIndex]?.url ?? FALLBACK_IMAGE;
+
+  const prev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex(i => (i - 1 + sorted.length) % sorted.length);
+  };
+
+  const next = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex(i => (i + 1) % sorted.length);
+  };
+
   return (
     <div
       onClick={selectable ? onToggle : undefined}
@@ -45,11 +69,11 @@ export default function ProductCard({
           : "border-border/60 hover:shadow-md hover:border-border",
       )}
     >
-      {/* Imagen con badges flotantes */}
-      <div className="relative aspect-video overflow-hidden shrink-0">
+      {/* Imagen / galería */}
+      <div className="relative aspect-square overflow-hidden shrink-0">
         <Image
-          src={gallery_images?.[0] ?? FALLBACK_IMAGE}
-          alt={name}
+          src={currentUrl}
+          alt={`${name} — imagen ${currentIndex + 1}`}
           fill
           className={cn(
             "object-cover transition-transform duration-500",
@@ -57,18 +81,21 @@ export default function ProductCard({
           )}
         />
 
-        {/* Gradiente inferior sobre la imagen */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        {/* Gradiente inferior */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
 
-        {/* Precio flotante sobre la imagen */}
-        <div className="absolute bottom-3 left-3">
+        {/* Precio flotante */}
+        <div className="absolute bottom-3 left-3 pointer-events-none">
           <span className="inline-flex items-center bg-white/95 backdrop-blur-sm text-foreground text-sm font-bold px-2.5 py-1 rounded-full shadow-sm">
             {formatPrice(price)}
           </span>
         </div>
 
         {/* Duración flotante */}
-        <div className="absolute bottom-3 right-3">
+        <div
+          className="absolute bottom-3 pointer-events-none"
+          style={{ right: hasMultiple ? "2.5rem" : "0.75rem" }}
+        >
           <span className="inline-flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
             <Clock className="size-3" />
             {formatDuration(estimated_delivery_time)}
@@ -82,14 +109,55 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* Badge "Nuevo" si no tiene imagen propia (indicativo visual) */}
-        {!gallery_images?.length && (
+        {/* Sin imagen badge */}
+        {sorted.length === 0 && (
           <Badge
             variant="secondary"
             className="absolute top-3 left-3 text-xs border-0 bg-muted/80 backdrop-blur-sm"
           >
             Sin imagen
           </Badge>
+        )}
+
+        {/* Controles de galería */}
+        {hasMultiple && (
+          <>
+            <button
+              type="button"
+              onClick={prev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 size-7 rounded-full bg-background/80 hover:bg-background flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Imagen anterior"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              className="absolute right-2 top-1/2 -translate-y-1/2 size-7 rounded-full bg-background/80 hover:bg-background flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Imagen siguiente"
+            >
+              <ChevronRight className="size-4" />
+            </button>
+            <div className="absolute bottom-2 right-2 flex gap-1">
+              {sorted.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation();
+                    setCurrentIndex(i);
+                  }}
+                  className={cn(
+                    "size-1.5 rounded-full transition-colors",
+                    i === currentIndex
+                      ? "bg-white"
+                      : "bg-white/50 hover:bg-white/80",
+                  )}
+                  aria-label={`Ir a imagen ${i + 1}`}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
 

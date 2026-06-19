@@ -16,12 +16,12 @@ import {
 } from "lucide-react";
 
 const ROUTE_META: Record<string, { label: string; icon: LucideIcon }> = {
-  "/dashboard":               { label: "Dashboard",   icon: LayoutDashboard },
-  "/dashboard/reservations":  { label: "Reservas",    icon: CalendarCheck },
-  "/dashboard/schedules":     { label: "Horarios",    icon: BookCheck },
-  "/dashboard/products":      { label: "Servicios",   icon: Package },
-  "/dashboard/business":      { label: "Mi Negocio",  icon: Building2 },
-  "/dashboard/profile":       { label: "Mi Perfil",   icon: UserCircle },
+  "/dashboard": { label: "Dashboard", icon: LayoutDashboard },
+  "/dashboard/reservations": { label: "Reservas", icon: CalendarCheck },
+  "/dashboard/schedules": { label: "Horarios", icon: BookCheck },
+  "/dashboard/products": { label: "Servicios", icon: Package },
+  "/dashboard/business": { label: "Mi Negocio", icon: Building2 },
+  "/dashboard/profile": { label: "Mi Perfil", icon: UserCircle },
 };
 
 function getCurrentRoute(pathname: string) {

@@ -49,9 +49,9 @@ export default function LayoutProducts() {
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-primary">Mis Productos</h2>
+          <h2 className="text-xl font-semibold text-primary">Mis Servicios</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Administra los productos que ofrece tu negocio.
+            Administra los servicios que ofrece tu negocio.
           </p>
         </div>
         <Button onClick={handleAdd} className="rounded-full gap-1.5 shrink-0">

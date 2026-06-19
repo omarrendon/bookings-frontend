@@ -4,6 +4,7 @@ import {
   CalendarCheck,
   LayoutDashboard,
   Package,
+  Settings2Icon,
   UserCircle,
 } from "lucide-react";
 
@@ -40,6 +41,11 @@ export const menuDataOptions = {
       title: "Mi Perfil",
       url: "/dashboard/profile",
       icon: UserCircle,
+    },
+    {
+      title: "Configuración",
+      url: "/dashboard/settings",
+      icon: Settings2Icon,
     },
   ],
 };

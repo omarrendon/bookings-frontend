@@ -27,21 +27,38 @@ export default function LayoutSchedules() {
     d.setHours(0, 0, 0, 0);
     return { start: d, end: null };
   });
+  const [isSelectingRange, setIsSelectingRange] = useState(false);
 
   const { data, isLoading } = useMonthSlots(businessId, currentMonth);
   const slotsData = data?.data?.slots ?? [];
 
   const handleDateSelect = (date: Date) => {
-    setDateRange(prev => {
-      // Second click on a different day → complete the range
-      if (prev.end === null && !isSameDay(date, prev.start)) {
+    if (dateRange.end !== null) {
+      // Range already complete → reset to new single day
+      setDateRange({ start: date, end: null });
+      setIsSelectingRange(false);
+    } else if (isSelectingRange) {
+      if (isSameDay(date, dateRange.start)) {
+        // Re-click on start → cancel range mode
+        setIsSelectingRange(false);
+      } else {
+        // Click on different day → complete the range
         const [start, end] =
-          date > prev.start ? [prev.start, date] : [date, prev.start];
-        return { start, end };
+          date > dateRange.start
+            ? [dateRange.start, date]
+            : [date, dateRange.start];
+        setDateRange({ start, end });
+        setIsSelectingRange(false);
       }
-      // First click or re-click → start a new range
-      return { start: date, end: null };
-    });
+    } else {
+      if (isSameDay(date, dateRange.start)) {
+        // Second click on same day → enter range selection mode
+        setIsSelectingRange(true);
+      } else {
+        // First click on a new day → just select it
+        setDateRange({ start: date, end: null });
+      }
+    }
 
     if (
       date.getMonth() !== currentMonth.getMonth() ||
@@ -73,6 +90,7 @@ export default function LayoutSchedules() {
           slotsData={slotsData}
           isLoading={isLoading}
           dateRange={dateRange}
+          isSelectingRange={isSelectingRange}
           currentMonth={currentMonth}
           onDateSelect={handleDateSelect}
           onMonthChange={setCurrentMonth}

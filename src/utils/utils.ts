@@ -80,22 +80,23 @@ export const formatAdress = (business: {
     .join(", ");
 };
 
-export const formatDuration = (minutes: number): string => {
-  const hrs = Math.floor(minutes / 60);
-  const mins = minutes % 60;
+export const formatDuration = (minutes: string | number): string => {
+  const m = Number(minutes);
+  const hrs = Math.floor(m / 60);
+  const mins = m % 60;
   if (hrs === 0) return `${mins} min`;
   if (mins === 0) return `${hrs} hr${hrs > 1 ? "s" : ""}`;
   return `${hrs} hr${hrs > 1 ? "s" : ""} ${mins} min`;
 };
 
-export const formatPrice = (price: number): string => {
+export const formatPrice = (price: string | number): string => {
   const formatter = new Intl.NumberFormat("es-MX", {
     style: "currency",
     currency: "MXN",
     // minimumFractionDigits: 0,
     // maximumFractionDigits: 0,
   });
-  return formatter.format(price);
+  return formatter.format(Number(price));
 };
 
 // const formatTime = (hours: number, minutes?: number): string => {

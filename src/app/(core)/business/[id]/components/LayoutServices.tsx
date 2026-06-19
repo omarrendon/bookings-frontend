@@ -52,7 +52,7 @@ export default function LayoutServices({
           {products.map(product => (
             <ProductCard
               key={product.id}
-              gallery_images={product.gallery_images}
+              images={product.images}
               name={product.name}
               description={product.description}
               price={product.price}

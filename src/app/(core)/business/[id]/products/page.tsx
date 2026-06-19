@@ -18,7 +18,7 @@ export default async function BusinessProductsPage({
 
   let products;
   try {
-    const response = await productsApi.getById(id);
+    const response = await productsApi.getByBusiness(id);
     products = response.data;
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {

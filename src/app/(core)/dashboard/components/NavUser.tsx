@@ -35,8 +35,7 @@ export function NavUser() {
     [user?.name, user?.last_name].filter(Boolean).join(" ") || "-";
   const email = user?.email ?? "-";
   const initials = getInitials(user?.name, user?.last_name);
-  const roleLabel =
-    user?.role === "owner" ? "Propietario" : (user?.role ?? "");
+  const roleLabel = user?.role === "owner" ? "Propietario" : (user?.role ?? "");
 
   return (
     <SidebarMenu>
