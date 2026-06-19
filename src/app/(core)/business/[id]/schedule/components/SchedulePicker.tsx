@@ -89,7 +89,7 @@ export default function SchedulePicker({ businessId }: SchedulePickerProps) {
         </div>
 
         {/* Horarios */}
-        <div className="p-6">
+        <div className="p-10">
           <div className="flex items-center gap-1.5 mb-4">
             <Clock className="size-4 text-muted-foreground" />
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">

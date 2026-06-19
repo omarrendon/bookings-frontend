@@ -277,6 +277,11 @@ export interface GalleryImageItem {
   order: number;
 }
 
+export interface UploadResponse {
+  success: boolean;
+  data: { url: string };
+}
+
 export interface UploadGalleryResponse {
   success: boolean;
   data: GalleryImageItem[];

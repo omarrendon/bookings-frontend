@@ -13,9 +13,17 @@ export const NavigationSheet = () => {
           <Menu />
         </Button>
       </SheetTrigger>
-      <SheetContent className="px-6 py-3">
+      <SheetContent className="px-6 py-3 flex flex-col">
         <div className="[&_a]:text-foreground [&_a]:opacity-70 hover:[&_a]:opacity-100">
           <NavMenu orientation="vertical" className="mt-6 [&>div]:h-full" />
+        </div>
+        <div className="mt-auto flex flex-col gap-4 pb-2">
+          <Button size="sm" className="w-full">
+            Reservar Ahora
+          </Button>
+          <Button variant="outline" size="sm" className="w-full">
+            Iniciar Sesión
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

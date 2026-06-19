@@ -20,7 +20,7 @@ export default function ScheduleDetail() {
   const { selectedProducts, selectedDate, selectedTime, customerInfo } =
     useCartStore();
 
-  const total = selectedProducts.reduce((sum, p) => sum + p.price, 0);
+  const total = selectedProducts.reduce((sum, p) => sum + Number(p.price), 0);
 
   const formattedDate = selectedDate
     ? new Date(selectedDate + "T12:00:00").toLocaleDateString("es-ES", {
@@ -78,7 +78,7 @@ export default function ScheduleDetail() {
                 <div key={product.id} className="flex gap-3 p-4">
                   <div className="relative size-12 rounded-xl overflow-hidden flex-shrink-0">
                     <Image
-                      src={product.gallery_images?.[0] ?? FALLBACK_IMAGE}
+                      src={product.images?.[0]?.url ?? FALLBACK_IMAGE}
                       alt={product.name}
                       fill
                       className="object-cover"

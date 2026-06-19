@@ -46,6 +46,18 @@ export default function NavigationBar({ id }: NavigationBarProps) {
                 Reservar Ahora
               </Button>
             </Link>
+            <Link
+              href={`/login?redirect=/business/${id}`}
+              className="hidden md:inline-flex rounded-full  border-white/20 text-black hover:bg-white/10 hover:text-white"
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:cursor-pointer"
+              >
+                Iniciar Sesión
+              </Button>
+            </Link>
             {/* Mobile Menu */}
             <div className="sm:hidden z-10">
               <NavigationSheet />

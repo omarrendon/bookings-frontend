@@ -27,7 +27,7 @@ export default async function BusinessDetailPage({
   try {
     [business, products] = await Promise.all([
       businessApi.getById(id),
-      productsApi.getById(id),
+      productsApi.getByBusiness(id),
     ]);
     business = business.data;
     products = products.data;
