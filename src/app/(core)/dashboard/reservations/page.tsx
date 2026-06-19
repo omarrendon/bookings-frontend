@@ -6,6 +6,7 @@ import FilterReservations from "./components/FilterReservations";
 import { DataTable } from "@/components/ui/DataTable";
 import { ColumnsReservationTable } from "./components/ColumnsReservationTable";
 import { reservationData } from "./components/data";
+import ReservationMobileList from "./components/ReservationMobileList";
 import {
   BadgeCheck,
   BadgeX,
@@ -118,8 +119,13 @@ export default function ReservationsPage() {
         </CardContent>
       </Card>
 
-      {/* Table */}
-      <DataTable columns={ColumnsReservationTable} />
+      {/* Mobile list (< md) */}
+      <ReservationMobileList />
+
+      {/* Desktop table (≥ md) */}
+      <div className="hidden md:block">
+        <DataTable columns={ColumnsReservationTable} />
+      </div>
 
       {/* Modals */}
       <CustomModal
