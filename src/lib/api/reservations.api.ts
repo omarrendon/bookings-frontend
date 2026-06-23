@@ -1,44 +1,47 @@
 import { apiClient } from "./client";
 import type {
   Reservation,
+  ReservationsListResponse,
   CreateReservationRequest,
   CreateBookingRequest,
   BookingResponse,
   ReservationStatus,
+  UpdateStatusResponse,
+  RescheduleRequest,
+  RescheduleResponse,
   UploadResponse,
 } from "./types";
 
 export const reservationsApi = {
   getByBusiness: (businessId: string) =>
-    apiClient.get<Reservation[]>(`/businesses/${businessId}/reservations`),
+    apiClient.get<ReservationsListResponse>(`/reservations/${businessId}`),
 
-  getById: (businessId: string, reservationId: string) =>
-    apiClient.get<Reservation>(
-      `/businesses/${businessId}/reservations/${reservationId}`,
-    ),
+  getById: (reservationId: string) =>
+    apiClient.get<Reservation>(`/reservations/${reservationId}`),
 
-  create: (businessId: string, data: CreateReservationRequest) =>
-    apiClient.post<Reservation>(
-      `/businesses/${businessId}/reservations`,
-      data,
-    ),
+  create: (data: CreateReservationRequest) =>
+    apiClient.post<Reservation>(`/reservations`, data),
 
-  updateStatus: (
-    businessId: string,
-    reservationId: string,
-    status: ReservationStatus,
-  ) =>
-    apiClient.patch<Reservation>(
-      `/businesses/${businessId}/reservations/${reservationId}/status`,
-      { status },
-    ),
+  updateStatus: (reservationId: string, status: ReservationStatus) =>
+    apiClient.put<UpdateStatusResponse>(`/reservations/${reservationId}`, {
+      status,
+    }),
 
   book: (data: CreateBookingRequest) =>
     apiClient.post<BookingResponse>("/reservations", data),
 
-  uploadProofOfPayment: (file: File) => {
+  reschedule: (reservationId: string | number, data: RescheduleRequest) =>
+    apiClient.patch<RescheduleResponse>(
+      `/reservations/${reservationId}/reschedule`,
+      data,
+    ),
+
+  uploadProofOfPayment: (reservationId: string, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    return apiClient.upload<UploadResponse>("/reservations/upload-proof", formData);
+    return apiClient.upload<UploadResponse>(
+      `/reservations/${reservationId}/upload-proof`,
+      formData,
+    );
   },
 };

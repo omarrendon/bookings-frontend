@@ -34,7 +34,7 @@ export default function NavigationBar({ id }: NavigationBarProps) {
           {/* Desktop Menu */}
           <NavMenu className="hidden sm:block" />
           <div className="flex items-center gap-3">
-            <Link
+            {/* <Link
               href={`/business/${id}/products`}
               className="hidden md:inline-flex rounded-full  border-white/20 text-black hover:bg-white/10 hover:text-white"
             >
@@ -45,7 +45,7 @@ export default function NavigationBar({ id }: NavigationBarProps) {
               >
                 Reservar Ahora
               </Button>
-            </Link>
+            </Link> */}
             <Link
               href={`/login?redirect=/business/${id}`}
               className="hidden md:inline-flex rounded-full  border-white/20 text-black hover:bg-white/10 hover:text-white"

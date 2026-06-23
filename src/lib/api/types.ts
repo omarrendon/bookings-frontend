@@ -174,18 +174,57 @@ export type UpdateProductRequest = Partial<CreateProductRequest>;
 
 // ── Reservations ──────────────────────────────────────────────────────────────
 
-export type ReservationStatus = "pending" | "confirmed" | "cancelled";
+export type ReservationStatus = "pending" | "confirmed" | "cancelled" | "completed" | "rescheduled";
+
+export type ProofOfPaymentStatus = "pending" | "approved" | "rejected";
+
+export interface ProofOfPaymentItem {
+  id: number;
+  url: string;
+  status: ProofOfPaymentStatus;
+  uploaded_by: string | null;
+  created_at: string;
+}
+
+export interface ReservationProduct {
+  id: number;
+  name: string;
+  price: string;
+  estimated_delivery_time: number;
+  ReservationProduct: {
+    quantity: number;
+  };
+}
 
 export interface Reservation {
-  id: string;
-  business_id: string;
+  id: number;
+  business_id: number;
+  user_id: string | null;
+  reservation_date: string;
+  status: ReservationStatus;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
-  proof_of_payment_url: string;
-  scheduled_at: string;
-  status: ReservationStatus;
+  proof_of_payment: string | null; // campo legacy
+  notes: string | null;
+  start_time: string;
+  end_time: string;
+  updated_by: string | null;
   created_at: string;
+  updated_at: string;
+  products: ReservationProduct[];
+  proof_of_payments: ProofOfPaymentItem[];
+}
+
+export interface ReservationsListResponse {
+  message: string;
+  data: Reservation[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+  success: boolean;
 }
 
 export interface CreateReservationRequest {
@@ -194,6 +233,27 @@ export interface CreateReservationRequest {
   customer_phone: string;
   proof_of_payment_url: string;
   scheduled_at: string;
+}
+
+// ── Update status (PATCH /api/reservations/:id/status) ───────────────────────
+
+export interface UpdateStatusResponse {
+  message: string;
+  data: Reservation;
+  success: boolean;
+}
+
+// ── Reschedule (PATCH /api/reservations/:id/reschedule) ──────────────────────
+
+export interface RescheduleRequest {
+  new_date: string; // YYYY-MM-DD
+  new_time: string; // HH:mm
+}
+
+export interface RescheduleResponse {
+  message: string;
+  data: Reservation;
+  success: boolean;
 }
 
 // ── Booking (POST /api/reservations) ──────────────────────────────────────────
@@ -210,8 +270,8 @@ export interface CreateBookingRequest {
   customer_phone: string;
   start_time: string; // ISO 8601 — "2026-04-15T10:00:00.000Z"
   products: BookingProductItem[];
-  user_id?: string;
-  proof_of_payment?: string; // URL del comprobante
+  proof_of_payment?: string; // URL del comprobante (obtenida tras upload)
+  notes?: string;
 }
 
 export interface BookingResponse {
@@ -258,15 +318,24 @@ export interface SchedulesListResponse {
 // ── Derived types (used by calendar/picker components) ────────────────────────
 
 export interface TimeSlot {
-  start: string; // "HH:MM"
-  end: string;   // "HH:MM"
+  start: string;       // "HH:MM"
+  end?: string;        // "HH:MM" — opcional, no siempre viene del backend
   isBooked: boolean;
-  scheduleId?: number; // ID of the parent Schedule record, used for deletion
+  scheduleId?: number;
 }
 
 export interface DaySlots {
   date: string; // "YYYY-MM-DD"
   slots: TimeSlot[];
+}
+
+export interface SlotsMonthResponse {
+  data: {
+    month: string;
+    slots: DaySlots[];
+  };
+  message: string;
+  success: boolean;
 }
 
 // ── File Upload ───────────────────────────────────────────────────────────────
