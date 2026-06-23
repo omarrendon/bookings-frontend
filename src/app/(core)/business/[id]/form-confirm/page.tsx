@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Footer from "@/components/ui/Footer";
 import CustomerForm from "./components/CustomerForm";
 import BookingSummary from "./components/BookingSummary";
 import BookingStepBar from "../components/BookingStepBar";
@@ -52,7 +51,7 @@ export default async function BusinessFormConfirmPage({
         </div>
       </main>
 
-      <Footer />
+
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import { businessApi } from "@/lib/api/business.api";
 import { formatAdress } from "@/utils/utils";
-import Footer from "@/components/ui/Footer";
 import ScheduleDetail from "./components/ScheduleDetail";
 import BackToBusinessButton from "./components/BackToBusinessButton";
 import BusinessContactCard from "./components/BusinessContactCard";
@@ -71,7 +70,7 @@ export default async function BusinessConfirmationPage({
         </div>
       </main>
 
-      <Footer />
+
     </div>
   );
 }

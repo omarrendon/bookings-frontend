@@ -4,7 +4,6 @@ import { businessApi } from "@/lib/api/business.api";
 import { productsApi } from "@/lib/api/products.api";
 import { ApiError } from "@/lib/api/client";
 // Components
-import Footer from "@/components/ui/Footer";
 import NavigationBar from "@/components/ui/NavigationBar";
 import ContactBusiness from "./components/ContactBusiness";
 import HeaderBusiness from "./components/HeaderBusiness";
@@ -58,7 +57,7 @@ export default async function BusinessDetailPage({
           socialLinks={business.social_links}
         />
       </main>
-      <Footer />
+
     </div>
   );
 }
