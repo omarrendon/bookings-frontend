@@ -23,12 +23,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading?: boolean;
+  onRowClick?: (row: TData) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading = false,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
 
@@ -116,7 +118,8 @@ export function DataTable<TData, TValue>({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-muted/20 transition-colors border-border/40"
+                    className={`hover:bg-muted/20 transition-colors border-border/40 ${onRowClick ? "cursor-pointer" : ""}`}
+                    onClick={() => onRowClick?.(row.original)}
                   >
                     {row.getVisibleCells().map(cell => (
                       <TableCell

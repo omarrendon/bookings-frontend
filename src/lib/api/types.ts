@@ -235,6 +235,27 @@ export interface CreateReservationRequest {
   scheduled_at: string;
 }
 
+// ── Update status (PATCH /api/reservations/:id/status) ───────────────────────
+
+export interface UpdateStatusResponse {
+  message: string;
+  data: Reservation;
+  success: boolean;
+}
+
+// ── Reschedule (PATCH /api/reservations/:id/reschedule) ──────────────────────
+
+export interface RescheduleRequest {
+  new_date: string; // YYYY-MM-DD
+  new_time: string; // HH:mm
+}
+
+export interface RescheduleResponse {
+  message: string;
+  data: Reservation;
+  success: boolean;
+}
+
 // ── Booking (POST /api/reservations) ──────────────────────────────────────────
 
 export interface BookingProductItem {
@@ -297,15 +318,24 @@ export interface SchedulesListResponse {
 // ── Derived types (used by calendar/picker components) ────────────────────────
 
 export interface TimeSlot {
-  start: string; // "HH:MM"
-  end: string;   // "HH:MM"
+  start: string;       // "HH:MM"
+  end?: string;        // "HH:MM" — opcional, no siempre viene del backend
   isBooked: boolean;
-  scheduleId?: number; // ID of the parent Schedule record, used for deletion
+  scheduleId?: number;
 }
 
 export interface DaySlots {
   date: string; // "YYYY-MM-DD"
   slots: TimeSlot[];
+}
+
+export interface SlotsMonthResponse {
+  data: {
+    month: string;
+    slots: DaySlots[];
+  };
+  message: string;
+  success: boolean;
 }
 
 // ── File Upload ───────────────────────────────────────────────────────────────

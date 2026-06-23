@@ -71,7 +71,12 @@ export default function CustomerForm({ businessId }: CustomerFormProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    const allowed = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
     if (!allowed.includes(file.type)) {
       toast.error("Formato no permitido. Usa JPG, PNG, WEBP o PDF.");
       return;
@@ -120,7 +125,7 @@ export default function CustomerForm({ businessId }: CustomerFormProps) {
         setIsUploading(true);
         try {
           await reservationsApi.uploadProofOfPayment(
-            result.data.reservation.id,
+            result.data.reservation.id.toString(),
             proofFile,
           );
         } catch {
@@ -241,7 +246,9 @@ export default function CustomerForm({ businessId }: CustomerFormProps) {
             {proofFile ? (
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border/80 bg-muted/30">
                 <FileImage className="size-4 text-primary shrink-0" />
-                <span className="text-sm flex-1 truncate">{proofFile.name}</span>
+                <span className="text-sm flex-1 truncate">
+                  {proofFile.name}
+                </span>
                 <button
                   type="button"
                   onClick={() => {

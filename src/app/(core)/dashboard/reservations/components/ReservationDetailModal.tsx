@@ -61,12 +61,14 @@ interface ReservationDetailModalProps {
   reservation: Reservation | null;
   businessId: string;
   onClose: () => void;
+  onReschedule?: (reservation: Reservation) => void;
 }
 
 export default function ReservationDetailModal({
   reservation,
   businessId,
   onClose,
+  onReschedule,
 }: ReservationDetailModalProps) {
   const [pendingStatus, setPendingStatus] = useState<ReservationStatus | null>(null);
   const [localStatus, setLocalStatus] = useState<ReservationStatus | null>(null);
@@ -301,7 +303,13 @@ export default function ReservationDetailModal({
                       <DropdownMenuItem
                         key={key}
                         className="gap-2 cursor-pointer"
-                        onClick={() => setPendingStatus(key)}
+                        onClick={() => {
+                          if (key === "rescheduled" && onReschedule) {
+                            onReschedule(reservation);
+                          } else {
+                            setPendingStatus(key);
+                          }
+                        }}
                       >
                         <Badge
                           variant="outline"

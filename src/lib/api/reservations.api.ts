@@ -6,6 +6,9 @@ import type {
   CreateBookingRequest,
   BookingResponse,
   ReservationStatus,
+  UpdateStatusResponse,
+  RescheduleRequest,
+  RescheduleResponse,
   UploadResponse,
 } from "./types";
 
@@ -20,12 +23,18 @@ export const reservationsApi = {
     apiClient.post<Reservation>(`/reservations`, data),
 
   updateStatus: (reservationId: string, status: ReservationStatus) =>
-    apiClient.patch<Reservation>(`/reservations/${reservationId}/status`, {
+    apiClient.put<UpdateStatusResponse>(`/reservations/${reservationId}`, {
       status,
     }),
 
   book: (data: CreateBookingRequest) =>
     apiClient.post<BookingResponse>("/reservations", data),
+
+  reschedule: (reservationId: string | number, data: RescheduleRequest) =>
+    apiClient.patch<RescheduleResponse>(
+      `/reservations/${reservationId}/reschedule`,
+      data,
+    ),
 
   uploadProofOfPayment: (reservationId: string, file: File) => {
     const formData = new FormData();

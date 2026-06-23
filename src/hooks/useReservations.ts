@@ -9,6 +9,7 @@ import type {
   CreateReservationRequest,
   CreateBookingRequest,
   ReservationStatus,
+  RescheduleRequest,
 } from "@/lib/api/types";
 
 export const reservationKeys = {
@@ -83,14 +84,80 @@ export function useUpdateReservationStatus(businessId: string) {
       status: ReservationStatus;
     }) => reservationsApi.updateStatus(reservationId, status),
     onSuccess: () => {
-      // Invalida la caché para que la lista se refresque automáticamente
       queryClient.invalidateQueries({
         queryKey: reservationKeys.byBusiness(businessId),
       });
       toast.success("Estado de la reserva actualizado.");
     },
-    onError: () => {
-      toast.error("No se pudo actualizar el estado. Inténtalo de nuevo.");
+    onError: (error: unknown) => {
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 400:
+            toast.error("Cambio de estado no permitido", {
+              description: error.message,
+            });
+            break;
+          case 403:
+            toast.error("No tienes permiso para modificar esta reserva.");
+            break;
+          case 404:
+            toast.error("Reservación no encontrada.");
+            break;
+          case 422:
+            toast.error("No se puede cambiar el estado", {
+              description: "La reserva ya fue cancelada o completada.",
+            });
+            break;
+          default:
+            toast.error("Error inesperado. Inténtalo de nuevo.");
+        }
+      } else {
+        toast.error("No se pudo actualizar el estado. Inténtalo de nuevo.");
+      }
+    },
+  });
+}
+
+export function useRescheduleReservation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      reservationId,
+      data,
+    }: {
+      reservationId: string | number;
+      data: RescheduleRequest;
+    }) => reservationsApi.reschedule(reservationId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: reservationKeys.all });
+    },
+    onError: (error: unknown) => {
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 400:
+            toast.error("No se pudo reprogramar", { description: error.message });
+            break;
+          case 403:
+            toast.error("No tienes permiso para reprogramar esta cita.");
+            break;
+          case 404:
+            toast.error("Reservación no encontrada.");
+            break;
+          case 409:
+            toast.error("Conflicto de horario", {
+              description: "Ya existe otra reserva en ese horario.",
+            });
+            break;
+          case 422:
+            toast.error("La reserva ya fue cancelada o completada y no puede reprogramarse.");
+            break;
+          default:
+            toast.error("Error inesperado. Inténtalo de nuevo.");
+        }
+      } else {
+        toast.error("No se pudo reprogramar la cita. Inténtalo de nuevo.");
+      }
     },
   });
 }

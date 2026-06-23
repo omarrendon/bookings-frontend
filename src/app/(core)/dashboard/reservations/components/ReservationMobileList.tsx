@@ -45,12 +45,14 @@ interface ReservationMobileListProps {
   reservations: Reservation[];
   businessId: string;
   isLoading?: boolean;
+  onReschedule?: (reservation: Reservation) => void;
 }
 
 export default function ReservationMobileList({
   reservations,
   businessId,
   isLoading = false,
+  onReschedule,
 }: ReservationMobileListProps) {
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Reservation | null>(null);
@@ -207,6 +209,10 @@ export default function ReservationMobileList({
         reservation={selected}
         businessId={businessId}
         onClose={() => setSelected(null)}
+        onReschedule={reservation => {
+          setSelected(null);
+          onReschedule?.(reservation);
+        }}
       />
     </div>
   );

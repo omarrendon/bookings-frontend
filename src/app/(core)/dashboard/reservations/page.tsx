@@ -6,6 +6,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { createReservationColumns } from "./components/ColumnsReservationTable";
 import ReservationMobileList from "./components/ReservationMobileList";
 import ReservationDetailModal from "./components/ReservationDetailModal";
+import RescheduleModal from "./components/RescheduleModal";
 import { useGetReservations, useUpdateReservationStatus } from "@/hooks/useReservations";
 import { useBusinessStore } from "@/store/business.store";
 import type { Reservation } from "@/lib/api/types";
@@ -20,6 +21,7 @@ export default function ReservationsPage() {
   const businessId = useBusinessStore(s => s.business?.id ?? "");
 
   const [detailReservation, setDetailReservation] = useState<Reservation | null>(null);
+  const [rescheduleReservation, setRescheduleReservation] = useState<Reservation | null>(null);
 
   const { data: reservations = [], isLoading } = useGetReservations(businessId);
   const { mutate: updateStatus } = useUpdateReservationStatus(businessId);
@@ -28,7 +30,8 @@ export default function ReservationsPage() {
     () =>
       createReservationColumns(
         (reservationId, status) => updateStatus({ reservationId, status }),
-        (reservation) => setDetailReservation(reservation),
+        reservation => setDetailReservation(reservation),
+        reservation => setRescheduleReservation(reservation),
       ),
     [updateStatus],
   );
@@ -140,6 +143,7 @@ export default function ReservationsPage() {
         reservations={reservations}
         businessId={businessId}
         isLoading={isLoading}
+        onReschedule={reservation => setRescheduleReservation(reservation)}
       />
 
       {/* Desktop table (≥ md) */}
@@ -148,6 +152,7 @@ export default function ReservationsPage() {
           columns={columns}
           data={reservations}
           isLoading={isLoading}
+          onRowClick={reservation => setDetailReservation(reservation)}
         />
       </div>
 
@@ -156,6 +161,17 @@ export default function ReservationsPage() {
         reservation={detailReservation}
         businessId={businessId}
         onClose={() => setDetailReservation(null)}
+        onReschedule={reservation => {
+          setDetailReservation(null);
+          setRescheduleReservation(reservation);
+        }}
+      />
+
+      {/* Reschedule modal */}
+      <RescheduleModal
+        reservation={rescheduleReservation}
+        businessId={businessId}
+        onClose={() => setRescheduleReservation(null)}
       />
     </div>
   );

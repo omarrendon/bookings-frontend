@@ -79,6 +79,7 @@ export const STATUS_CONFIG: Record<
 export function createReservationColumns(
   onStatusChange: (reservationId: string, status: ReservationStatus) => void,
   onViewDetails: (reservation: Reservation) => void,
+  onReschedule: (reservation: Reservation) => void,
 ): ColumnDef<Reservation>[] {
   return [
     {
@@ -91,11 +92,13 @@ export function createReservationColumns(
         />
       ),
       cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={value => row.toggleSelected(!!value)}
-          aria-label="Seleccionar fila"
-        />
+        <div onClick={e => e.stopPropagation()}>
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={value => row.toggleSelected(!!value)}
+            aria-label="Seleccionar fila"
+          />
+        </div>
       ),
       enableSorting: false,
       enableHiding: false,
@@ -217,7 +220,9 @@ export function createReservationColumns(
           Object.keys(STATUS_CONFIG) as ReservationStatus[]
         ).filter(s => s !== status);
 
+        const reservation = row.original;
         return (
+          <div onClick={e => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -244,7 +249,11 @@ export function createReservationColumns(
                   <DropdownMenuItem
                     key={key}
                     className="gap-2 cursor-pointer"
-                    onClick={() => onStatusChange(String(id), key)}
+                    onClick={() =>
+                      key === "rescheduled"
+                        ? onReschedule(reservation)
+                        : onStatusChange(String(id), key)
+                    }
                   >
                     <Badge
                       variant="outline"
@@ -257,6 +266,7 @@ export function createReservationColumns(
               })}
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         );
       },
     },
@@ -266,6 +276,7 @@ export function createReservationColumns(
       cell: ({ row }) => {
         const reservation = row.original;
         return (
+          <div onClick={e => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -297,7 +308,10 @@ export function createReservationColumns(
                 <CalendarCheck className="size-4 text-muted-foreground" />
                 Ver detalles
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer">
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer"
+                onClick={() => onReschedule(reservation)}
+              >
                 <CalendarClock className="size-4 text-muted-foreground" />
                 Reprogramar
               </DropdownMenuItem>
@@ -311,6 +325,7 @@ export function createReservationColumns(
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         );
       },
     },
