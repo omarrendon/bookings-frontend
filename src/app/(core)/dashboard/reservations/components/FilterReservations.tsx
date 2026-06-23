@@ -148,7 +148,7 @@ const STATUS_OPTIONS = [
   { value: "pending",     label: "Pendiente",   className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/50" },
   { value: "confirmed",   label: "Confirmada",  className: "bg-primary/10 text-primary border-primary/20" },
   { value: "completed",   label: "Completada",  className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/50" },
-  { value: "canceled",    label: "Cancelada",   className: "bg-destructive/10 text-destructive border-destructive/20" },
+  { value: "cancelled",   label: "Cancelada",   className: "bg-destructive/10 text-destructive border-destructive/20" },
   { value: "rescheduled", label: "Reprogramada",className: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-200/50" },
 ] as const;
 

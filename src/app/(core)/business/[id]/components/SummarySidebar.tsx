@@ -53,7 +53,7 @@ export default function SummarySidebar({
             <div key={product.id} className="flex gap-3 p-4">
               <div className="relative size-12 rounded-xl overflow-hidden flex-shrink-0">
                 <Image
-                  src={product.gallery_images?.[0] ?? FALLBACK_IMAGE}
+                  src={product?.images?.[0]?.url ?? FALLBACK_IMAGE}
                   alt={product.name}
                   fill
                   className="object-cover"

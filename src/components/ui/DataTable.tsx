@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -17,27 +17,23 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTablePagination } from "./DataTablePagination";
-import { Reservation } from "@/types/Reservation";
-import { reservationData } from "@/app/(core)/dashboard/reservations/components/data";
 import { CalendarX } from "lucide-react";
-
-async function getData(): Promise<Reservation[]> {
-  return reservationData;
-}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  isLoading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
+  data,
+  isLoading = false,
 }: DataTableProps<TData, TValue>) {
-  const [dataTable, setDataTable] = useState<TData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
-    data: dataTable,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
@@ -46,21 +42,7 @@ export function DataTable<TData, TValue>({
     initialState: { pagination: { pageSize: 10 } },
   });
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const result = await getData();
-        setDataTable(result as TData[]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="rounded-xl border border-border/60 overflow-hidden">
         {/* Skeleton header */}

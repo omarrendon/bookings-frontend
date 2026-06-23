@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { reservationsApi } from "@/lib/api/reservations.api";
 import { ApiError } from "@/lib/api/client";
-import type { CreateReservationRequest, CreateBookingRequest, ReservationStatus } from "@/lib/api/types";
+import type {
+  CreateReservationRequest,
+  CreateBookingRequest,
+  ReservationStatus,
+} from "@/lib/api/types";
 
 export const reservationKeys = {
   all: ["reservations"] as const,
@@ -19,6 +23,7 @@ export function useGetReservations(businessId: string) {
     queryKey: reservationKeys.byBusiness(businessId),
     queryFn: () => reservationsApi.getByBusiness(businessId),
     enabled: !!businessId,
+    select: res => res.data,
   });
 }
 
@@ -27,7 +32,7 @@ export function useCreateReservation(businessId: string) {
 
   return useMutation({
     mutationFn: (data: CreateReservationRequest) =>
-      reservationsApi.create(businessId, data),
+      reservationsApi.create(data),
     onSuccess: () => {
       router.push(`/business/${businessId}/confirmation`);
     },
@@ -37,22 +42,16 @@ export function useCreateReservation(businessId: string) {
   });
 }
 
-export function useBookReservation(businessId: string) {
-  const router = useRouter();
-
+export function useBookReservation() {
   return useMutation({
     mutationFn: (data: CreateBookingRequest) => reservationsApi.book(data),
-    onSuccess: () => {
-      toast.success("¡Reserva confirmada!", {
-        description: "Recibirás un correo con los detalles de tu cita.",
-      });
-      router.push(`/business/${businessId}/confirmation`);
-    },
     onError: (error: unknown) => {
       if (error instanceof ApiError) {
         switch (error.status) {
           case 400:
-            toast.error("No se pudo crear la reserva", { description: error.message });
+            toast.error("No se pudo crear la reserva", {
+              description: error.message,
+            });
             break;
           case 404:
             toast.error("El negocio no fue encontrado.");
@@ -82,7 +81,7 @@ export function useUpdateReservationStatus(businessId: string) {
     }: {
       reservationId: string;
       status: ReservationStatus;
-    }) => reservationsApi.updateStatus(businessId, reservationId, status),
+    }) => reservationsApi.updateStatus(reservationId, status),
     onSuccess: () => {
       // Invalida la caché para que la lista se refresque automáticamente
       queryClient.invalidateQueries({
