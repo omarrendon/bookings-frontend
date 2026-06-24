@@ -14,6 +14,7 @@ import {
   Shield,
   User,
 } from "lucide-react";
+import Footer from "@/components/ui/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -231,32 +232,7 @@ export default function PrivacidadPage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-border/60 bg-muted/30 mt-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <BookOpen className="h-4 w-4" />
-            <span>
-              © {new Date().getFullYear()} Bookea.me — Todos los derechos
-              reservados.
-            </span>
-          </div>
-          <div className="flex items-center gap-6 text-sm">
-            <Link
-              href="/terminos"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Términos de uso
-            </Link>
-            <Link
-              href="/"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Inicio
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

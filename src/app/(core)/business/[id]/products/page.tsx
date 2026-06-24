@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Footer from "@/components/ui/Footer";
 import ProductsSelector from "./components/ProductsSelector";
 import BookingStepBar from "../components/BookingStepBar";
 import { productsApi } from "@/lib/api/products.api";
@@ -57,7 +56,7 @@ export default async function BusinessProductsPage({
         </div>
       </main>
 
-      <Footer />
+
     </div>
   );
 }

@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import type { ReservationsFilters } from "@/lib/api/types";
 import {
   Popover,
   PopoverContent,
@@ -17,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import {
   addMonths,
-  format,
   getDaysInMonth,
   isSameDay,
   startOfMonth,
@@ -154,7 +155,11 @@ const STATUS_OPTIONS = [
 
 // ─── Filter component ─────────────────────────────────────────────────────────
 
-export default function FilterReservations() {
+interface FilterReservationsProps {
+  onSearch: (filters: ReservationsFilters) => void;
+}
+
+export default function FilterReservations({ onSearch }: FilterReservationsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
 
@@ -172,6 +177,21 @@ export default function FilterReservations() {
     setName("");
     setEmail("");
     setPhone("");
+    onSearch({});
+  };
+
+  const handleSearch = () => {
+    const filters: ReservationsFilters = {};
+    if (status && status !== "all") filters.status = [status];
+    if (date) {
+      const dateStr = format(date, "yyyy-MM-dd");
+      filters.date_from = dateStr;
+      filters.date_to = dateStr;
+    }
+    if (name.trim()) filters.customer_name = name.trim();
+    if (email.trim()) filters.customer_email = email.trim();
+    if (phone.trim()) filters.customer_phone = phone.trim();
+    onSearch(filters);
   };
 
   return (
@@ -395,7 +415,7 @@ export default function FilterReservations() {
 
             {/* Search button */}
             <div className="flex justify-end pt-1">
-              <Button className="gap-2 font-medium">
+              <Button onClick={handleSearch} className="gap-2 font-medium">
                 <Search className="size-4" />
                 Buscar reservas
               </Button>

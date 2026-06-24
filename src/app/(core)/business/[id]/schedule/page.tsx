@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Footer from "@/components/ui/Footer";
 import SchedulePicker from "./components/SchedulePicker";
 import CardSummaryServices from "./components/CardSummaryServices";
 import BookingStepBar from "../components/BookingStepBar";
@@ -52,7 +51,7 @@ export default async function BusinessSchedulePage({
         </div>
       </main>
 
-      <Footer />
+
     </div>
   );
 }

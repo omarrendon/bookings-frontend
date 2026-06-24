@@ -9,6 +9,7 @@ import type {
   CreateReservationRequest,
   CreateBookingRequest,
   ReservationStatus,
+  ReservationsFilters,
   RescheduleRequest,
 } from "@/lib/api/types";
 
@@ -19,12 +20,16 @@ export const reservationKeys = {
     ["reservations", businessId, id] as const,
 };
 
-export function useGetReservations(businessId: string) {
+export function useGetReservations(
+  businessId: string,
+  filters: ReservationsFilters = {},
+  page = 1,
+  limit = 20,
+) {
   return useQuery({
-    queryKey: reservationKeys.byBusiness(businessId),
-    queryFn: () => reservationsApi.getByBusiness(businessId),
+    queryKey: [...reservationKeys.byBusiness(businessId), filters, page, limit],
+    queryFn: () => reservationsApi.getByBusiness(businessId, filters, page, limit),
     enabled: !!businessId,
-    select: res => res.data,
   });
 }
 

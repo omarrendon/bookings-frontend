@@ -9,7 +9,7 @@ import ReservationDetailModal from "./components/ReservationDetailModal";
 import RescheduleModal from "./components/RescheduleModal";
 import { useGetReservations, useUpdateReservationStatus } from "@/hooks/useReservations";
 import { useBusinessStore } from "@/store/business.store";
-import type { Reservation } from "@/lib/api/types";
+import type { Reservation, ReservationsFilters } from "@/lib/api/types";
 import {
   CalendarCheck,
   CheckCircle2,
@@ -17,14 +17,41 @@ import {
   XCircle,
 } from "lucide-react";
 
+const DEFAULT_LIMIT = 20;
+
 export default function ReservationsPage() {
   const businessId = useBusinessStore(s => s.business?.id ?? "");
 
+  // Filter + pagination state
+  const [filters, setFilters] = useState<ReservationsFilters>({});
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(DEFAULT_LIMIT);
+
+  // Modal state
   const [detailReservation, setDetailReservation] = useState<Reservation | null>(null);
   const [rescheduleReservation, setRescheduleReservation] = useState<Reservation | null>(null);
 
-  const { data: reservations = [], isLoading } = useGetReservations(businessId);
+  const { data: queryResult, isLoading } = useGetReservations(businessId, filters, page, limit);
+  const reservations = queryResult?.data ?? [];
+  const meta = queryResult?.meta;
+  const total = meta?.total ?? 0;
+  const totalPages = total > 0 ? Math.ceil(total / limit) : 1;
+
   const { mutate: updateStatus } = useUpdateReservationStatus(businessId);
+
+  const handleSearch = (newFilters: ReservationsFilters) => {
+    setFilters(newFilters);
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(Math.max(1, Math.min(newPage, totalPages)));
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
 
   const columns = useMemo(
     () =>
@@ -37,10 +64,19 @@ export default function ReservationsPage() {
   );
 
   const stats = {
-    total: reservations.length,
+    total,
     confirmed: reservations.filter(r => r.status === "confirmed").length,
     pending: reservations.filter(r => r.status === "pending").length,
     cancelled: reservations.filter(r => r.status === "cancelled").length,
+  };
+
+  const serverPagination = {
+    page,
+    totalPages,
+    total,
+    limit,
+    onPageChange: handlePageChange,
+    onLimitChange: handleLimitChange,
   };
 
   return (
@@ -134,7 +170,7 @@ export default function ReservationsPage() {
       {/* Filters */}
       <Card className="border-border/60 bg-card shadow-sm">
         <CardContent className="px-5 py-4">
-          <FilterReservations />
+          <FilterReservations onSearch={handleSearch} />
         </CardContent>
       </Card>
 
@@ -144,6 +180,10 @@ export default function ReservationsPage() {
         businessId={businessId}
         isLoading={isLoading}
         onReschedule={reservation => setRescheduleReservation(reservation)}
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={handlePageChange}
       />
 
       {/* Desktop table (≥ md) */}
@@ -153,6 +193,7 @@ export default function ReservationsPage() {
           data={reservations}
           isLoading={isLoading}
           onRowClick={reservation => setDetailReservation(reservation)}
+          serverPagination={serverPagination}
         />
       </div>
 
