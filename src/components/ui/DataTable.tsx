@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DataTablePagination } from "./DataTablePagination";
+import { DataTablePagination, type ServerPagination } from "./DataTablePagination";
 import { CalendarX } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
@@ -24,6 +24,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   isLoading?: boolean;
   onRowClick?: (row: TData) => void;
+  serverPagination?: ServerPagination;
 }
 
 export function DataTable<TData, TValue>({
@@ -31,6 +32,7 @@ export function DataTable<TData, TValue>({
   data,
   isLoading = false,
   onRowClick,
+  serverPagination,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
 
@@ -155,7 +157,7 @@ export function DataTable<TData, TValue>({
           </Table>
         </div>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} serverPagination={serverPagination} />
     </div>
   );
 }

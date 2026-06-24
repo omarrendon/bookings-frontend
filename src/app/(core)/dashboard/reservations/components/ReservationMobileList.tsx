@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const ITEMS_PER_PAGE = 8;
 
 function getInitials(name: string) {
   return name
@@ -46,6 +45,11 @@ interface ReservationMobileListProps {
   businessId: string;
   isLoading?: boolean;
   onReschedule?: (reservation: Reservation) => void;
+  // Server-side pagination
+  page?: number;
+  totalPages?: number;
+  total?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export default function ReservationMobileList({
@@ -53,15 +57,15 @@ export default function ReservationMobileList({
   businessId,
   isLoading = false,
   onReschedule,
+  page = 1,
+  totalPages = 1,
+  total,
+  onPageChange,
 }: ReservationMobileListProps) {
-  const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Reservation | null>(null);
 
-  const pageCount = Math.ceil(reservations.length / ITEMS_PER_PAGE);
-  const pageItems = reservations.slice(
-    page * ITEMS_PER_PAGE,
-    (page + 1) * ITEMS_PER_PAGE,
-  );
+  // With server-side pagination, all items in `reservations` are the current page
+  const pageItems = reservations;
 
   if (isLoading) {
     return (
@@ -148,23 +152,23 @@ export default function ReservationMobileList({
         <div className="flex items-center justify-between px-1 pt-1">
           <p className="text-xs text-muted-foreground">
             <span className="font-medium text-foreground">
-              {reservations.length}
+              {total ?? reservations.length}
             </span>{" "}
             reserva(s)
           </p>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
               Pág{" "}
-              <span className="font-medium text-foreground">{page + 1}</span> de{" "}
-              <span className="font-medium text-foreground">{pageCount}</span>
+              <span className="font-medium text-foreground">{page}</span> de{" "}
+              <span className="font-medium text-foreground">{totalPages}</span>
             </span>
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
                 size="icon"
                 className="size-8 border-border/60"
-                onClick={() => setPage(0)}
-                disabled={page === 0}
+                onClick={() => onPageChange?.(1)}
+                disabled={page <= 1}
                 aria-label="Primera página"
               >
                 <ChevronsLeft className="size-3.5" />
@@ -173,8 +177,8 @@ export default function ReservationMobileList({
                 variant="outline"
                 size="icon"
                 className="size-8 border-border/60"
-                onClick={() => setPage(p => Math.max(0, p - 1))}
-                disabled={page === 0}
+                onClick={() => onPageChange?.(page - 1)}
+                disabled={page <= 1}
                 aria-label="Página anterior"
               >
                 <ChevronLeft className="size-3.5" />
@@ -183,8 +187,8 @@ export default function ReservationMobileList({
                 variant="outline"
                 size="icon"
                 className="size-8 border-border/60"
-                onClick={() => setPage(p => Math.min(pageCount - 1, p + 1))}
-                disabled={page >= pageCount - 1}
+                onClick={() => onPageChange?.(page + 1)}
+                disabled={page >= totalPages}
                 aria-label="Página siguiente"
               >
                 <ChevronRight className="size-3.5" />
@@ -193,8 +197,8 @@ export default function ReservationMobileList({
                 variant="outline"
                 size="icon"
                 className="size-8 border-border/60"
-                onClick={() => setPage(pageCount - 1)}
-                disabled={page >= pageCount - 1}
+                onClick={() => onPageChange?.(totalPages)}
+                disabled={page >= totalPages}
                 aria-label="Última página"
               >
                 <ChevronsRight className="size-3.5" />

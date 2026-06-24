@@ -14,13 +14,116 @@ import {
   ChevronsRight,
 } from "lucide-react";
 
+export interface ServerPagination {
+  page: number;
+  totalPages: number;
+  total: number;
+  limit: number;
+  onPageChange: (page: number) => void;
+  onLimitChange: (limit: number) => void;
+}
+
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  serverPagination?: ServerPagination;
 }
 
 export function DataTablePagination<TData>({
   table,
+  serverPagination,
 }: DataTablePaginationProps<TData>) {
+  if (serverPagination) {
+    const { page, totalPages, total, limit, onPageChange, onLimitChange } = serverPagination;
+    const selectedCount = table.getFilteredSelectedRowModel().rows.length;
+
+    return (
+      <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 px-1">
+        <p className="text-xs text-muted-foreground">
+          {selectedCount > 0 ? (
+            <>
+              <span className="font-medium text-foreground">{selectedCount}</span>
+              {" seleccionada(s) · "}
+            </>
+          ) : null}
+          <span className="font-medium text-foreground">{total}</span>
+          {" reserva(s) en total"}
+        </p>
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-muted-foreground whitespace-nowrap">Por página</p>
+            <Select
+              value={`${limit}`}
+              onValueChange={value => { onLimitChange(Number(value)); onPageChange(1); }}
+            >
+              <SelectTrigger className="h-8 w-16 text-xs border-border/60">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 20, 30, 50].map(size => (
+                  <SelectItem key={size} value={`${size}`} className="text-xs">
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span>Página</span>
+            <span className="font-medium text-foreground">{page}</span>
+            <span>de</span>
+            <span className="font-medium text-foreground">{totalPages}</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8 border-border/60 hidden sm:flex"
+              onClick={() => onPageChange(1)}
+              disabled={page <= 1}
+              aria-label="Primera página"
+            >
+              <ChevronsLeft className="size-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8 border-border/60"
+              onClick={() => onPageChange(page - 1)}
+              disabled={page <= 1}
+              aria-label="Página anterior"
+            >
+              <ChevronLeft className="size-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8 border-border/60"
+              onClick={() => onPageChange(page + 1)}
+              disabled={page >= totalPages}
+              aria-label="Página siguiente"
+            >
+              <ChevronRight className="size-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8 border-border/60 hidden sm:flex"
+              onClick={() => onPageChange(totalPages)}
+              disabled={page >= totalPages}
+              aria-label="Última página"
+            >
+              <ChevronsRight className="size-3.5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Client-side pagination (original)
   const selectedCount = table.getFilteredSelectedRowModel().rows.length;
   const totalCount = table.getFilteredRowModel().rows.length;
 

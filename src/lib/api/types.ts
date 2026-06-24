@@ -216,6 +216,15 @@ export interface Reservation {
   proof_of_payments: ProofOfPaymentItem[];
 }
 
+export interface ReservationsFilters {
+  status?: string[];        // e.g. ['pending', 'confirmed']
+  date_from?: string;       // YYYY-MM-DD
+  date_to?: string;         // YYYY-MM-DD
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+}
+
 export interface ReservationsListResponse {
   message: string;
   data: Reservation[];
@@ -223,6 +232,7 @@ export interface ReservationsListResponse {
     total: number;
     page: number;
     limit: number;
+    [key: string]: unknown; // filtros activos reflejados en meta
   };
   success: boolean;
 }
