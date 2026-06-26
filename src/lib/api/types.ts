@@ -375,3 +375,42 @@ export interface DeleteProductResponse {
   success: boolean;
   message: string;
 }
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+
+export type DashboardPeriod = 7 | 30 | 90;
+
+export interface DashboardMetric {
+  current_period: number;
+  previous_period: number;
+  growth_percentage: number;
+  period_label: string;
+}
+
+export interface DashboardRevenue {
+  current_month: number;
+  last_month: number;
+  growth_percentage: number;
+  currency: string;
+  period_label: string;
+}
+
+export interface DashboardReservationsByStatus {
+  period_days: number;
+  pending: number;
+  confirmed: number;
+  cancelled: number;
+}
+
+export interface DashboardData {
+  reservations: DashboardMetric;
+  revenue: DashboardRevenue;
+  customers: DashboardMetric;
+  reservations_by_status: DashboardReservationsByStatus;
+}
+
+export interface DashboardResponse {
+  message: string;
+  success: boolean;
+  data: DashboardData;
+}
