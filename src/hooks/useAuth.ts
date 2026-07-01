@@ -34,6 +34,36 @@ export function useUpdateProfile() {
   });
 }
 
+export function useGoogleAuth() {
+  const router = useRouter();
+  const setSession = useAuthStore(state => state.setSession);
+
+  return useMutation({
+    mutationFn: (idToken: string) => authApi.googleLogin(idToken),
+    onSuccess: response => {
+      setSession(response.data.user, response.data.token);
+      toast.success("Sesión iniciada con Google correctamente");
+      router.push("/dashboard");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof ApiError) {
+        switch (error.status) {
+          case 400:
+            toast.error("No se pudo autenticar con Google. Inténtalo de nuevo.");
+            break;
+          case 401:
+            toast.error("Token de Google inválido. Inténtalo de nuevo.");
+            break;
+          default:
+            toast.error("No se pudo iniciar sesión. Inténtalo de nuevo.");
+        }
+      } else {
+        toast.error("No se pudo iniciar sesión con Google. Inténtalo de nuevo.");
+      }
+    },
+  });
+}
+
 export function useLogin() {
   const router = useRouter();
   const setSession = useAuthStore(state => state.setSession);

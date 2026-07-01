@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import QueryProvider from "@/providers/QueryProvider";
 import AuthProvider from "@/providers/AuthProvider";
+import GoogleProvider from "@/providers/GoogleProvider";
 // Styles
 import "./globals.css";
 
@@ -34,7 +35,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <GoogleProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </GoogleProvider>
         </QueryProvider>
         <Toaster richColors position="top-center" />
       </body>

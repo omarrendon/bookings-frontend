@@ -23,6 +23,8 @@ import { loginFormSchema } from "@/lib/schemas/loginFormSchema";
 import { useLogin } from "@/hooks/useAuth";
 // Icons
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import GoogleLoginButton from "./GoogleLoginButton";
+import { Separator } from "@/components/ui/separator";
 
 type FormValues = z.infer<typeof loginFormSchema>;
 
@@ -146,6 +148,16 @@ export default function LoginForm() {
           </form>
         </Form>
       </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3">
+        <Separator className="flex-1" />
+        <span className="text-xs text-muted-foreground">o continúa con</span>
+        <Separator className="flex-1" />
+      </div>
+
+      {/* Google login */}
+      <GoogleLoginButton />
 
       {/* Footer link */}
       <p className="text-center text-sm text-muted-foreground">

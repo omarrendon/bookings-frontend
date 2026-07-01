@@ -1,5 +1,5 @@
 "use client";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -47,6 +47,9 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:cursor-pointer hover:bg-sidebar-accent"
             >
               <Avatar className="h-8 w-8 rounded-lg shrink-0">
+                {user?.avatar_url && (
+                  <AvatarImage src={user.avatar_url} alt={fullName} className="rounded-lg" />
+                )}
                 <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-semibold">
                   {initials}
                 </AvatarFallback>
@@ -71,6 +74,9 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-3 px-2 py-2">
                 <Avatar className="h-9 w-9 rounded-lg shrink-0">
+                  {user?.avatar_url && (
+                    <AvatarImage src={user.avatar_url} alt={fullName} className="rounded-lg" />
+                  )}
                   <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-sm font-semibold">
                     {initials}
                   </AvatarFallback>
