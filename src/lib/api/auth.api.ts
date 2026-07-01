@@ -25,6 +25,9 @@ export const authApi = {
   updateProfile: (data: UpdateProfileRequest) =>
     apiClient.put<UpdateProfileResponse>("/users/me", data),
 
+  googleLogin: (idToken: string) =>
+    apiClient.post<AuthResponse>("/auth/google", { id_token: idToken }),
+
   // Usa la cookie httpOnly del refreshToken para obtener un nuevo access token
   refresh: () =>
     apiClient.post<AuthResponse>("/auth/refresh", {}),

@@ -15,6 +15,8 @@ export interface LoginUser {
   last_name: string;
   email: string;
   role: string;
+  avatar_url?: string | null;
+  auth_provider?: "google" | "local";
 }
 
 // Wrapper estándar de respuesta exitosa del backend
