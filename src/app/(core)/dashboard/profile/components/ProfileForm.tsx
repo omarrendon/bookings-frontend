@@ -30,6 +30,7 @@ import { useUpdateProfile } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/auth.store";
 // Icons
 import { Loader2, Mail, ShieldCheck, User } from "lucide-react";
+import Image from "next/image";
 
 const fieldLabel = "text-xs font-medium text-muted-foreground uppercase tracking-wide";
 const inputClass = "bg-background border-border/80 focus-visible:ring-ring";
@@ -75,12 +76,22 @@ export default function ProfileForm() {
         <CardContent className="px-6 pb-6 -mt-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4">
             {/* Avatar */}
-            <div className="size-20 rounded-full bg-card ring-4 ring-border/60 shadow-sm flex items-center justify-center shrink-0">
-              <div className="size-full rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-2xl font-semibold text-primary select-none">
-                  {initials}
-                </span>
-              </div>
+            <div className="size-20 rounded-full bg-card ring-4 ring-border/60 shadow-sm overflow-hidden shrink-0">
+              {user?.avatar_url ? (
+                <Image
+                  src={user.avatar_url}
+                  alt={`${user.name} ${user.last_name}`}
+                  width={80}
+                  height={80}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <div className="size-full rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-2xl font-semibold text-primary select-none">
+                    {initials}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Info */}
