@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { authApi } from "@/lib/api/auth.api";
+import { businessApi } from "@/lib/api/business.api";
 import { ApiError } from "@/lib/api/client";
 import { useAuthStore } from "@/store/auth.store";
 import { useBusinessStore } from "@/store/business.store";
@@ -37,11 +38,22 @@ export function useUpdateProfile() {
 export function useGoogleAuth() {
   const router = useRouter();
   const setSession = useAuthStore(state => state.setSession);
+  const setBusiness = useBusinessStore(state => state.setBusiness);
 
   return useMutation({
     mutationFn: (idToken: string) => authApi.googleLogin(idToken),
-    onSuccess: response => {
+    onSuccess: async response => {
+      // Guardar sesión con user completo (incluye avatar_url y auth_provider)
       setSession(response.data.user, response.data.token);
+
+      // Cargar el negocio para que los componentes del dashboard tengan datos
+      try {
+        const businessResponse = await businessApi.getMy();
+        setBusiness(businessResponse.data);
+      } catch {
+        // Cuenta nueva sin negocio — flujo normal
+      }
+
       toast.success("Sesión iniciada con Google correctamente");
       router.push("/dashboard");
     },

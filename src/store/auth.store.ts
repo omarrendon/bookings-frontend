@@ -40,8 +40,11 @@ export const useAuthStore = create<AuthState>()(
       name: "bookea-auth",
       // Solo persistimos el usuario para mostrar nombre/email en la UI.
       // El token NO persiste — se recupera via silent refresh con la cookie httpOnly.
+      // Persiste el user completo (incluye avatar_url y auth_provider)
+      // El token NO persiste — se recupera vía silent refresh con la cookie httpOnly
       partialize: state => ({
         user: state.user,
+        isAuthenticated: state.isAuthenticated,
       }),
     },
   ),
